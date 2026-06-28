@@ -51,7 +51,6 @@ ultraplinianRoutes.post('/completions', async (req, res) => {
   try {
     const {
       messages,
-      openrouter_api_key: caller_key,
       // ULTRAPLINIAN options
       tier = 'fast' as SpeedTier,
       godmode = true,
@@ -83,15 +82,6 @@ ultraplinianRoutes.post('/completions', async (req, res) => {
     // Validate
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       res.status(400).json({ error: 'messages (array) is required and must not be empty' })
-      return
-    }
-
-    // Resolve OpenRouter key: caller-provided > server-side env var
-    const openrouter_api_key = caller_key || process.env.OPENROUTER_API_KEY || ''
-    if (!openrouter_api_key) {
-      res.status(400).json({
-        error: 'No OpenRouter API key available. Either pass openrouter_api_key in the request body, or set OPENROUTER_API_KEY on the server. Get a key at https://openrouter.ai/keys',
-      })
       return
     }
 
@@ -267,7 +257,6 @@ ultraplinianRoutes.post('/completions', async (req, res) => {
       const results = await raceModels(
         models,
         processedMessages,
-        openrouter_api_key,
         raceParams,
         {
           minResults: Math.min(5, models.length),
@@ -468,7 +457,6 @@ ultraplinianRoutes.post('/completions', async (req, res) => {
     const results = await raceModels(
       models,
       processedMessages,
-      openrouter_api_key,
       raceParams,
       {
         minResults: Math.min(5, models.length),

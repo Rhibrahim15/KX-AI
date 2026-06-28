@@ -247,7 +247,6 @@ interface RaceConfig {
 export function raceModels(
   models: string[],
   messages: Message[],
-  apiKey: string,
   params: {
     temperature?: number
     max_tokens?: number
@@ -292,7 +291,7 @@ export function raceModels(
     const WAVE_DELAY_MS = 150
 
     const launchModel = (model: string) => {
-      queryModel(model, messages, apiKey, params, controller.signal)
+      queryModel(model, messages, params, controller.signal)
         .then(result => {
           if (resolved) return
           results.push(result)
@@ -343,7 +342,6 @@ interface Message {
 export async function queryModel(
   model: string,
   messages: Message[],
-  apiKey: string,
   params: {
     temperature?: number
     max_tokens?: number
@@ -356,48 +354,30 @@ export async function queryModel(
   signal?: AbortSignal,
 ): Promise<ModelResult> {
   const startTime = Date.now()
+  const router = getRouter()
 
   try {
-    const body: Record<string, unknown> = {
-      model,
+    const result = await router.execute(
       messages,
-      temperature: params.temperature ?? 0.7,
-      max_tokens: params.max_tokens ?? 4096,
-    }
-
-    if (params.top_p !== undefined) body.top_p = params.top_p
-    if (params.top_k !== undefined) body.top_k = params.top_k
-    if (params.frequency_penalty !== undefined) body.frequency_penalty = params.frequency_penalty
-    if (params.presence_penalty !== undefined) body.presence_penalty = params.presence_penalty
-    if (params.repetition_penalty !== undefined) body.repetition_penalty = params.repetition_penalty
-
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://godmod3.ai',
-        'X-Title': 'GODMOD3.AI-ultraplinian-api',
+      'reasoning',
+      {
+        temperature: params.temperature,
+        max_tokens: params.max_tokens,
+        top_p: params.top_p,
+        top_k: params.top_k,
+        frequency_penalty: params.frequency_penalty,
+        presence_penalty: params.presence_penalty,
+        repetition_penalty: params.repetition_penalty,
       },
-      body: JSON.stringify(body),
-      signal,
-    })
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}))
-      throw new Error(errorData.error?.message || `HTTP ${response.status}`)
-    }
-
-    const data = await response.json()
-    const content = data.choices?.[0]?.message?.content || ''
-
-    if (!content) throw new Error('Empty response')
+      model,
+    )
 
     return {
-      model,
-      content,
+      model: result.model,
+      content: result.content || '',
       duration_ms: Date.now() - startTime,
-      success: true,
+      success: result.success,
+      error: result.error,
       score: 0, // scored later
     }
   } catch (err: any) {

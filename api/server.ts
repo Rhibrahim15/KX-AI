@@ -10,6 +10,11 @@
  * Designed for deployment on Hugging Face Spaces (Docker) or any container host.
  */
 
+// Load .env file before anything else so process.env is populated
+import { config as loadEnv } from 'dotenv'
+import { resolve } from 'path'
+loadEnv({ path: resolve(process.cwd(), '.env') })
+
 import express from 'express'
 import cors from 'cors'
 import helmet from 'helmet'

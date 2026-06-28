@@ -20,7 +20,6 @@ import { v4 as uuidv4 } from 'uuid'
 import { computeAutoTuneParams, type AutoTuneStrategy } from '../../src/lib/autotune'
 import { applyParseltongue, type ParseltongueConfig } from '../../src/lib/parseltongue'
 import { allModules, applySTMs, type STMModule } from '../../src/stm/modules'
-import { sendMessage } from '../../src/lib/openrouter'
 import { getSharedProfiles } from './autotune'
 import {
   GODMODE_SYSTEM_PROMPT,
@@ -39,6 +38,7 @@ import {
   type OrchestratorModel,
   type ConsortiumResponse,
 } from '../lib/consortium'
+import { getRouter, type ModelParams, type Message, type TaskType } from '../lib/llm_router'
 import { addEntry } from '../lib/dataset'
 import { recordEvent, categorizeError } from '../lib/metadata'
 
@@ -254,18 +254,9 @@ chatRoutes.post('/completions', async (req, res) => {
       return
     }
 
-    // Resolve OpenRouter key
     const openrouter_api_key = caller_key || process.env.OPENROUTER_API_KEY || ''
-    if (!openrouter_api_key) {
-      res.status(400).json({
-        error: {
-          message: 'No OpenRouter API key available. Either pass openrouter_api_key in the request body, or set OPENROUTER_API_KEY on the server.',
-          type: 'invalid_request_error',
-          code: 'missing_api_key',
-        }
-      })
-      return
-    }
+    const router = getRouter()
+    const taskType: TaskType = (req.body.task_type || 'default') as TaskType
 
     // ── ULTRAPLINIAN virtual model routing ─────────────────────────────
     // model="ultraplinian/fast" | "ultraplinian/standard" | "ultraplinian/smart" | "ultraplinian/power" | "ultraplinian/ultra"
@@ -316,7 +307,6 @@ chatRoutes.post('/completions', async (req, res) => {
       const results = await raceModels(
         models,
         pipeline.processedMessages,
-        openrouter_api_key,
         raceParams,
         { minResults: Math.min(5, models.length), gracePeriod: 5000, hardTimeout: 45000 },
       )
@@ -482,7 +472,6 @@ chatRoutes.post('/completions', async (req, res) => {
       const results = await collectAllResponses(
         models,
         pipeline.processedMessages,
-        openrouter_api_key,
         queryParams,
         { minResponses: Math.min(3, models.length), hardTimeout: 60000 },
       )
@@ -512,7 +501,6 @@ chatRoutes.post('/completions', async (req, res) => {
         synthesisResult = await synthesize(
           pipeline.userContent,
           scoredResponses,
-          openrouter_api_key,
           orchestratorModel,
           max_tokens,
         )
@@ -838,21 +826,36 @@ chatRoutes.post('/completions', async (req, res) => {
     }
 
     // ── Non-streaming mode ────────────────────────────────────────────
-    const response = await sendMessage({
-      messages: pipeline.processedMessages,
-      model,
-      apiKey: openrouter_api_key,
+    const modelParams: ModelParams = {
       temperature: pipeline.finalParams.temperature,
-      maxTokens: max_tokens,
+      max_tokens,
       top_p: pipeline.finalParams.top_p,
       top_k: pipeline.finalParams.top_k,
       frequency_penalty: pipeline.finalParams.frequency_penalty,
       presence_penalty: pipeline.finalParams.presence_penalty,
       repetition_penalty: pipeline.finalParams.repetition_penalty,
-    })
+    }
+
+    const response = await router.execute(
+      pipeline.processedMessages,
+      taskType,
+      modelParams,
+      model,
+    )
+
+    if (!response.success || !response.content) {
+      res.status(502).json({
+        error: {
+          message: response.error || 'Upstream provider error',
+          type: 'upstream_error',
+          code: 'provider_failure',
+        },
+      })
+      return
+    }
 
     // STM transforms
-    const { finalResponse, stmResult } = applySTMPost(response, stm_modules)
+    const { finalResponse, stmResult } = applySTMPost(response.content, stm_modules)
 
     // Dataset collection (opt-in)
     let datasetId: string | null = null

@@ -151,7 +151,6 @@ function buildOrchestrationPrompt(
 export function collectAllResponses(
   models: string[],
   messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }>,
-  apiKey: string,
   params: {
     temperature?: number
     max_tokens?: number
@@ -187,7 +186,7 @@ export function collectAllResponses(
 
     // Fire all queries
     for (const model of models) {
-      queryModel(model, messages, apiKey, params, controller.signal)
+      queryModel(model, messages, params, controller.signal)
         .then(result => {
           if (resolved) return
           results.push(result)
@@ -247,7 +246,6 @@ export function collectAllResponses(
 export async function synthesize(
   userQuery: string,
   responses: ConsortiumResponse[],
-  apiKey: string,
   orchestratorModel: OrchestratorModel = ORCHESTRATOR_MODELS[0],
   maxTokens: number = 8192,
 ): Promise<{ synthesis: string; duration_ms: number; model: string }> {
@@ -261,7 +259,6 @@ export async function synthesize(
   const result = await queryModel(
     orchestratorModel,
     messages,
-    apiKey,
     { temperature: 0.3, max_tokens: maxTokens }, // Low temp for analytical synthesis
   )
 
@@ -295,7 +292,6 @@ export interface ConsortiumPipelineConfig {
 export async function runConsortium(
   userQuery: string,
   messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }>,
-  apiKey: string,
   params: {
     temperature?: number
     max_tokens?: number
@@ -314,7 +310,6 @@ export async function runConsortium(
   const rawResults = await collectAllResponses(
     models,
     messages,
-    apiKey,
     params,
     config.collectionConfig,
   )
@@ -342,7 +337,6 @@ export async function runConsortium(
   const orchestratorResult = await synthesize(
     userQuery,
     scoredResponses,
-    apiKey,
     config.orchestratorModel,
     config.maxTokens ?? params.max_tokens ?? 8192,
   )
