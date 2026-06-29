@@ -1,0 +1,14 @@
+{
+  "name": "kx-ai-tauri-desktop",
+  "version": "0.4.0",
+  "private": true,
+  "description": "Native Desktop OS Tauri Wrapper for KX Autonomous AI",
+  "scripts": {
+    "tauri": "tauri",
+    "dev": "tauri dev",
+    "build": "tauri build"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.0.0"
+  }
+}
