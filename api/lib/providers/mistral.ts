@@ -1,11 +1,5 @@
 /**
  * Mistral AI Provider Implementation
- * 
- * Implements BaseProvider for Mistral AI (La Plateforme).
- * Generous experimentation tier for developers.
- * 
- * Models: codestral-latest, mistral-large-latest, mistral-small-latest
- * Specialty: World-class code generation and syntax refactoring.
  */
 
 import { BaseProvider, Message, ModelParams, ProviderResponse } from './base'
@@ -28,6 +22,10 @@ export class MistralProvider extends BaseProvider {
     )
   }
 
+  private cleanModel(model: string): string {
+    return model.replace(/^mistral\//i, '')
+  }
+
   async sendMessage(
     messages: Message[],
     model: string,
@@ -48,8 +46,9 @@ export class MistralProvider extends BaseProvider {
     }
 
     try {
+      const targetModel = this.cleanModel(model)
       const body: Record<string, any> = {
-        model,
+        model: targetModel,
         messages,
         temperature: params.temperature ?? 0.7,
         max_tokens: params.max_tokens ?? 4096,
@@ -127,8 +126,9 @@ export class MistralProvider extends BaseProvider {
       throw new Error('Mistral API key not configured')
     }
 
+    const targetModel = this.cleanModel(model)
     const body: Record<string, any> = {
-      model,
+      model: targetModel,
       messages,
       temperature: params.temperature ?? 0.7,
       max_tokens: params.max_tokens ?? 4096,

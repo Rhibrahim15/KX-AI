@@ -1,12 +1,5 @@
 /**
  * Cerebras Cloud Provider Implementation
- * 
- * Implements BaseProvider for Cerebras Cloud.
- * Ultra-fast inference (>2,000 tokens/sec) on Wafer-Scale Engines.
- * Free tier: 1 Million tokens/day.
- * 
- * Models: llama-3.3-70b, llama3.1-8b
- * Specialty: Instant voice conversational turns, real-time command classification.
  */
 
 import { BaseProvider, Message, ModelParams, ProviderResponse } from './base'
@@ -26,6 +19,10 @@ export class CerebrasProvider extends BaseProvider {
       'https://api.cerebras.ai/v1',
       CEREBRAS_MODELS
     )
+  }
+
+  private cleanModel(model: string): string {
+    return model.replace(/^cerebras\//i, '')
   }
 
   async sendMessage(
@@ -48,8 +45,9 @@ export class CerebrasProvider extends BaseProvider {
     }
 
     try {
+      const targetModel = this.cleanModel(model)
       const body: Record<string, any> = {
-        model,
+        model: targetModel,
         messages,
         temperature: params.temperature ?? 0.7,
         max_tokens: params.max_tokens ?? 4096,
@@ -126,8 +124,9 @@ export class CerebrasProvider extends BaseProvider {
       throw new Error('Cerebras API key not configured')
     }
 
+    const targetModel = this.cleanModel(model)
     const body: Record<string, any> = {
-      model,
+      model: targetModel,
       messages,
       temperature: params.temperature ?? 0.7,
       max_tokens: params.max_tokens ?? 4096,

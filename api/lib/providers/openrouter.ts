@@ -1,8 +1,5 @@
 /**
  * OpenRouter Provider Implementation
- * 
- * Implements BaseProvider for OpenRouter.
- * Routes to 100+ models via OpenRouter API.
  */
 
 import { BaseProvider, Message, ModelParams, ProviderResponse } from './base'
@@ -15,8 +12,12 @@ export class OpenRouterProvider extends BaseProvider {
       'OpenRouter',
       apiKey,
       'https://openrouter.ai/api/v1',
-      [] // Models are dynamic for OpenRouter
+      []
     )
+  }
+
+  private cleanModel(model: string): string {
+    return model.replace(/^openrouter\//i, '')
   }
 
   async sendMessage(
@@ -39,15 +40,15 @@ export class OpenRouterProvider extends BaseProvider {
     }
 
     try {
+      const targetModel = this.cleanModel(model)
       const body: Record<string, any> = {
-        model,
+        model: targetModel,
         messages,
         temperature: params.temperature ?? 0.7,
         max_tokens: params.max_tokens ?? 4096,
       }
 
       if (params.top_p !== undefined) body.top_p = params.top_p
-      if (params.top_k !== undefined) body.top_k = params.top_k
       if (params.frequency_penalty !== undefined) body.frequency_penalty = params.frequency_penalty
       if (params.presence_penalty !== undefined) body.presence_penalty = params.presence_penalty
       if (params.repetition_penalty !== undefined) body.repetition_penalty = params.repetition_penalty
@@ -123,8 +124,9 @@ export class OpenRouterProvider extends BaseProvider {
       throw new Error('OpenRouter API key not configured')
     }
 
+    const targetModel = this.cleanModel(model)
     const body: Record<string, any> = {
-      model,
+      model: targetModel,
       messages,
       temperature: params.temperature ?? 0.7,
       max_tokens: params.max_tokens ?? 4096,
@@ -132,7 +134,6 @@ export class OpenRouterProvider extends BaseProvider {
     }
 
     if (params.top_p !== undefined) body.top_p = params.top_p
-    if (params.top_k !== undefined) body.top_k = params.top_k
     if (params.frequency_penalty !== undefined) body.frequency_penalty = params.frequency_penalty
     if (params.presence_penalty !== undefined) body.presence_penalty = params.presence_penalty
     if (params.repetition_penalty !== undefined) body.repetition_penalty = params.repetition_penalty
@@ -158,9 +159,6 @@ export class OpenRouterProvider extends BaseProvider {
     return response
   }
 
-  /**
-   * OpenRouter-specific health check
-   */
   async healthCheck(): Promise<boolean> {
     const startTime = Date.now()
     try {

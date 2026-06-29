@@ -1,11 +1,5 @@
 /**
  * NVIDIA NIM Provider Implementation
- * 
- * Implements BaseProvider for NVIDIA NIM (Nemotron Inference Microservices).
- * Enterprise-grade LLM inference with proprietary optimization.
- * 
- * Models: Nemotron-340B, Llama, etc.
- * Free tier: Available for developers
  */
 
 import { BaseProvider, Message, ModelParams, ProviderResponse } from './base'
@@ -30,6 +24,10 @@ export class NVIDIANIMProvider extends BaseProvider {
     this.nvApiKey = apiKey
   }
 
+  private cleanModel(model: string): string {
+    return model.replace(/^nvidia-nim\//i, '')
+  }
+
   async sendMessage(
     messages: Message[],
     model: string,
@@ -50,8 +48,8 @@ export class NVIDIANIMProvider extends BaseProvider {
     }
 
     try {
-      // Map short model names to full NIM endpoints
-      const fullModel = model.includes('nvidia/') ? model : `nvidia/${model}`
+      const targetModel = this.cleanModel(model)
+      const fullModel = targetModel.includes('nvidia/') ? targetModel : `nvidia/${targetModel}`
       const endpoint = `${this.baseUrl}/${fullModel}/chat/completions`
 
       const body: Record<string, any> = {
@@ -62,7 +60,6 @@ export class NVIDIANIMProvider extends BaseProvider {
       }
 
       if (params.top_p !== undefined) body.top_p = params.top_p
-      if (params.top_k !== undefined) body.top_k = params.top_k
       if (params.frequency_penalty !== undefined) body.frequency_penalty = params.frequency_penalty
       if (params.presence_penalty !== undefined) body.presence_penalty = params.presence_penalty
 
@@ -136,7 +133,8 @@ export class NVIDIANIMProvider extends BaseProvider {
       throw new Error('NVIDIA NIM API key not configured')
     }
 
-    const fullModel = model.includes('nvidia/') ? model : `nvidia/${model}`
+    const targetModel = this.cleanModel(model)
+    const fullModel = targetModel.includes('nvidia/') ? targetModel : `nvidia/${targetModel}`
     const endpoint = `${this.baseUrl}/${fullModel}/chat/completions`
 
     const body: Record<string, any> = {
@@ -148,7 +146,6 @@ export class NVIDIANIMProvider extends BaseProvider {
     }
 
     if (params.top_p !== undefined) body.top_p = params.top_p
-    if (params.top_k !== undefined) body.top_k = params.top_k
     if (params.frequency_penalty !== undefined) body.frequency_penalty = params.frequency_penalty
     if (params.presence_penalty !== undefined) body.presence_penalty = params.presence_penalty
 
@@ -172,9 +169,6 @@ export class NVIDIANIMProvider extends BaseProvider {
     return response
   }
 
-  /**
-   * NVIDIA NIM-specific health check
-   */
   async healthCheck(): Promise<boolean> {
     const startTime = Date.now()
     try {

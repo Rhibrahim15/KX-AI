@@ -1,11 +1,5 @@
 /**
  * Google Gemini Provider Implementation
- * 
- * Implements BaseProvider for Google Gemini via OpenAI-Compatible Endpoint.
- * Generous free tier: 1,500 requests/day, 1 Million TPM, 15 RPM.
- * 
- * Models: gemini-2.5-flash, gemini-1.5-pro, gemini-1.5-flash
- * Specialty: 1M+ context window, codebase ingestion, Arabic/Hausa translation.
  */
 
 import { BaseProvider, Message, ModelParams, ProviderResponse } from './base'
@@ -13,9 +7,8 @@ import { BaseProvider, Message, ModelParams, ProviderResponse } from './base'
 const GEMINI_OPENAI_URL = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions'
 
 export const GEMINI_MODELS = [
-  'gemini-2.5-flash',
-  'gemini-1.5-pro',
   'gemini-1.5-flash',
+  'gemini-1.5-pro',
   'gemini-2.0-flash-exp',
 ]
 
@@ -27,6 +20,10 @@ export class GeminiProvider extends BaseProvider {
       'https://generativelanguage.googleapis.com/v1beta/openai',
       GEMINI_MODELS
     )
+  }
+
+  private cleanModel(model: string): string {
+    return model.replace(/^gemini\//i, '')
   }
 
   async sendMessage(
@@ -49,8 +46,9 @@ export class GeminiProvider extends BaseProvider {
     }
 
     try {
+      const targetModel = this.cleanModel(model)
       const body: Record<string, any> = {
-        model,
+        model: targetModel,
         messages,
         temperature: params.temperature ?? 0.7,
         max_tokens: params.max_tokens ?? 4096,
@@ -127,8 +125,9 @@ export class GeminiProvider extends BaseProvider {
       throw new Error('Google Gemini API key not configured')
     }
 
+    const targetModel = this.cleanModel(model)
     const body: Record<string, any> = {
-      model,
+      model: targetModel,
       messages,
       temperature: params.temperature ?? 0.7,
       max_tokens: params.max_tokens ?? 4096,
@@ -166,7 +165,7 @@ export class GeminiProvider extends BaseProvider {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'gemini-2.5-flash',
+          model: 'gemini-1.5-flash',
           messages: [{ role: 'user', content: 'ping' }],
           max_tokens: 5,
         }),

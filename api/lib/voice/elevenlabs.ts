@@ -1,8 +1,5 @@
 /**
  * ElevenLabs Neural Voice Provider
- * 
- * Synthesizes lifelike multilingual speech (Arabic, English, Hausa accents)
- * via ElevenLabs API (https://api.elevenlabs.io/v1).
  */
 
 const ELEVENLABS_API_URL = 'https://api.elevenlabs.io/v1'
@@ -25,29 +22,37 @@ export async function generateSpeechStream(
     throw new Error('ElevenLabs API key not configured')
   }
 
-  const voiceId = options.voiceId || process.env.ELEVENLABS_VOICE_ID || '21m00Tcm4TlvDq8ikWAM'
+  let voiceId = options.voiceId || process.env.ELEVENLABS_VOICE_ID || 'JBFqnCBsd6RMkjVDRZzb' // Default George
   const modelId = options.modelId || 'eleven_multilingual_v2'
 
-  const endpoint = `${ELEVENLABS_API_URL}/text-to-speech/${voiceId}/stream`
-
-  const response = await fetch(endpoint, {
-    method: 'POST',
-    headers: {
-      'Accept': 'audio/mpeg',
-      'Content-Type': 'application/json',
-      'xi-api-key': key,
-    },
-    body: JSON.stringify({
-      text: options.text,
-      model_id: modelId,
-      voice_settings: {
-        stability: options.stability ?? 0.5,
-        similarity_boost: options.similarityBoost ?? 0.75,
-        style: options.style ?? 0.0,
-        use_speaker_boost: true,
+  const executeRequest = async (targetVoice: string) => {
+    return fetch(`${ELEVENLABS_API_URL}/text-to-speech/${targetVoice}/stream`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'audio/mpeg',
+        'Content-Type': 'application/json',
+        'xi-api-key': key,
       },
-    }),
-  })
+      body: JSON.stringify({
+        text: options.text,
+        model_id: modelId,
+        voice_settings: {
+          stability: options.stability ?? 0.5,
+          similarity_boost: options.similarityBoost ?? 0.75,
+          style: options.style ?? 0.0,
+          use_speaker_boost: true,
+        },
+      }),
+    })
+  }
+
+  let response = await executeRequest(voiceId)
+
+  // Auto-healing: If user provided a library voice that requires paid plan, fallback to standard free George voice
+  if (response.status === 402 || response.status === 403) {
+    console.warn(`[ElevenLabs] Voice "${voiceId}" restricted on current tier (HTTP ${response.status}). Auto-healing with free Premade voice "JBFqnCBsd6RMkjVDRZzb"...`)
+    response = await executeRequest('JBFqnCBsd6RMkjVDRZzb')
+  }
 
   if (!response.ok) {
     const errData = await response.json().catch(() => ({}))

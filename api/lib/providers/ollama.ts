@@ -1,12 +1,5 @@
 /**
  * Ollama Provider Implementation
- * 
- * Implements BaseProvider for Ollama.
- * Run open-source models locally (no API cost).
- * Requires Ollama to be running on local machine or accessible server.
- * 
- * Models: Any GGUF model (Llama 2, Mistral, etc.)
- * Cost: Free (local compute)
  */
 
 import { BaseProvider, Message, ModelParams, ProviderResponse } from './base'
@@ -15,10 +8,14 @@ export class OllamaProvider extends BaseProvider {
   constructor(baseUrl?: string) {
     super(
       'Ollama',
-      'local', // No API key for local Ollama
+      'local',
       baseUrl || 'http://localhost:11434',
-      [] // Models are dynamic
+      []
     )
+  }
+
+  private cleanModel(model: string): string {
+    return model.replace(/^ollama\//i, '')
   }
 
   async sendMessage(
@@ -32,20 +29,17 @@ export class OllamaProvider extends BaseProvider {
 
     try {
       const endpoint = `${this.baseUrl}/api/chat`
+      const targetModel = this.cleanModel(model)
 
       const body: Record<string, any> = {
-        model,
+        model: targetModel,
         messages,
         stream: false,
         options: {
           temperature: params.temperature ?? 0.7,
-          top_p: params.top_p,
-          top_k: params.top_k,
         },
       }
 
-      // Ollama doesn't support all OpenAI params, so we only set what it supports
-      if (params.temperature !== undefined) body.options.temperature = params.temperature
       if (params.top_p !== undefined) body.options.top_p = params.top_p
       if (params.top_k !== undefined) body.options.top_k = params.top_k
 
@@ -113,9 +107,10 @@ export class OllamaProvider extends BaseProvider {
     overrideApiKey?: string
   ): Promise<Response> {
     const endpoint = `${this.baseUrl}/v1/chat/completions`
+    const targetModel = this.cleanModel(model)
 
     const body: Record<string, any> = {
-      model,
+      model: targetModel,
       messages,
       stream: true,
       temperature: params.temperature ?? 0.7,
@@ -142,10 +137,6 @@ export class OllamaProvider extends BaseProvider {
     return response
   }
 
-  /**
-   * Ollama-specific health check
-   * Checks if Ollama is running and accessible
-   */
   async healthCheck(): Promise<boolean> {
     const startTime = Date.now()
     try {
@@ -166,19 +157,6 @@ export class OllamaProvider extends BaseProvider {
       const duration = Date.now() - startTime
       this.updateStatus(false, duration, err.message)
       return false
-    }
-  }
-
-  /**
-   * Get list of available models from Ollama
-   */
-  async getAvailableModels(): Promise<string[]> {
-    try {
-      const response = await fetch(`${this.baseUrl}/api/tags`)
-      const data = await response.json()
-      return (data.models || []).map((m: any) => m.name || m)
-    } catch (err) {
-      return []
     }
   }
 }

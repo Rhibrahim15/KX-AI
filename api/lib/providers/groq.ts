@@ -3,9 +3,6 @@
  * 
  * Implements BaseProvider for Groq.
  * Fastest open-source LLM inference via Groq's LPU.
- * 
- * Models: Mixtral 8x7B, LLama 2, etc.
- * Free tier: Good rate limits
  */
 
 import { BaseProvider, Message, ModelParams, ProviderResponse } from './base'
@@ -13,10 +10,10 @@ import { BaseProvider, Message, ModelParams, ProviderResponse } from './base'
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
 
 export const GROQ_MODELS = [
+  'llama-3.3-70b-versatile',
+  'llama-3.1-8b-instant',
   'mixtral-8x7b-32768',
-  'llama-2-70b-chat',
-  'llama2-70b-4096',
-  'gemma-7b-it',
+  'gemma2-9b-it',
 ]
 
 export class GroqProvider extends BaseProvider {
@@ -27,6 +24,10 @@ export class GroqProvider extends BaseProvider {
       'https://api.groq.com/openai/v1',
       GROQ_MODELS
     )
+  }
+
+  private cleanModel(model: string): string {
+    return model.replace(/^groq\//i, '')
   }
 
   async sendMessage(
@@ -49,15 +50,15 @@ export class GroqProvider extends BaseProvider {
     }
 
     try {
+      const targetModel = this.cleanModel(model)
       const body: Record<string, any> = {
-        model,
+        model: targetModel,
         messages,
         temperature: params.temperature ?? 0.7,
         max_tokens: params.max_tokens ?? 4096,
       }
 
       if (params.top_p !== undefined) body.top_p = params.top_p
-      if (params.top_k !== undefined) body.top_k = params.top_k
       if (params.frequency_penalty !== undefined) body.frequency_penalty = params.frequency_penalty
       if (params.presence_penalty !== undefined) body.presence_penalty = params.presence_penalty
 
@@ -130,8 +131,9 @@ export class GroqProvider extends BaseProvider {
       throw new Error('Groq API key not configured')
     }
 
+    const targetModel = this.cleanModel(model)
     const body: Record<string, any> = {
-      model,
+      model: targetModel,
       messages,
       temperature: params.temperature ?? 0.7,
       max_tokens: params.max_tokens ?? 4096,
@@ -139,7 +141,6 @@ export class GroqProvider extends BaseProvider {
     }
 
     if (params.top_p !== undefined) body.top_p = params.top_p
-    if (params.top_k !== undefined) body.top_k = params.top_k
     if (params.frequency_penalty !== undefined) body.frequency_penalty = params.frequency_penalty
     if (params.presence_penalty !== undefined) body.presence_penalty = params.presence_penalty
 
@@ -162,9 +163,6 @@ export class GroqProvider extends BaseProvider {
     return response
   }
 
-  /**
-   * Groq-specific health check
-   */
   async healthCheck(): Promise<boolean> {
     const startTime = Date.now()
     try {
@@ -175,9 +173,9 @@ export class GroqProvider extends BaseProvider {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'mixtral-8x7b-32768',
-          messages: [{ role: 'user' as const, content: 'ping' }],
-          max_tokens: 10,
+          model: 'llama-3.1-8b-instant',
+          messages: [{ role: 'user', content: 'ping' }],
+          max_tokens: 5,
         }),
         signal: AbortSignal.timeout(5000),
       })
