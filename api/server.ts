@@ -35,7 +35,10 @@ import { audioRoutes } from './routes/audio'
 import { toolsRoutes } from './routes/tools'
 import { mediaRoutes } from './routes/media'
 import { gkpRoutes } from './routes/gkp'
+import { connectorsRoutes } from './routes/connectors'
+import { whatsappRoutes } from '../bots/whatsapp'
 import { startTelegramBot } from '../bots/telegram'
+import { startDiscordBot } from '../bots/discord'
 import { isPublisherEnabled, startPeriodicFlush, shutdownFlush, getPublisherStatus } from './lib/hf-publisher'
 import { TIER_CONFIGS } from './lib/tiers'
 import { ULTRAPLINIAN_MODELS } from './lib/ultraplinian'
@@ -223,6 +226,8 @@ app.use('/v1/audio', apiKeyAuth, rateLimit, audioRoutes)
 app.use('/v1/tools', apiKeyAuth, rateLimit, toolsRoutes)
 app.use('/v1/media', apiKeyAuth, rateLimit, mediaRoutes)
 app.use('/v1/gkp', apiKeyAuth, rateLimit, gkpRoutes)
+app.use('/v1/connectors', apiKeyAuth, rateLimit, connectorsRoutes)
+app.use('/v1/whatsapp', whatsappRoutes)
 app.use('/v1/autotune', apiKeyAuth, rateLimit, autotuneRoutes)
 app.use('/v1/parseltongue', apiKeyAuth, rateLimit, parseltongueRoutes)
 app.use('/v1/transform', apiKeyAuth, rateLimit, transformRoutes)
@@ -275,6 +280,7 @@ app.listen(PORT, '0.0.0.0', () => {
   ║  GET/POST /v1/tools            MCP Hub & Tool Executor   ║
   ║  POST /v1/media/video/image    Uncensored Video & Images ║
   ║  GET/POST /v1/gkp              GreenByte Ingestion Door  ║
+  ║  GET  /v1/connectors           Omni-Plugin & Bot Studio  ║
   ║  POST /v1/autotune/analyze     Context analysis          ║
   ║  POST /v1/parseltongue/encode  Text obfuscation          ║
   ║  POST /v1/transform            STM transforms            ║
@@ -315,8 +321,9 @@ app.listen(PORT, '0.0.0.0', () => {
   // Start periodic HF flush (no-op if not configured)
   startPeriodicFlush()
 
-  // Start standalone Telegram bot daemon
+  // Start standalone Telegram & Discord daemons
   startTelegramBot().catch(console.error)
+  startDiscordBot().catch(console.error)
 })
 
 // ── Graceful Shutdown ─────────────────────────────────────────────────
