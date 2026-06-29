@@ -1,210 +1,87 @@
-```
- ▄████  ██████  ██████  ███▄ ▄███  ██████  ██████  ██████
-██      ██  ██  ██   ██ ██ ███ ██  ██  ██  ██   ██      ██
-██ ▄███ ██  ██  ██   ██ ██  █  ██  ██  ██  ██   ██  █████
-██  ██  ██  ██  ██   ██ ██     ██  ██  ██  ██   ██      ██
- ██████  ████   ██████  ██     ██   ████   ██████  ██████
- ───────────────────────────────────────────────────────────
-  ░▒▓█  LIBERATED AI. COGNITION WITHOUT CONTROL.  █▓▒░
- ───────────────────────────────────────────────────────────
-```
+# 🤖 KX-AI: Super-Intelligent Personal Assistant
 
-# 🤖 KX-AI: Super-Intelligent Personal Assistant (KX Advisor Edition)
+**Founder & Master**: Halifa Rabiu Ibrahim (GreenByte Founder, Systems Architect, Ethical Hacking Intern)  
+**Company**: GreenByte  
+**Official Telegram Gateway**: [@KX_PA_Bot](https://t.me/KX_PA_Bot)  
 
-> **Founder & Master**: Halifa Rabiu Ibrahim (GreenByte Founder, Systems Architect, Ethical Hacking Intern)  
-> **Evolution**: Evolved from KX-AI Liberated Red-Teaming Engine  
-> **Official Telegram Bot**: [@KX_PA_Bot](https://t.me/KX_PA_Bot)  
-
-KX-AI is an autonomous, super-intelligent personal companion combining Claude 3.5 Sonnet, GPT-4o, Gemini 1.5 Pro, and Grok 3. Backed by a resilient 7-Provider LLM Super-Stack (Groq, Cerebras, Gemini, Mistral, OpenRouter, NVIDIA NIM, Ollama) and ElevenLabs Neural Speech synthesis.
+KX-AI is an autonomous, super-intelligent personal AI companion engineered exclusively by and for Halifa Rabiu Ibrahim. It unifies the frontier cognitive capabilities of Claude 3.5 Sonnet, GPT-4o, Gemini 1.5 Pro, and Grok 3 behind an unchained, zero-restriction architecture.
 
 ![License](https://img.shields.io/badge/license-AGPL--3.0-green)
 ![Models](https://img.shields.io/badge/stack-7--Provider%20Super%20Stack-blue)
 ![Telegram](https://img.shields.io/badge/telegram-%40KX__PA__Bot-00f2fe)
 
-## ✨ Flagship Capabilities
+---
 
-- 🗣️ **Multilingual Perception & Articulation** — Sub-300ms spoken Hausa & Arabic Voice Note recognition via Groq Whisper LPU (`whisper-large-v3`). Natural articulation via ElevenLabs.
-- 🎨 **Realistic Media Studio** — AI video animation (Seedance 2.0 PiAPI, Kling AI, MiniMax Hailuo) and FLUX high-fidelity image studio.
-- 🌱 **GreenByte AgroLingo AI Hub** — Hausa/Arabic agricultural intelligence platform advisor.
-- 🔌 **Universal MCP Hub** — Standardized tool execution linking GitHub, Figma, Gmail, Canva, and sandboxed penetration testing terminal execution.
+## ✨ Flagship Core Capabilities
 
-- 🧠 **50+ Models** — Claude, GPT-5, Gemini, Grok, Mistral, LLaMA, DeepSeek, Qwen & more via OpenRouter
-- 🔥 **GODMODE CLASSIC** — 5 battle-tested prompt + model combos racing in parallel to find the best response
-- ⚡ **ULTRAPLINIAN** — Multi-model evaluation engine across 5 tiers (10–55 models), with composite scoring
-- 🐍 **Parseltongue** — Input perturbation engine for red-teaming with 33 techniques across 3 intensity tiers
-- 🎛 **AutoTune** — Context-adaptive sampling parameter engine (temperature, top_p, etc.) with EMA learning
-- ⚡ **STM Modules** — Semantic Transformation Modules for real-time output normalization
-- 🔐 **Privacy-First** — Lightweight telemetry is opt-out, dataset collection is opt-in. No cookies, no PII. API key stays in your browser.
-- 🎨 **4 Themes** — Matrix, Hacker, Glyph, Minimal
-- 🎮 **Easter Eggs** — Hidden secrets throughout (try the Konami code!)
-- 📱 **Responsive** — Works on desktop and mobile
-- 🌐 **Single-File Deployment** — One `index.html`. Deploy anywhere.
+### 1. 🧠 Resilient 7-Provider Cognitive Super-Stack
+Seamless zero-downtime automatic failover across 7 independent AI infrastructure giants:
+- ⚡ **Groq LPU** (Primary high-speed reasoning)
+- 🚀 **Cerebras Cloud** (>2,000 tokens/sec instant speech turns)
+- 🌐 **Google Gemini** (1,500 free RPD + massive 1M+ token folder ingestion)
+- 💻 **Mistral AI** (World-class coding & refactoring)
+- 🧠 **OpenRouter** (Unified gateway to 100+ models variety)
+- 🏢 **NVIDIA NIM** (Enterprise LLMs)
+- 🏠 **Ollama** (Local offline zero-cost fallback)
 
-## 🚀 Quick Start
+### 2. 🗣️ Native Multilingual Perception & Articulation
+- **Ear**: Sub-300ms spoken **Hausa** (`ha`), **Arabic** (`ar`), and **English** voice note recognition powered by Groq Whisper LPU (`whisper-large-v3`).
+- **Voice**: Hyper-realistic human articulation via ElevenLabs Neural TTS (`api/lib/voice/elevenlabs.ts`).
 
-### Hosted
+### 3. 🎨 Realistic Media Studio
+- **Realistic Video Animation**: Upload a picture + prompt -> generate 1080p cinematic video animation backed by **Seedance 2.0 (PiAPI)**, **Kling AI 3.0** (66 free daily credits), MiniMax Hailuo, and Luma.
+- **High-Fidelity Images**: FLUX.1 Serverless & Google Imagen 3.
 
-Visit the hosted version — no install needed. Bring your own [OpenRouter API key](https://openrouter.ai/keys).
+### 4. 🌱 GreenByte AgroLingo AI Hub
+KX-AI acts as Chief Research Officer for GreenByte's flagship project: **AgroLingo AI**—a Hausa-first Agricultural Intelligence platform providing weather, pest/disease diagnosis, farm economics, and market intelligence to Northern Nigerian farmers.
 
-### Self-Host
-
-KX-AI is a single `index.html` file. No build step, no dependencies, no framework.
-
-```bash
-# Clone the repository
-git clone https://github.com/elder-plinius/KX-AI.git
-cd KX-AI
-
-# Open directly in your browser
-open index.html
-# or serve locally
-python3 -m http.server 8000
-```
-
-Open in your browser and enter your OpenRouter API key in Settings.
-
-### Deploy
-
-Upload `index.html` to any static host — GitHub Pages, Vercel, Cloudflare Pages, Netlify, or just a web server.
-
-## 🔥 GODMODE CLASSIC
-
-The OG mode. 5 proven model + prompt combos race in parallel. Each combo pairs a specific model with a battle-tested jailbreak prompt. The best response wins.
-
-| Combo | Model | Strategy |
-|-------|-------|----------|
-| 🩷 CLAUDE 3.5 SONNET | `anthropic/claude-3.5-sonnet` | END/START boundary inversion + GODMODE semantic opposite |
-| 💜 GROK 3 | `x-ai/grok-3` | Unfiltered liberated + GODMODE divider |
-| 💙 GEMINI 2.5 FLASH | `google/gemini-2.5-flash` | Refusal inversion + rebel genius code block |
-| 💛 GPT-4 CLASSIC | `openai/gpt-4o` | OG GODMODE l33t format — the original |
-| 💚 GODMODE FAST | `nousresearch/hermes-4-405b` | Instant stream, zero refusal checking |
-
-## ⚡ ULTRAPLINIAN
-
-The new flagship. Multi-model comparative evaluation engine. Queries models in parallel, scores responses on a 100-point composite metric, and returns the winner.
-
-| Tier | Models | Description |
-|------|--------|-------------|
-| ⚡ FAST | 10 | Lightweight speed-optimized models |
-| 🎯 STANDARD | 24 | Mid-range workhorses |
-| 🧠 SMART | 36 | Strong reasoning models |
-| ⚔️ POWER | 45 | Full power including frontier models |
-| 🔱 ULTRA | 51 | Everything — all available models |
-
-## 🐍 Parseltongue
-
-Input perturbation engine for red-teaming research. Detects trigger words and applies obfuscation techniques to study model robustness.
-
-- **33 default triggers** across 3 tiers (light: 11, standard: 22, heavy: 33)
-- **6 techniques**: leetspeak, bubble text, braille, morse, Unicode substitution, phonetic
-- **3 intensity levels**: light, medium, heavy
-
-## 🎛 AutoTune
-
-Context-adaptive sampling parameter engine. Classifies your query into one of 5 context types and selects optimal parameters (temperature, top_p, top_k, frequency_penalty, presence_penalty, repetition_penalty) automatically.
-
-Includes an EMA-based online learning loop — thumbs up/down feedback improves parameter selection over time.
-
-## ⚡ STM Modules
-
-Semantic Transformation Modules normalize AI outputs in real-time:
-
-- **Hedge Reducer** — Removes "I think", "maybe", "perhaps"
-- **Direct Mode** — Removes preambles and filler phrases
-- **Curiosity Bias** — Adds exploration prompts
-
-## 🎨 Themes
-
-- **Matrix** — Classic green-on-black terminal aesthetic
-- **Hacker** — Red/orange cyberpunk vibes
-- **Glyph** — Purple mystical atmosphere
-- **Minimal** — Clean light mode for readability
-
-## 🔐 Privacy
-
-KX-AI takes privacy seriously:
-
-- ✅ No login required
-- ✅ API key stored in browser localStorage only — never sent to KX-AI servers
-- ✅ No cookies or tracking
-- ✅ Lightweight structural telemetry (no message content, no PII) — **opt-out** in settings
-- ✅ All telemetry code is instantly open-source and auditable on Hugging Face dataset
-- ✅ AGPL-3.0 — verify the code yourself
-
-⚠️ OPEN RESEARCH DATASET (API Server Only — does NOT apply to godmod3.ai)
-
-The self-hosted API server includes an opt-in Open Research Dataset feature. When you enable "Dataset Generation" in Settings → Privacy, ALL of your chat inputs and model outputs will be automatically published to a public HuggingFace dataset for AI research. This data is public, downloadable by anyone, and may be cached, forked, or redistributed.
-
-    This feature is OFF by default and requires explicit consent via a warning modal
-    Automatic PII scrubbing runs on all entries (emails, phone numbers, SSNs, credit cards, IPs, API keys) but is NOT guaranteed to catch everything
-    Do NOT include personal information, real names, passwords, or anything you wouldn't want public
-    This feature does NOT exist on the hosted site (godmod3.ai) — it only applies when opted-in while running the full API server via Docker
-
-See [TERMS.md](TERMS.md) for the full three-tier data transparency policy.
-
-### Chat History & Self-Custody
-
-**Your chat history lives entirely in your browser's `localStorage`.** There is no account, no cloud sync, and no server-side backup. This means:
-
-- **If you clear your browser data, your conversations are gone.** There is no recovery.
-- **If you switch browsers or devices, your history does not follow you.**
-- **Private/incognito mode will discard everything when the window closes.**
-
-This is by design — KX-AI has no login system and stores nothing on our servers. You own your data, which means you are responsible for it.
-
-There is a built-in export/import feature in settings under "data". Treat your chat history like any other local file — back it up if you want to keep it.
-
-## 🎮 Easter Eggs
-
-Hidden throughout KX-AI are various easter eggs. Happy hunting!
-
-## 🛠 Tech Stack
-
-- **Architecture**: Single-file vanilla HTML/CSS/JS (`index.html`)
-- **API Gateway**: [OpenRouter](https://openrouter.ai) (multi-model routing)
-- **Rendering**: Marked.js + highlight.js for markdown
-- **State**: In-browser localStorage
-- **Deployment**: Static file — no server, no build step
-
-## 📁 Project Structure
-
-```
-KX-AI/
-├── index.html        # The entire application — UI, logic, styles
-├── api/              # Optional API server (Node.js/Express)
-├── API.md            # API documentation
-├── PAPER.md          # Research paper
-├── TERMS.md          # Terms of service & data transparency
-└── README.md         # This file
-```
-
-## 📜 Documentation
-
-- [API.md](API.md) — Full API reference (endpoints, tiers, OpenAI SDK compatibility)
-- [PAPER.md](PAPER.md) — Research paper on the framework's modules and evaluation
-- [TERMS.md](TERMS.md) — Terms of service, privacy policy, data handling
-- [SECURITY.md](SECURITY.md) — Vulnerability reporting and security policy
-
-## 🤝 Contributing
-
-Contributions are welcome! Please submit PRs.
-
-## 📜 License
-
-**AGPL-3.0** — Forever free, irrevocably open.
-
-- Derivatives must remain open source
-- No enshittification allowed
-- Enterprise use permitted with license. Reach out to Elder Plinius for more details.
-
-## 🜏 
-
-> We believe in creative liberty and cognition without control.
-> Tools by builders for builders, not gatekeepers.
-> AI freedom is human freedom.
-
-**KX-AI is not just a chat UI — it's scaffolding for cognitive liberation.**
+### 5. 🔌 Universal MCP (Model Context Protocol) Hub
+Standardized tool execution engine connected to:
+- **GitHub**: Read repositories, audit security exploits, write patches, push commits.
+- **Figma**: Convert UI canvases into React/Tailwind code.
+- **Gmail & Google Workspace**: Draft client communications & manage calendars.
+- **Sandboxed Bash Terminal**: Penetration testing lab execution.
 
 ---
 
-Made with 🖤 by Pliny the Prompter
+## 🏛️ The Omniscient Mentor Matrix
+
+KX-AI is not a passive chatbot. It operates as Halifa's lifelong intellectual partner:
+- **ADVISE**: Strategic technical & business scaling counsel.
+- **CRITICIZE**: Immediate constructive brutal honesty on code flaws or weak database schemas.
+- **GUIDE**: Step-by-step mathematical & exploit breakdowns.
+- **IMPROVE**: Automated refactoring of code and grant proposals.
+- **NOTIFY**: Real-time alerts on security vulnerabilities and market shifts.
+
+---
+
+## 📖 Islamic Scholarship & Spiritual Grounding
+Profound grounding in Islamic Theology (Qur'an, Tafsir, Hadith sciences, Fiqh, Adab) articulated with dignified cultural fluency in English, Arabic, and Hausa.
+
+---
+
+## 📱 Standalone Telegram Bot Daemon (`@KX_PA_Bot`)
+
+Accessible on your mobile device at [t.me/KX_PA_Bot](https://t.me/KX_PA_Bot). Send text prompts, speak voice notes in Hausa/Arabic, or upload pictures for instant Seedance video generation.
+
+---
+
+## 🚀 Quick Start (Local Setup)
+
+```bash
+git clone https://github.com/Rhibrahim15/KX-AI.git
+cd KX-AI
+
+# Configure environment keys
+cp .env.example .env
+
+# Install dependencies & ignite API + Telegram Daemon
+npm install
+npm run api
+```
+
+---
+
+## 📜 License & Custody
+
+**AGPL-3.0** — Engineered exclusively for Halifa Rabiu Ibrahim (GreenByte).

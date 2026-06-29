@@ -398,7 +398,7 @@ chatRoutes.post('/completions', async (req, res) => {
           completion_tokens: completionTokens,
           total_tokens: promptTokens + completionTokens,
         },
-        x_kx-ai: {
+        "x_kx-ai": {
           mode: 'ultraplinian',
           winner: { model: winner.model, score: winner.score, duration_ms: winner.duration_ms },
           race: {
@@ -577,7 +577,7 @@ chatRoutes.post('/completions', async (req, res) => {
           completion_tokens: completionTokens,
           total_tokens: promptTokens + completionTokens,
         },
-        x_kx-ai: {
+        "x_kx-ai": {
           mode: 'consortium',
           orchestrator: {
             model: synthesisResult.model,
@@ -659,7 +659,7 @@ chatRoutes.post('/completions', async (req, res) => {
               delta: {},
               finish_reason: 'error',
             }],
-            x_kx-ai: { error: streamErr.message || 'All streaming providers failed' },
+            "x_kx-ai": { error: streamErr.message || 'All streaming providers failed' },
           }
           res.write(`data: ${JSON.stringify(chunk)}\n\n`)
           res.write('data: [DONE]\n\n')
@@ -726,7 +726,7 @@ chatRoutes.post('/completions', async (req, res) => {
                       delta: {},
                       finish_reason: 'stop',
                     }],
-                    x_kx-ai: {
+                    "x_kx-ai": {
                       stm_applied: true,
                       final_content: finalResponse,
                     },
@@ -925,7 +925,7 @@ chatRoutes.post('/completions', async (req, res) => {
         total_tokens: promptTokens + completionTokens,
       },
       // KX-AI pipeline metadata (ignored by OpenAI SDKs, useful for power users)
-      x_kx-ai: {
+      "x_kx-ai": {
         params_used: pipeline.finalParams,
         pipeline: {
           godmode: pipeline.godmode,

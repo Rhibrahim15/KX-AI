@@ -21,7 +21,7 @@ interface ModelEntry {
   model_count?: number
 }
 
-const KX-AI_MODELS: ModelEntry[] = [
+const KX_AI_MODELS: ModelEntry[] = [
   {
     id: 'ultraplinian',
     description: 'ULTRAPLINIAN: Race 12 models in parallel, return the best (fast tier). Alias for ultraplinian-fast.',
