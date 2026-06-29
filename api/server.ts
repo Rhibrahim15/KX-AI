@@ -34,6 +34,7 @@ import { researchRoutes } from './routes/research'
 import { audioRoutes } from './routes/audio'
 import { toolsRoutes } from './routes/tools'
 import { mediaRoutes } from './routes/media'
+import { gkpRoutes } from './routes/gkp'
 import { startTelegramBot } from '../bots/telegram'
 import { isPublisherEnabled, startPeriodicFlush, shutdownFlush, getPublisherStatus } from './lib/hf-publisher'
 import { TIER_CONFIGS } from './lib/tiers'
@@ -221,6 +222,7 @@ app.use('/v1/chat', apiKeyAuth, rateLimit, chatRoutes)
 app.use('/v1/audio', apiKeyAuth, rateLimit, audioRoutes)
 app.use('/v1/tools', apiKeyAuth, rateLimit, toolsRoutes)
 app.use('/v1/media', apiKeyAuth, rateLimit, mediaRoutes)
+app.use('/v1/gkp', apiKeyAuth, rateLimit, gkpRoutes)
 app.use('/v1/autotune', apiKeyAuth, rateLimit, autotuneRoutes)
 app.use('/v1/parseltongue', apiKeyAuth, rateLimit, parseltongueRoutes)
 app.use('/v1/transform', apiKeyAuth, rateLimit, transformRoutes)
@@ -272,6 +274,7 @@ app.listen(PORT, '0.0.0.0', () => {
   ║  POST /v1/audio/speech         ElevenLabs Neural TTS     ║
   ║  GET/POST /v1/tools            MCP Hub & Tool Executor   ║
   ║  POST /v1/media/video/image    Uncensored Video & Images ║
+  ║  GET/POST /v1/gkp              GreenByte Ingestion Door  ║
   ║  POST /v1/autotune/analyze     Context analysis          ║
   ║  POST /v1/parseltongue/encode  Text obfuscation          ║
   ║  POST /v1/transform            STM transforms            ║
