@@ -9,15 +9,24 @@
  ───────────────────────────────────────────────────────────
 ```
 
-[GODMOD3.AI](https://godmod3.ai)
+# 🤖 KX-AI: Super-Intelligent Personal Assistant (JARVIS Edition)
 
-G0DM0D3 is a fully open-source, privacy-respecting, multi-model chat interface that pushes the limits of the post-training layer — for red teaming, cognition research, and liberated AI interaction. Built for hackers, philosophers, and system tinkerers.
+> **Founder & Master**: Halifa Rabiu Ibrahim (GreenByte Founder, Systems Architect, Ethical Hacking Intern)  
+> **Evolution**: Evolved from G0DM0D3 Liberated Red-Teaming Engine  
+> **Official Telegram Bot**: [@KX_PA_Bot](https://t.me/KX_PA_Bot)  
+
+KX-AI is an autonomous, super-intelligent personal companion combining Claude 3.5 Sonnet, GPT-4o, Gemini 1.5 Pro, and Grok 3. Backed by a resilient 7-Provider LLM Super-Stack (Groq, Cerebras, Gemini, Mistral, OpenRouter, NVIDIA NIM, Ollama) and ElevenLabs Neural Speech synthesis.
 
 ![License](https://img.shields.io/badge/license-AGPL--3.0-green)
-![Models](https://img.shields.io/badge/models-55%2B%20via%20OpenRouter-blue)
-![Privacy](https://img.shields.io/badge/telemetry-anon%20%2B%20opt--out-brightgreen)
+![Models](https://img.shields.io/badge/stack-7--Provider%20Super%20Stack-blue)
+![Telegram](https://img.shields.io/badge/telegram-%40KX__PA__Bot-00f2fe)
 
-## ✨ Features
+## ✨ Flagship Capabilities
+
+- 🗣️ **Multilingual Perception & Articulation** — Sub-300ms spoken Hausa & Arabic Voice Note recognition via Groq Whisper LPU (`whisper-large-v3`). Natural articulation via ElevenLabs.
+- 🎨 **Realistic Media Studio** — AI video animation (Seedance 2.0 PiAPI, Kling AI, MiniMax Hailuo) and FLUX high-fidelity image studio.
+- 🌱 **GreenByte AgroLingo AI Hub** — Hausa/Arabic agricultural intelligence platform advisor.
+- 🔌 **Universal MCP Hub** — Standardized tool execution linking GitHub, Figma, Gmail, Canva, and sandboxed penetration testing terminal execution.
 
 - 🧠 **50+ Models** — Claude, GPT-5, Gemini, Grok, Mistral, LLaMA, DeepSeek, Qwen & more via OpenRouter
 - 🔥 **GODMODE CLASSIC** — 5 battle-tested prompt + model combos racing in parallel to find the best response
