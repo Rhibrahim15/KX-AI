@@ -36,7 +36,7 @@ export class OAuthDaemon {
     const renewed: string[] = []
     const now = Date.now()
 
-    for (const [provider, cred] of this.credentials) {
+    for (const [provider, cred] of Array.from(this.credentials.entries())) {
       // If token expires in less than 30 mins, execute OAuth refresh hook
       if (cred.expiresAt - now < 1800000 && cred.refreshToken) {
         console.log(`[OAuthDaemon] Renewing access token for provider: ${provider}...`)
