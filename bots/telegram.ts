@@ -83,27 +83,31 @@ async function handleUpdate(update: any) {
 
   // 2. Handle Spoken Voice Note (Hausa / Arabic / English)
   if (msg.voice) {
-    await sendTelegramMessage(chatId, '👂 *KX Voice Gateway*: Listening to Hausa/Arabic voice note...')
+    await sendTelegramMessage(chatId, '👂 *KX Voice Gateway*: Listening to speech...')
     const voiceUrl = await getFileUrl(msg.voice.file_id)
 
-    let transcript = 'Hello JARVIS, check AgroLingo status.'
-    const dgKey = process.env.DEEPGRAM_API_KEY
-    if (dgKey) {
+    let transcript = 'Hello JARVIS.'
+    const groqKey = process.env.GROQ_API_KEY
+    if (groqKey) {
       try {
-        const audioBlob = await fetch(voiceUrl).then(r => r.arrayBuffer())
-        const dgRes = await fetch('https://api.deepgram.com/v1/listen?model=nova-2&smart_format=true', {
+        const audioBlob = await fetch(voiceUrl).then(r => r.blob())
+        const form = new FormData()
+        form.append('file', audioBlob, 'voice.ogg')
+        form.append('model', 'whisper-large-v3')
+
+        const groqRes = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
           method: 'POST',
-          headers: { 'Authorization': `Token ${dgKey}`, 'Content-Type': 'audio/ogg' },
-          body: audioBlob,
+          headers: { 'Authorization': `Bearer ${groqKey}` },
+          body: form,
         })
-        const dgJson = await dgRes.json()
-        transcript = dgJson.results?.channels?.[0]?.alternatives?.[0]?.transcript || transcript
+        const groqJson = await groqRes.json()
+        transcript = groqJson.text || transcript
       } catch (err) {
-        console.warn('[DeepGram Hook]', err)
+        console.warn('[Groq Whisper Hook]', err)
       }
     }
 
-    await sendTelegramMessage(chatId, `🗣 *Transcribed*: "${transcript}"\nCognitive router computing reply...`)
+    await sendTelegramMessage(chatId, `🗣 *Transcribed*: _"${transcript.trim()}"_\nComputing reply...`)
 
     const router = getRouter()
     const llmReply = await router.execute([{ role: 'user', content: transcript }], 'simple')
