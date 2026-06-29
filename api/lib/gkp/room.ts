@@ -1,8 +1,6 @@
 /**
- * GreenByte Virtual OS Room & Conversational VFS Engine
- * 
- * Enables Khalifa Elgezy to treat the GreenByte knowledge platform as an interactive room.
- * Supports natural language folder creation, file co-authoring, and live directory tree visualization.
+ * GreenByte Virtual OS Room & Conversational VFS Engine (Secure Sandbox Edition)
+ * Enforces strict path traversal mitigation (preventing directory breakout outside gkp/).
  */
 
 import fs from 'fs'
@@ -27,10 +25,18 @@ export class GreenByteRoom {
   }
 
   /**
-   * 1. Create Folder
+   * Forensic Security Guard: Mitigate Path Traversal / Directory Escape
    */
+  private resolveSecurePath(relP: string): string {
+    const resolved = path.resolve(this.roomRoot, relP)
+    if (!resolved.startsWith(this.roomRoot)) {
+      throw new Error(`Security Exception: Path traversal breach attempt detected ("${relP}"). Sandbox breakout outside gkp/ is strictly blocked.`)
+    }
+    return resolved
+  }
+
   createFolder(relFolderPath: string): RoomActionResult {
-    const targetDir = path.resolve(this.roomRoot, relFolderPath)
+    const targetDir = this.resolveSecurePath(relFolderPath)
     fs.mkdirSync(targetDir, { recursive: true })
     return {
       action: 'create_folder',
@@ -39,11 +45,8 @@ export class GreenByteRoom {
     }
   }
 
-  /**
-   * 2. Create / Overwrite File
-   */
   createFile(relFilePath: string, content: string = ''): RoomActionResult {
-    const targetFile = path.resolve(this.roomRoot, relFilePath)
+    const targetFile = this.resolveSecurePath(relFilePath)
     fs.mkdirSync(path.dirname(targetFile), { recursive: true })
     fs.writeFileSync(targetFile, content, 'utf-8')
     return {
@@ -54,11 +57,13 @@ export class GreenByteRoom {
     }
   }
 
-  /**
-   * 3. Visual ASCII Directory Tree
-   */
   getRoomTreeASCII(subRelDir: string = ''): string {
-    const target = path.resolve(this.roomRoot, subRelDir)
+    let target = this.roomRoot
+    try {
+      target = this.resolveSecurePath(subRelDir)
+    } catch {
+      return `Directory escape attempt blocked.`
+    }
     if (!fs.existsSync(target)) return `Directory gkp/${subRelDir} does not exist.`
 
     let treeStr = `🏛️ GREENBYTE ROOM VFS [gkp/${subRelDir}]\n`
@@ -83,13 +88,9 @@ export class GreenByteRoom {
     return treeStr
   }
 
-  /**
-   * 4. Conversational Natural Language Command Dispatcher
-   */
   executeNaturalCommand(userMessage: string): RoomActionResult {
     const msg = userMessage.trim()
 
-    // Match "create folder <name>" or "make directory <name>"
     const folderMatch = msg.match(/(?:create|make|open)\s+(?:a\s+)?(?:new\s+)?(?:folder|directory)\s+[`'"]?([a-zA-Z0-9_\-\/]+)[`'"]?/i)
     if (folderMatch) {
       let folderName = folderMatch[1]
@@ -97,15 +98,13 @@ export class GreenByteRoom {
       return this.createFolder(folderName)
     }
 
-    // Match "create file <name>" or "make file <name>"
     const fileMatch = msg.match(/(?:create|make|touch)\s+(?:a\s+)?(?:new\s+)?file\s+[`'"]?([a-zA-Z0-9_\-\/\.]+)[`'"]?(?:\s+(?:with\s+content|saying)\s+[`'"]?(.+)[`'"]?)?/i)
     if (fileMatch) {
       const fileName = fileMatch[1]
-      const fileContent = fileMatch[2] || `# ${path.basename(fileName, '.md')}\n\nCo-authored by Khalifa Elgezy & JARVIS inside GreenByte Room.\n`
+      const fileContent = fileMatch[2] || `# ${path.basename(fileName, '.md')}\n\nCo-authored by Khalifa Elgezy inside GreenByte Room.\n`
       return this.createFile(fileName, fileContent)
     }
 
-    // Match "show tree" or "list folder" or "what's inside"
     if (/(?:show|list|visualize)\s+(?:the\s+)?(?:room|folder|directory)?\s*tree|what'?s\s+inside/i.test(msg)) {
       return {
         action: 'list_tree',
