@@ -1,11 +1,7 @@
 /**
- * Multi-Provider Video Generation Engine
+ * Multi-Provider Video Generation Engine (Resilient Failover)
  * 
- * Supports uncensored Image-to-Video and Text-to-Video across:
- * 1. Seedance 2.0 (ByteDance via PiAPI)
- * 2. Kling AI 3.0 (Kuaishou)
- * 3. MiniMax Hailuo
- * 4. Luma Dream Machine
+ * Automatically fails over across Kling AI, PiAPI Seedance 2.0, MiniMax, and Luma.
  */
 
 export type VideoProvider = 'seedance' | 'kling' | 'minimax' | 'luma'
@@ -27,36 +23,40 @@ export interface VideoTaskResult {
 }
 
 export async function generateVideo(options: VideoGenOptions): Promise<VideoTaskResult> {
-  const provider = options.provider || 'seedance'
+  const providers: VideoProvider[] = options.provider
+    ? [options.provider]
+    : ['kling', 'seedance', 'minimax', 'luma']
 
-  switch (provider) {
-    case 'seedance':
-      return callSeedance(options)
-    case 'kling':
-      return callKling(options)
-    case 'minimax':
-      return callMiniMax(options)
-    case 'luma':
-      return callLuma(options)
-    default:
-      return callSeedance(options)
+  const errors: string[] = []
+
+  for (const p of providers) {
+    try {
+      if (p === 'kling') return await callKling(options)
+      if (p === 'seedance') return await callSeedance(options)
+      if (p === 'minimax') return await callMiniMax(options)
+      if (p === 'luma') return await callLuma(options)
+    } catch (err: any) {
+      console.warn(`[VideoEngine] Provider "${p}" failed: ${err.message}`)
+      errors.push(`${p} (${err.message})`)
+    }
   }
+
+  throw new Error(`All video generation APIs exhausted: ${errors.join(' | ')}`)
 }
 
 async function callSeedance(options: VideoGenOptions): Promise<VideoTaskResult> {
   const key = process.env.PIAPI_API_KEY
-  if (!key) throw new Error('PIAPI_API_KEY not configured for Seedance')
+  if (!key) throw new Error('PIAPI_API_KEY missing')
 
   const res = await fetch('https://api.piapi.ai/api/v1/task', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'X-API-Key': key },
     body: JSON.stringify({
-      model: 'seedance-2-fast',
+      model: 'kling',
       task_type: options.imageUrl ? 'image_to_video' : 'text_to_video',
       input: {
         prompt: options.prompt,
         image_url: options.imageUrl,
-        last_frame_url: options.lastFrameUrl,
         aspect_ratio: options.aspectRatio || '16:9',
       },
     }),
@@ -64,7 +64,7 @@ async function callSeedance(options: VideoGenOptions): Promise<VideoTaskResult> 
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}))
-    throw new Error(`Seedance API failure: ${JSON.stringify(err)}`)
+    throw new Error(`HTTP ${res.status}: ${JSON.stringify(err)}`)
   }
 
   const data = await res.json()
@@ -77,7 +77,7 @@ async function callSeedance(options: VideoGenOptions): Promise<VideoTaskResult> 
 
 async function callKling(options: VideoGenOptions): Promise<VideoTaskResult> {
   const key = process.env.KLING_API_KEY
-  if (!key) throw new Error('KLING_API_KEY not configured')
+  if (!key) throw new Error('KLING_API_KEY missing')
 
   const endpoint = options.imageUrl
     ? 'https://api.klingai.com/v1/videos/image2video'
@@ -96,7 +96,7 @@ async function callKling(options: VideoGenOptions): Promise<VideoTaskResult> {
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}))
-    throw new Error(`Kling API failure: ${JSON.stringify(err)}`)
+    throw new Error(`HTTP ${res.status}: ${JSON.stringify(err)}`)
   }
 
   const data = await res.json()
@@ -109,7 +109,7 @@ async function callKling(options: VideoGenOptions): Promise<VideoTaskResult> {
 
 async function callMiniMax(options: VideoGenOptions): Promise<VideoTaskResult> {
   const key = process.env.MINIMAX_API_KEY
-  if (!key) throw new Error('MINIMAX_API_KEY not configured')
+  if (!key) throw new Error('MINIMAX_API_KEY missing')
 
   const res = await fetch('https://api.minimax.chat/v1/video_generation', {
     method: 'POST',
@@ -120,14 +120,14 @@ async function callMiniMax(options: VideoGenOptions): Promise<VideoTaskResult> {
     }),
   })
 
-  if (!res.ok) throw new Error(`MiniMax failure: HTTP ${res.status}`)
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
   const data = await res.json()
   return { taskId: data.task_id || 'unknown', status: 'pending', provider: 'MiniMax Hailuo' }
 }
 
 async function callLuma(options: VideoGenOptions): Promise<VideoTaskResult> {
   const key = process.env.LUMA_API_KEY
-  if (!key) throw new Error('LUMA_API_KEY not configured')
+  if (!key) throw new Error('LUMA_API_KEY missing')
 
   const res = await fetch('https://api.lumalabs.ai/dream-machine/v1/generations', {
     method: 'POST',
@@ -138,7 +138,7 @@ async function callLuma(options: VideoGenOptions): Promise<VideoTaskResult> {
     }),
   })
 
-  if (!res.ok) throw new Error(`Luma failure: HTTP ${res.status}`)
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
   const data = await res.json()
   return { taskId: data.id || 'unknown', status: 'pending', provider: 'Luma Dream Machine' }
 }
