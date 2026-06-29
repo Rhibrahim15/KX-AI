@@ -179,6 +179,12 @@ async function handleUpdate(update: any) {
       return
     }
 
+    if (userText.startsWith('/anchor') || userText.startsWith('/why') || /\b(exhausted|rejected|tired|give up|no funding)\b/i.test(userText)) {
+      await sendChatAction(chatId, 'typing')
+      await sendTelegramMessage(chatId, '◈ *The GreenByte & Founder Resilience Anchor*\n_Retrieving institutional grounding document..._\n\nBrother Khalifa, when grants reject us or exhaustion sets in:\n\n1. **Committees vs The Soil**: Grant gatekeepers reject what doesn\'t match yesterday\'s checklists. You built *AgroLingo AI* for Northern Nigerian farmers, not committee paperwork. The farmers validate our code.\n\n2. **Zero-Cost Sovereignty**: We wired `𝕂𝕏-𝔸𝕀` to run on local Daemons and zero-cost Gradio scraping specifically so gatekeepers can never starve our mission.\n\n3. **Fatigue is Physical Engineering**: You are mastering Golang distributed systems while pursuing Qur\'anic Hifz. Close the laptop, perform 2 rak\'ahs, recite your Hifz portion, and rest. The code will be here tomorrow.')
+      return
+    }
+
     // ── Natural Human Conversational AI Turn ────────────────────────
     await sendChatAction(chatId, 'typing')
 
