@@ -11,6 +11,7 @@
 import { Message, ModelParams, ProviderResponse } from './providers'
 export type { Message, ModelParams, ProviderResponse }
 import { ProviderRegistry, createDefaultRegistry } from './providers/index'
+import { getGKPEngine } from './gkp/index'
 
 export type TaskType = 'simple' | 'reasoning' | 'code' | 'creative' | 'analysis' | 'default'
 
@@ -151,6 +152,30 @@ export class LLMRouter {
       .slice(0, 3)
   }
 
+  private enrichWithRAG(messages: Message[]): Message[] {
+    if (!messages || messages.length === 0) return messages
+    try {
+      const lastUser = [...messages].reverse().find(m => m.role === 'user')
+      if (!lastUser) return messages
+
+      const gkp = getGKPEngine()
+      const docs = gkp.retrieveGKPContext(lastUser.content, 3)
+      const citationBlock = gkp.formatCitationsForPrompt(docs)
+
+      if (!citationBlock) return messages
+
+      const clone = [...messages]
+      if (clone[0].role === 'system') {
+        clone[0] = { ...clone[0], content: clone[0].content + citationBlock }
+      } else {
+        clone.unshift({ role: 'system', content: citationBlock })
+      }
+      return clone
+    } catch {
+      return messages
+    }
+  }
+
   /**
    * Execute a request with automatic fallback
    */
@@ -162,6 +187,7 @@ export class LLMRouter {
     maxRetries: number = 3,
     overrideApiKey?: string
   ): Promise<ProviderResponse> {
+    const enrichedMessages = this.enrichWithRAG(messages)
     const route = await this.decideRoute(taskType, preferredModel)
     const allAttempts: Array<{ provider: string; model: string; error?: string }> = []
 
@@ -169,7 +195,7 @@ export class LLMRouter {
     const primaryProvider = this.registry.getProvider(route.provider)
     if (primaryProvider) {
       try {
-        const result = await primaryProvider.sendMessage(messages, route.model, params, undefined, overrideApiKey)
+        const result = await primaryProvider.sendMessage(enrichedMessages, route.model, params, undefined, overrideApiKey)
         if (result.success) {
           return result
         }
@@ -184,7 +210,7 @@ export class LLMRouter {
       const fallbackProvider = this.registry.getProvider(fallback.provider)
       if (fallbackProvider) {
         try {
-          const result = await fallbackProvider.sendMessage(messages, fallback.model, params, undefined, overrideApiKey)
+          const result = await fallbackProvider.sendMessage(enrichedMessages, fallback.model, params, undefined, overrideApiKey)
           if (result.success) {
             return result
           }
@@ -214,6 +240,7 @@ export class LLMRouter {
     preferredModel?: string,
     overrideApiKey?: string
   ): Promise<{ response: Response; provider: string; model: string }> {
+    const enrichedMessages = this.enrichWithRAG(messages)
     const route = await this.decideRoute(taskType, preferredModel)
     const allAttempts: Array<{ provider: string; model: string; error?: string }> = []
 
@@ -221,7 +248,7 @@ export class LLMRouter {
     const primaryProvider = this.registry.getProvider(route.provider)
     if (primaryProvider) {
       try {
-        const response = await primaryProvider.streamMessage(messages, route.model, params, undefined, overrideApiKey)
+        const response = await primaryProvider.streamMessage(enrichedMessages, route.model, params, undefined, overrideApiKey)
         return { response, provider: route.provider, model: route.model }
       } catch (err: any) {
         allAttempts.push({ provider: route.provider, model: route.model, error: err.message })
@@ -233,7 +260,7 @@ export class LLMRouter {
       const fallbackProvider = this.registry.getProvider(fallback.provider)
       if (fallbackProvider) {
         try {
-          const response = await fallbackProvider.streamMessage(messages, fallback.model, params, undefined, overrideApiKey)
+          const response = await fallbackProvider.streamMessage(enrichedMessages, fallback.model, params, undefined, overrideApiKey)
           return { response, provider: fallback.provider, model: fallback.model }
         } catch (err: any) {
           allAttempts.push({ provider: fallback.provider, model: fallback.model, error: err.message })
