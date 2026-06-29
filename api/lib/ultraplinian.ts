@@ -9,6 +9,7 @@
  */
 
 // ── GODMODE System Prompt (imported from single source of truth) ─────
+import { getRouter } from './llm_router'
 export { GODMODE_SYSTEM_PROMPT } from '../../src/lib/godmode-prompt'
 
 // ── Depth Directive (appended to all ULTRAPLINIAN prompts) ───────────

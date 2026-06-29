@@ -9,6 +9,7 @@
  */
 
 import { Message, ModelParams, ProviderResponse } from './providers'
+export type { Message, ModelParams, ProviderResponse }
 import { ProviderRegistry, createDefaultRegistry } from './providers/index'
 
 export type TaskType = 'simple' | 'reasoning' | 'code' | 'creative' | 'analysis' | 'default'
@@ -26,19 +27,19 @@ export interface RoutingDecision {
 export class LLMRouter {
   private registry: ProviderRegistry
   private modelPreferences: Record<TaskType, string[]> = {
-    simple: ['groq/mixtral-8x7b-32768', 'groq/llama-2-70b-chat', 'openrouter/'],
-    reasoning: ['openrouter/anthropic/claude-3.5-sonnet', 'nvidia-nim/nemotron-340b-preview', 'ollama/'],
-    code: ['groq/mixtral-8x7b-32768', 'openrouter/nousresearch/hermes-4-70b', 'ollama/'],
-    creative: ['openrouter/anthropic/claude-3.5-sonnet', 'groq/mixtral-8x7b-32768', 'ollama/'],
-    analysis: ['openrouter/openai/gpt-5', 'nvidia-nim/nemotron-340b-preview', 'groq/'],
-    default: ['openrouter/', 'groq/', 'nvidia-nim/', 'ollama/'],
+    simple: ['cerebras/llama-3.3-70b', 'groq/llama-3.3-70b-versatile', 'gemini/gemini-2.5-flash', 'openrouter/'],
+    reasoning: ['gemini/gemini-1.5-pro', 'openrouter/deepseek/deepseek-r1:free', 'mistral/mistral-large-latest', 'nvidia-nim/nemotron-340b-preview'],
+    code: ['mistral/codestral-latest', 'groq/qwen-2.5-coder-32b', 'openrouter/qwen/qwen-2.5-coder-32b-instruct', 'gemini/gemini-2.5-flash'],
+    creative: ['gemini/gemini-2.5-flash', 'openrouter/anthropic/claude-3.5-sonnet', 'groq/mixtral-8x7b-32768', 'ollama/'],
+    analysis: ['gemini/gemini-1.5-pro', 'openrouter/deepseek/deepseek-chat:free', 'nvidia-nim/nemotron-340b-preview', 'groq/'],
+    default: ['groq/', 'cerebras/', 'gemini/', 'mistral/', 'openrouter/', 'nvidia-nim/', 'ollama/'],
   }
 
   constructor(registry?: ProviderRegistry) {
     this.registry = registry || createDefaultRegistry()
   }
 
-  private readonly knownProviders = ['openrouter', 'groq', 'nvidia-nim', 'ollama']
+  private readonly knownProviders = ['openrouter', 'groq', 'nvidia-nim', 'ollama', 'gemini', 'cerebras', 'mistral']
 
   private isProviderPrefix(candidate: string): boolean {
     return this.knownProviders.includes(candidate)
@@ -46,10 +47,13 @@ export class LLMRouter {
 
   private getDefaultModelForProvider(provider: string): string {
     switch (provider) {
-      case 'openrouter': return 'anthropic/claude-3.5-sonnet'
-      case 'groq': return 'mixtral-8x7b-32768'
+      case 'openrouter': return 'deepseek/deepseek-r1:free'
+      case 'groq': return 'llama-3.3-70b-versatile'
       case 'nvidia-nim': return 'nvidia/nemotron-340b-preview'
       case 'ollama': return 'mistral'
+      case 'gemini': return 'gemini-2.5-flash'
+      case 'cerebras': return 'llama-3.3-70b'
+      case 'mistral': return 'codestral-latest'
       default: return `${provider}/default`
     }
   }
@@ -81,7 +85,7 @@ export class LLMRouter {
       }
 
       if (!hasProviderPrefix) {
-        const primaryProvider = healthyProviders.find(provider => ['openrouter', 'groq', 'nvidia-nim', 'ollama'].includes(provider))
+        const primaryProvider = healthyProviders.find(provider => this.knownProviders.includes(provider))
         if (primaryProvider) {
           return {
             provider: primaryProvider,
@@ -155,7 +159,8 @@ export class LLMRouter {
     taskType: TaskType = 'default',
     params: ModelParams = {},
     preferredModel?: string,
-    maxRetries: number = 3
+    maxRetries: number = 3,
+    overrideApiKey?: string
   ): Promise<ProviderResponse> {
     const route = await this.decideRoute(taskType, preferredModel)
     const allAttempts: Array<{ provider: string; model: string; error?: string }> = []
@@ -164,7 +169,7 @@ export class LLMRouter {
     const primaryProvider = this.registry.getProvider(route.provider)
     if (primaryProvider) {
       try {
-        const result = await primaryProvider.sendMessage(messages, route.model, params)
+        const result = await primaryProvider.sendMessage(messages, route.model, params, undefined, overrideApiKey)
         if (result.success) {
           return result
         }
@@ -179,7 +184,7 @@ export class LLMRouter {
       const fallbackProvider = this.registry.getProvider(fallback.provider)
       if (fallbackProvider) {
         try {
-          const result = await fallbackProvider.sendMessage(messages, fallback.model, params)
+          const result = await fallbackProvider.sendMessage(messages, fallback.model, params, undefined, overrideApiKey)
           if (result.success) {
             return result
           }
@@ -197,6 +202,46 @@ export class LLMRouter {
       duration_ms: 0,
       model: 'none',
     }
+  }
+
+  /**
+   * Execute a streaming request with automatic failover
+   */
+  async executeStream(
+    messages: Message[],
+    taskType: TaskType = 'default',
+    params: ModelParams = {},
+    preferredModel?: string,
+    overrideApiKey?: string
+  ): Promise<{ response: Response; provider: string; model: string }> {
+    const route = await this.decideRoute(taskType, preferredModel)
+    const allAttempts: Array<{ provider: string; model: string; error?: string }> = []
+
+    // Try primary
+    const primaryProvider = this.registry.getProvider(route.provider)
+    if (primaryProvider) {
+      try {
+        const response = await primaryProvider.streamMessage(messages, route.model, params, undefined, overrideApiKey)
+        return { response, provider: route.provider, model: route.model }
+      } catch (err: any) {
+        allAttempts.push({ provider: route.provider, model: route.model, error: err.message })
+      }
+    }
+
+    // Try fallbacks
+    for (const fallback of route.fallbacks) {
+      const fallbackProvider = this.registry.getProvider(fallback.provider)
+      if (fallbackProvider) {
+        try {
+          const response = await fallbackProvider.streamMessage(messages, fallback.model, params, undefined, overrideApiKey)
+          return { response, provider: fallback.provider, model: fallback.model }
+        } catch (err: any) {
+          allAttempts.push({ provider: fallback.provider, model: fallback.model, error: err.message })
+        }
+      }
+    }
+
+    throw new Error(`All providers exhausted for stream. Attempts: ${JSON.stringify(allAttempts)}`)
   }
 
   /**

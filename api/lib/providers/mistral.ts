@@ -1,23 +1,30 @@
 /**
- * Ollama Provider Implementation
+ * Mistral AI Provider Implementation
  * 
- * Implements BaseProvider for Ollama.
- * Run open-source models locally (no API cost).
- * Requires Ollama to be running on local machine or accessible server.
+ * Implements BaseProvider for Mistral AI (La Plateforme).
+ * Generous experimentation tier for developers.
  * 
- * Models: Any GGUF model (Llama 2, Mistral, etc.)
- * Cost: Free (local compute)
+ * Models: codestral-latest, mistral-large-latest, mistral-small-latest
+ * Specialty: World-class code generation and syntax refactoring.
  */
 
 import { BaseProvider, Message, ModelParams, ProviderResponse } from './base'
 
-export class OllamaProvider extends BaseProvider {
-  constructor(baseUrl?: string) {
+const MISTRAL_API_URL = 'https://api.mistral.ai/v1/chat/completions'
+
+export const MISTRAL_MODELS = [
+  'codestral-latest',
+  'mistral-large-latest',
+  'mistral-small-latest',
+]
+
+export class MistralProvider extends BaseProvider {
+  constructor(apiKey: string) {
     super(
-      'Ollama',
-      'local', // No API key for local Ollama
-      baseUrl || 'http://localhost:11434',
-      [] // Models are dynamic
+      'Mistral',
+      apiKey,
+      'https://api.mistral.ai/v1',
+      MISTRAL_MODELS
     )
   }
 
@@ -29,30 +36,33 @@ export class OllamaProvider extends BaseProvider {
     overrideApiKey?: string
   ): Promise<ProviderResponse> {
     const startTime = Date.now()
+    const key = overrideApiKey || this.apiKey
+
+    if (!key) {
+      return {
+        success: false,
+        error: 'Mistral API key not configured',
+        duration_ms: Date.now() - startTime,
+        model,
+      }
+    }
 
     try {
-      const endpoint = `${this.baseUrl}/api/chat`
-
       const body: Record<string, any> = {
         model,
         messages,
-        stream: false,
-        options: {
-          temperature: params.temperature ?? 0.7,
-          top_p: params.top_p,
-          top_k: params.top_k,
-        },
+        temperature: params.temperature ?? 0.7,
+        max_tokens: params.max_tokens ?? 4096,
       }
 
-      // Ollama doesn't support all OpenAI params, so we only set what it supports
-      if (params.temperature !== undefined) body.options.temperature = params.temperature
-      if (params.top_p !== undefined) body.options.top_p = params.top_p
-      if (params.top_k !== undefined) body.options.top_k = params.top_k
+      if (params.top_p !== undefined) body.top_p = params.top_p
 
-      const response = await fetch(endpoint, {
+      const response = await fetch(MISTRAL_API_URL, {
         method: 'POST',
         headers: {
+          'Authorization': `Bearer ${key}`,
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
         body: JSON.stringify(body),
         signal,
@@ -62,7 +72,7 @@ export class OllamaProvider extends BaseProvider {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
-        const errorMsg = errorData.error || `HTTP ${response.status}`
+        const errorMsg = errorData.error?.message || `HTTP ${response.status}`
         this.updateStatus(false, duration, errorMsg)
         return {
           success: false,
@@ -73,10 +83,10 @@ export class OllamaProvider extends BaseProvider {
       }
 
       const data = await response.json()
-      const content = data.message?.content || ''
+      const content = data.choices?.[0]?.message?.content || ''
 
       if (!content) {
-        this.updateStatus(false, duration, 'Empty response from Ollama')
+        this.updateStatus(false, duration, 'Empty response from Mistral')
         return {
           success: false,
           error: 'Empty response',
@@ -112,44 +122,55 @@ export class OllamaProvider extends BaseProvider {
     signal?: AbortSignal,
     overrideApiKey?: string
   ): Promise<Response> {
-    const endpoint = `${this.baseUrl}/v1/chat/completions`
+    const key = overrideApiKey || this.apiKey
+    if (!key) {
+      throw new Error('Mistral API key not configured')
+    }
 
     const body: Record<string, any> = {
       model,
       messages,
-      stream: true,
       temperature: params.temperature ?? 0.7,
+      max_tokens: params.max_tokens ?? 4096,
+      stream: true,
     }
 
     if (params.top_p !== undefined) body.top_p = params.top_p
-    if (params.max_tokens !== undefined) body.max_tokens = params.max_tokens
 
-    const response = await fetch(endpoint, {
+    const response = await fetch(MISTRAL_API_URL, {
       method: 'POST',
       headers: {
+        'Authorization': `Bearer ${key}`,
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
       },
       body: JSON.stringify(body),
       signal,
     })
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}))
-      const errorMsg = (errorData as any).error?.message || `HTTP ${response.status}`
-      throw new Error(`Ollama stream error: ${errorMsg}`)
+      const errData = await response.json().catch(() => ({}))
+      const errorMsg = (errData as any).error?.message || `HTTP ${response.status}`
+      throw new Error(`Mistral stream error: ${errorMsg}`)
     }
 
     return response
   }
 
-  /**
-   * Ollama-specific health check
-   * Checks if Ollama is running and accessible
-   */
   async healthCheck(): Promise<boolean> {
     const startTime = Date.now()
     try {
-      const response = await fetch(`${this.baseUrl}/api/tags`, {
+      const response = await fetch(MISTRAL_API_URL, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'mistral-small-latest',
+          messages: [{ role: 'user', content: 'ping' }],
+          max_tokens: 5,
+        }),
         signal: AbortSignal.timeout(5000),
       })
 
@@ -166,19 +187,6 @@ export class OllamaProvider extends BaseProvider {
       const duration = Date.now() - startTime
       this.updateStatus(false, duration, err.message)
       return false
-    }
-  }
-
-  /**
-   * Get list of available models from Ollama
-   */
-  async getAvailableModels(): Promise<string[]> {
-    try {
-      const response = await fetch(`${this.baseUrl}/api/tags`)
-      const data = await response.json()
-      return (data.models || []).map((m: any) => m.name || m)
-    } catch (err) {
-      return []
     }
   }
 }

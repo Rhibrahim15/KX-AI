@@ -68,8 +68,20 @@ export abstract class BaseProvider {
     messages: Message[],
     model: string,
     params: ModelParams,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    overrideApiKey?: string
   ): Promise<ProviderResponse>
+
+  /**
+   * Stream a message to the LLM (returns fetch Response with SSE body)
+   */
+  abstract streamMessage(
+    messages: Message[],
+    model: string,
+    params: ModelParams,
+    signal?: AbortSignal,
+    overrideApiKey?: string
+  ): Promise<Response>
 
   /**
    * Get provider status for health checking
@@ -97,7 +109,7 @@ export abstract class BaseProvider {
   /**
    * Get available models for this provider
    */
-  getAvailableModels(): string[] {
+  getAvailableModels(): string[] | Promise<string[]> {
     return this.models
   }
 

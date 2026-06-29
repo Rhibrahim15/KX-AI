@@ -630,34 +630,25 @@ chatRoutes.post('/completions', async (req, res) => {
       let fullContent = ''
 
       try {
-        // Request streaming from OpenRouter
-        const streamBody: Record<string, unknown> = {
-          model,
-          messages: pipeline.processedMessages,
-          temperature: pipeline.finalParams.temperature,
-          max_tokens,
-          stream: true,
-        }
-        if (pipeline.finalParams.top_p !== undefined) streamBody.top_p = pipeline.finalParams.top_p
-        if (pipeline.finalParams.top_k !== undefined) streamBody.top_k = pipeline.finalParams.top_k
-        if (pipeline.finalParams.frequency_penalty !== undefined) streamBody.frequency_penalty = pipeline.finalParams.frequency_penalty
-        if (pipeline.finalParams.presence_penalty !== undefined) streamBody.presence_penalty = pipeline.finalParams.presence_penalty
-        if (pipeline.finalParams.repetition_penalty !== undefined) streamBody.repetition_penalty = pipeline.finalParams.repetition_penalty
-
-        const upstreamRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${openrouter_api_key}`,
-            'Content-Type': 'application/json',
-            'HTTP-Referer': 'https://godmod3.ai',
-            'X-Title': 'GODMOD3.AI',
-          },
-          body: JSON.stringify(streamBody),
-        })
-
-        if (!upstreamRes.ok) {
-          const errData = await upstreamRes.json().catch(() => ({}))
-          const errMsg = (errData as any).error?.message || `Upstream error: ${upstreamRes.status}`
+        let upstreamRes: Response
+        try {
+          const streamResult = await router.executeStream(
+            pipeline.processedMessages,
+            taskType,
+            {
+              temperature: pipeline.finalParams.temperature,
+              max_tokens,
+              top_p: pipeline.finalParams.top_p,
+              top_k: pipeline.finalParams.top_k,
+              frequency_penalty: pipeline.finalParams.frequency_penalty,
+              presence_penalty: pipeline.finalParams.presence_penalty,
+              repetition_penalty: pipeline.finalParams.repetition_penalty,
+            },
+            model,
+            caller_key ? caller_key : undefined
+          )
+          upstreamRes = streamResult.response
+        } catch (streamErr: any) {
           const chunk = {
             id: completionId,
             object: 'chat.completion.chunk',
@@ -668,7 +659,7 @@ chatRoutes.post('/completions', async (req, res) => {
               delta: {},
               finish_reason: 'error',
             }],
-            x_g0dm0d3: { error: errMsg },
+            x_g0dm0d3: { error: streamErr.message || 'All streaming providers failed' },
           }
           res.write(`data: ${JSON.stringify(chunk)}\n\n`)
           res.write('data: [DONE]\n\n')
@@ -841,6 +832,8 @@ chatRoutes.post('/completions', async (req, res) => {
       taskType,
       modelParams,
       model,
+      3,
+      caller_key ? caller_key : undefined
     )
 
     if (!response.success || !response.content) {

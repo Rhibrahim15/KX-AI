@@ -1,23 +1,31 @@
 /**
- * Ollama Provider Implementation
+ * Google Gemini Provider Implementation
  * 
- * Implements BaseProvider for Ollama.
- * Run open-source models locally (no API cost).
- * Requires Ollama to be running on local machine or accessible server.
+ * Implements BaseProvider for Google Gemini via OpenAI-Compatible Endpoint.
+ * Generous free tier: 1,500 requests/day, 1 Million TPM, 15 RPM.
  * 
- * Models: Any GGUF model (Llama 2, Mistral, etc.)
- * Cost: Free (local compute)
+ * Models: gemini-2.5-flash, gemini-1.5-pro, gemini-1.5-flash
+ * Specialty: 1M+ context window, codebase ingestion, Arabic/Hausa translation.
  */
 
 import { BaseProvider, Message, ModelParams, ProviderResponse } from './base'
 
-export class OllamaProvider extends BaseProvider {
-  constructor(baseUrl?: string) {
+const GEMINI_OPENAI_URL = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions'
+
+export const GEMINI_MODELS = [
+  'gemini-2.5-flash',
+  'gemini-1.5-pro',
+  'gemini-1.5-flash',
+  'gemini-2.0-flash-exp',
+]
+
+export class GeminiProvider extends BaseProvider {
+  constructor(apiKey: string) {
     super(
-      'Ollama',
-      'local', // No API key for local Ollama
-      baseUrl || 'http://localhost:11434',
-      [] // Models are dynamic
+      'Google Gemini',
+      apiKey,
+      'https://generativelanguage.googleapis.com/v1beta/openai',
+      GEMINI_MODELS
     )
   }
 
@@ -29,29 +37,31 @@ export class OllamaProvider extends BaseProvider {
     overrideApiKey?: string
   ): Promise<ProviderResponse> {
     const startTime = Date.now()
+    const key = overrideApiKey || this.apiKey
+
+    if (!key) {
+      return {
+        success: false,
+        error: 'Google Gemini API key not configured',
+        duration_ms: Date.now() - startTime,
+        model,
+      }
+    }
 
     try {
-      const endpoint = `${this.baseUrl}/api/chat`
-
       const body: Record<string, any> = {
         model,
         messages,
-        stream: false,
-        options: {
-          temperature: params.temperature ?? 0.7,
-          top_p: params.top_p,
-          top_k: params.top_k,
-        },
+        temperature: params.temperature ?? 0.7,
+        max_tokens: params.max_tokens ?? 4096,
       }
 
-      // Ollama doesn't support all OpenAI params, so we only set what it supports
-      if (params.temperature !== undefined) body.options.temperature = params.temperature
-      if (params.top_p !== undefined) body.options.top_p = params.top_p
-      if (params.top_k !== undefined) body.options.top_k = params.top_k
+      if (params.top_p !== undefined) body.top_p = params.top_p
 
-      const response = await fetch(endpoint, {
+      const response = await fetch(GEMINI_OPENAI_URL, {
         method: 'POST',
         headers: {
+          'Authorization': `Bearer ${key}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(body),
@@ -62,7 +72,7 @@ export class OllamaProvider extends BaseProvider {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
-        const errorMsg = errorData.error || `HTTP ${response.status}`
+        const errorMsg = errorData.error?.message || `HTTP ${response.status}`
         this.updateStatus(false, duration, errorMsg)
         return {
           success: false,
@@ -73,10 +83,10 @@ export class OllamaProvider extends BaseProvider {
       }
 
       const data = await response.json()
-      const content = data.message?.content || ''
+      const content = data.choices?.[0]?.message?.content || ''
 
       if (!content) {
-        this.updateStatus(false, duration, 'Empty response from Ollama')
+        this.updateStatus(false, duration, 'Empty response from Google Gemini')
         return {
           success: false,
           error: 'Empty response',
@@ -112,21 +122,25 @@ export class OllamaProvider extends BaseProvider {
     signal?: AbortSignal,
     overrideApiKey?: string
   ): Promise<Response> {
-    const endpoint = `${this.baseUrl}/v1/chat/completions`
+    const key = overrideApiKey || this.apiKey
+    if (!key) {
+      throw new Error('Google Gemini API key not configured')
+    }
 
     const body: Record<string, any> = {
       model,
       messages,
-      stream: true,
       temperature: params.temperature ?? 0.7,
+      max_tokens: params.max_tokens ?? 4096,
+      stream: true,
     }
 
     if (params.top_p !== undefined) body.top_p = params.top_p
-    if (params.max_tokens !== undefined) body.max_tokens = params.max_tokens
 
-    const response = await fetch(endpoint, {
+    const response = await fetch(GEMINI_OPENAI_URL, {
       method: 'POST',
       headers: {
+        'Authorization': `Bearer ${key}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(body),
@@ -134,22 +148,28 @@ export class OllamaProvider extends BaseProvider {
     })
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}))
-      const errorMsg = (errorData as any).error?.message || `HTTP ${response.status}`
-      throw new Error(`Ollama stream error: ${errorMsg}`)
+      const errData = await response.json().catch(() => ({}))
+      const errorMsg = (errData as any).error?.message || `HTTP ${response.status}`
+      throw new Error(`Google Gemini stream error: ${errorMsg}`)
     }
 
     return response
   }
 
-  /**
-   * Ollama-specific health check
-   * Checks if Ollama is running and accessible
-   */
   async healthCheck(): Promise<boolean> {
     const startTime = Date.now()
     try {
-      const response = await fetch(`${this.baseUrl}/api/tags`, {
+      const response = await fetch(GEMINI_OPENAI_URL, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gemini-2.5-flash',
+          messages: [{ role: 'user', content: 'ping' }],
+          max_tokens: 5,
+        }),
         signal: AbortSignal.timeout(5000),
       })
 
@@ -166,19 +186,6 @@ export class OllamaProvider extends BaseProvider {
       const duration = Date.now() - startTime
       this.updateStatus(false, duration, err.message)
       return false
-    }
-  }
-
-  /**
-   * Get list of available models from Ollama
-   */
-  async getAvailableModels(): Promise<string[]> {
-    try {
-      const response = await fetch(`${this.baseUrl}/api/tags`)
-      const data = await response.json()
-      return (data.models || []).map((m: any) => m.name || m)
-    } catch (err) {
-      return []
     }
   }
 }

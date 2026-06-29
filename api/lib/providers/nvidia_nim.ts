@@ -34,11 +34,13 @@ export class NVIDIANIMProvider extends BaseProvider {
     messages: Message[],
     model: string,
     params: ModelParams,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    overrideApiKey?: string
   ): Promise<ProviderResponse> {
     const startTime = Date.now()
+    const key = overrideApiKey || this.nvApiKey
 
-    if (!this.isConfigured()) {
+    if (!key) {
       return {
         success: false,
         error: 'NVIDIA NIM API key not configured',
@@ -67,7 +69,7 @@ export class NVIDIANIMProvider extends BaseProvider {
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.nvApiKey}`,
+          'Authorization': `Bearer ${key}`,
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
@@ -122,12 +124,60 @@ export class NVIDIANIMProvider extends BaseProvider {
     }
   }
 
+  async streamMessage(
+    messages: Message[],
+    model: string,
+    params: ModelParams,
+    signal?: AbortSignal,
+    overrideApiKey?: string
+  ): Promise<Response> {
+    const key = overrideApiKey || this.nvApiKey
+    if (!key) {
+      throw new Error('NVIDIA NIM API key not configured')
+    }
+
+    const fullModel = model.includes('nvidia/') ? model : `nvidia/${model}`
+    const endpoint = `${this.baseUrl}/${fullModel}/chat/completions`
+
+    const body: Record<string, any> = {
+      model: fullModel,
+      messages,
+      temperature: params.temperature ?? 0.7,
+      max_tokens: params.max_tokens ?? 4096,
+      stream: true,
+    }
+
+    if (params.top_p !== undefined) body.top_p = params.top_p
+    if (params.top_k !== undefined) body.top_k = params.top_k
+    if (params.frequency_penalty !== undefined) body.frequency_penalty = params.frequency_penalty
+    if (params.presence_penalty !== undefined) body.presence_penalty = params.presence_penalty
+
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${key}`,
+        'Content-Type': 'application/json',
+        'Accept': 'text/event-stream',
+      },
+      body: JSON.stringify(body),
+      signal,
+    })
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}))
+      const errorMsg = (errData as any).error?.message || `HTTP ${response.status}`
+      throw new Error(`NVIDIA NIM stream error: ${errorMsg}`)
+    }
+
+    return response
+  }
+
   /**
    * NVIDIA NIM-specific health check
    */
   async healthCheck(): Promise<boolean> {
+    const startTime = Date.now()
     try {
-      const startTime = Date.now()
       const endpoint = `${this.baseUrl}/nvidia/nemotron-340b-preview/chat/completions`
       
       const response = await fetch(endpoint, {

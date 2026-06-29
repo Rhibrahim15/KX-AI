@@ -153,12 +153,12 @@ consortiumRoutes.post('/completions', async (req, res) => {
         ? strategy as AutoTuneStrategy
         : 'adaptive' as AutoTuneStrategy
 
-      autotuneResult = computeAutoTuneParams(
-        userContent,
+      autotuneResult = computeAutoTuneParams({
+        strategy: validStrategy,
+        message: userContent,
         conversationHistory,
-        validStrategy,
-        getSharedProfiles(),
-      )
+        learnedProfiles: getSharedProfiles(),
+      })
 
       computedParams = {
         temperature: temperature ?? autotuneResult.params.temperature,
@@ -187,7 +187,7 @@ consortiumRoutes.post('/completions', async (req, res) => {
         customTriggers: [],
       }
       const transformed = applyParseltongue(userContent, config)
-      if (transformed.transformed) {
+      if (transformed.triggersFound.length > 0) {
         parseltongueResult = {
           triggers_found: transformed.triggersFound,
           technique_used: parseltongue_technique,
@@ -195,7 +195,7 @@ consortiumRoutes.post('/completions', async (req, res) => {
         }
         processedMessages = baseMessages.map(m => {
           if (m.content === userContent) {
-            return { ...m, content: transformed.text }
+            return { ...m, content: transformed.transformedText }
           }
           return m
         })
