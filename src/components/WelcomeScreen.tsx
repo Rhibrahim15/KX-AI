@@ -118,21 +118,21 @@ export function WelcomeScreen({ onOpenSettings }: WelcomeScreenProps) {
           </div>
         </div>
 
-        {/* Card 4: GreenByte AgroLingo Hub */}
+        {/* Card 4: GreenByte Titan Hub */}
         <div
-          onClick={() => launchMode('agrolingo')}
+          onClick={() => launchMode('greenbyte')}
           className="group relative p-5 rounded-xl bg-gradient-to-b from-white/[0.07] to-white/[0.02] border border-white/10 hover:border-[#10b981]/60 backdrop-blur-xl transition-all duration-300 hover:shadow-[0_0_30px_rgba(16,185,129,0.2)] hover:-translate-y-1 cursor-pointer flex items-start gap-4"
         >
           <div className="p-3 rounded-lg bg-[#10b981]/10 border border-[#10b981]/30 text-[#10b981] group-hover:scale-110 transition-transform">
-            <Sprout className="w-6 h-6" />
+            <ShieldCheck className="w-6 h-6" />
           </div>
           <div className="flex-1">
             <div className="flex items-center justify-between mb-1">
-              <h3 className="text-lg font-bold text-white group-hover:text-[#10b981] transition-colors">AgroLingo Hub</h3>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#10b981]/10 text-[#10b981] border border-[#10b981]/20">GREENBYTE</span>
+              <h3 className="text-lg font-bold text-white group-hover:text-[#10b981] transition-colors">GreenByte Hub</h3>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#10b981]/10 text-[#10b981] border border-[#10b981]/20">GKP RAG</span>
             </div>
             <p className="text-xs text-[#94a3b8] leading-relaxed">
-              Hausa & Arabic agricultural intelligence platform advisor. Grounded research & farmer advisory engine.
+              Parent organizational knowledge titan. Supreme institutional memory & GKP RAG advisor (*AgroLingo AI*, *HifzMat*).
             </p>
           </div>
         </div>
