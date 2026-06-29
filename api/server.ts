@@ -36,6 +36,7 @@ import { toolsRoutes } from './routes/tools'
 import { mediaRoutes } from './routes/media'
 import { gkpRoutes } from './routes/gkp'
 import { connectorsRoutes } from './routes/connectors'
+import { exportRoutes } from './routes/export'
 import { whatsappRoutes } from '../bots/whatsapp'
 import { startTelegramBot } from '../bots/telegram'
 import { startDiscordBot } from '../bots/discord'
@@ -229,6 +230,7 @@ app.use('/v1/tools', apiKeyAuth, rateLimit, toolsRoutes)
 app.use('/v1/media', apiKeyAuth, rateLimit, mediaRoutes)
 app.use('/v1/gkp', apiKeyAuth, rateLimit, gkpRoutes)
 app.use('/v1/connectors', apiKeyAuth, rateLimit, connectorsRoutes)
+app.use('/v1/export', apiKeyAuth, rateLimit, exportRoutes)
 app.use('/v1/whatsapp', whatsappRoutes)
 app.use('/v1/autotune', apiKeyAuth, rateLimit, autotuneRoutes)
 app.use('/v1/parseltongue', apiKeyAuth, rateLimit, parseltongueRoutes)
