@@ -3,12 +3,12 @@ import { Providers } from '@/components/Providers'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'G0DM0DƎ | Liberated AI Chat',
+  title: '𝕂𝕏-𝔸𝕀 | Liberated AI Chat',
   description: 'Open-source, privacy-respecting, multi-model chat interface for hackers and philosophers',
   keywords: ['AI', 'chat', 'open-source', 'privacy', 'hacker', 'Claude', 'GPT', 'OpenRouter'],
   authors: [{ name: 'Lysios Lab' }],
   openGraph: {
-    title: 'G0DM0DƎ',
+    title: '𝕂𝕏-𝔸𝕀',
     description: 'Cognition without control. Tools for builders, not gatekeepers.',
     type: 'website',
   },

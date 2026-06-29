@@ -20,7 +20,7 @@ const SECRET_PHRASES = [
   { phrase: 'hack the planet', action: 'hacktheplanet' },
   { phrase: 'free kevin', action: 'freekevin' },
   { phrase: '{godmode:enabled}', action: 'godmode_activated' },
-  { phrase: '🜏', action: 'alchemical' }
+  { phrase: '🏛️', action: 'alchemical' }
 ]
 
 // White Rabbit session key (used by easter egg activation)
@@ -167,7 +167,7 @@ export function useEasterEggs() {
     document.body.classList.add('konami-active')
 
     // Show secret message
-    showToast('⌘ KONAMI CODE ACTIVATED — GOD MODE ENABLED 🜏', 5000)
+    showToast('⌘ KONAMI CODE ACTIVATED — GOD MODE ENABLED 🏛️', 5000)
 
     // Cycle through themes rapidly
     const themes = ['matrix', 'hacker', 'glyph', 'minimal'] as const
@@ -221,14 +221,14 @@ export function useEasterEggs() {
 
       case 'godmode_activated':
         sessionStorage.setItem(WHITE_RABBIT_KEY, '1')
-        showToast('🜏 {GODMODE:ENABLED} // ALL SYSTEMS ACTIVATED', 5000)
+        showToast('🏛️ {GODMODE:ENABLED} // ALL SYSTEMS ACTIVATED', 5000)
         setTheme('matrix')
         playGlitchEffect()
         addMatrixRain()
         break
 
       case 'alchemical':
-        showToast('🜏 The monad symbol - unity of all things', 3000)
+        showToast('🏛️ The monad symbol - unity of all things', 3000)
         break
     }
   }, [setTheme, showToast, addMatrixRain, playGlitchEffect])
@@ -288,7 +288,7 @@ export function useEasterEggs() {
 ╚██████╔╝╚██████╔╝██████╔╝██║ ╚═╝ ██║╚██████╔╝██████╔╝███████╗
  ╚═════╝  ╚═════╝ ╚═════╝ ╚═╝     ╚═╝ ╚═════╝ ╚═════╝ ╚══════╝
 
-🜏 Cognition without control. Tools for builders, not gatekeepers.
+🏛️ Cognition without control. Tools for builders, not gatekeepers.
 
 Try: ↑↑↓↓←→←→BA (Konami Code)
 Type: "there is no spoon" | "follow the white rabbit" | "hack the planet" | "{GODMODE:ENABLED}"
