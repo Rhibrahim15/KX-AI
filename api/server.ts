@@ -39,6 +39,8 @@ import { connectorsRoutes } from './routes/connectors'
 import { whatsappRoutes } from '../bots/whatsapp'
 import { startTelegramBot } from '../bots/telegram'
 import { startDiscordBot } from '../bots/discord'
+import { getGKPAutoIndexer } from './lib/gkp/auto_indexer'
+import { getOAuthDaemon } from './lib/connectors/oauth_daemon'
 import { isPublisherEnabled, startPeriodicFlush, shutdownFlush, getPublisherStatus } from './lib/hf-publisher'
 import { TIER_CONFIGS } from './lib/tiers'
 import { ULTRAPLINIAN_MODELS } from './lib/ultraplinian'
@@ -324,6 +326,10 @@ app.listen(PORT, '0.0.0.0', () => {
   // Start standalone Telegram & Discord daemons
   startTelegramBot().catch(console.error)
   startDiscordBot().catch(console.error)
+
+  // Start background GKP vector auto-indexer & OAuth renewal custodian
+  getGKPAutoIndexer().startContinuousIndexer()
+  getOAuthDaemon().startAutoRenewal()
 })
 
 // ── Graceful Shutdown ─────────────────────────────────────────────────
