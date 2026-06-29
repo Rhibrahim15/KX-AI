@@ -1,4 +1,16 @@
-# 🤖 KX-AI: Super-Intelligent Personal Assistant
+```
+ ██╗  ██╗██╗  ██╗       █████╗ ██╗
+ ██║ ██╔╝╚██╗██╔╝      ██╔══██╗██║
+ █████╔╝  ╚███╔╝ █████╗███████║██║
+ ██╔═██╗  ██╔██╗ ╚════╝██╔══██║██║
+ ██║  ██╗██╔╝ ██╗      ██║  ██║██║
+ ╚═╝  ╚═╝╚═╝  ╚═╝      ╚═╝  ╚═╝╚═╝
+ ───────────────────────────────────────────────────────────
+  ░▒▓█  AUTONOMOUS AGENTIC INTELLIGENCE. JARVIS EDITION. █▓▒░
+ ───────────────────────────────────────────────────────────
+```
+
+# 🤖 𝕂𝕏-𝔸𝕀: Super-Intelligent Personal Assistant
 
 **Founder & Master**: Halifa Rabiu Ibrahim (GreenByte Founder, Systems Architect, Ethical Hacking Intern)  
 **Company**: GreenByte  

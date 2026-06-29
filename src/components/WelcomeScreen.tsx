@@ -52,10 +52,10 @@ export function WelcomeScreen({ onOpenSettings }: WelcomeScreenProps) {
       {/* Futuristic Typography */}
       <div className="text-center max-w-2xl mb-8 z-10">
         <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-[#e2e8f0] to-[#94a3b8] mb-3 font-sans">
-          KX <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#00f2fe] via-[#10b981] to-[#8b5cf6]">AUTONOMOUS</span> AI
+          𝕂𝕏 <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#00f2fe] via-[#10b981] to-[#8b5cf6]">𝔸𝕀</span>
         </h1>
         <p className="text-sm md:text-lg text-[#94a3b8] font-light tracking-wide max-w-xl mx-auto">
-          Liberated Personal Intelligence. Cognition Without Limits. Built for builders, researchers, and creators.
+          Autonomous Agentic Assistant. Engineered exclusively for Halifa Rabiu Ibrahim (GreenByte).
         </p>
       </div>
 
