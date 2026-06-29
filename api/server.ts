@@ -34,6 +34,7 @@ import { researchRoutes } from './routes/research'
 import { audioRoutes } from './routes/audio'
 import { toolsRoutes } from './routes/tools'
 import { mediaRoutes } from './routes/media'
+import { startTelegramBot } from '../bots/telegram'
 import { isPublisherEnabled, startPeriodicFlush, shutdownFlush, getPublisherStatus } from './lib/hf-publisher'
 import { TIER_CONFIGS } from './lib/tiers'
 import { ULTRAPLINIAN_MODELS } from './lib/ultraplinian'
@@ -310,6 +311,9 @@ app.listen(PORT, '0.0.0.0', () => {
 
   // Start periodic HF flush (no-op if not configured)
   startPeriodicFlush()
+
+  // Start standalone Telegram bot daemon
+  startTelegramBot().catch(console.error)
 })
 
 // ── Graceful Shutdown ─────────────────────────────────────────────────
