@@ -117,11 +117,12 @@ async function handleMessageCreate(msg: any) {
   const channelId = msg.channel_id
   const userContent = msg.content || ''
 
-  // Respond if DM or if bot is mentioned
+  // Respond if DM, if bot is mentioned, or if sitting inside private GreenByte Room sanctuary server
   const isDM = !msg.guild_id
+  const isSanctuaryServer = (msg.guild_id === '1521210173027258393')
   const isMentioned = userContent.includes('1521167915485757570') || userContent.toLowerCase().includes('jarvis') || userContent.toLowerCase().includes('kx')
 
-  if (!isDM && !isMentioned) return
+  if (!isDM && !isSanctuaryServer && !isMentioned) return
 
   console.log(`[Discord] Message from ${msg.author.username}: "${userContent}"`)
 
