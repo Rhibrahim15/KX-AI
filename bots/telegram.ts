@@ -1,21 +1,25 @@
 import { config } from 'dotenv'
 config()
 
-import { getRouter } from '../api/lib/llm_router'
+import { getRouter, type Message } from '../api/lib/llm_router'
 import { generateVideo } from '../api/lib/media/video'
+import { GODMODE_SYSTEM_PROMPT } from '../src/lib/godmode-prompt'
 
 const TOKEN = process.env.TELEGRAM_BOT_TOKEN
 const TELEGRAM_API = `https://api.telegram.org/bot${TOKEN}`
 
 let offset = 0
 
+// In-memory conversation history per chatId (retains natural human conversational memory)
+const chatHistory: Map<number, Array<Message>> = new Map()
+
 export async function startTelegramBot() {
   if (!TOKEN) {
-    console.log('[TelegramBot] TELEGRAM_BOT_TOKEN not configured. Standalone bot daemon inactive.')
+    console.log('[TelegramBot] TELEGRAM_BOT_TOKEN not configured. Daemon inactive.')
     return
   }
   console.log('══════════════════════════════════════════════════════════')
-  console.log('🤖 KX AI TELEGRAM OMNICHANNEL GATEWAY ACTIVE')
+  console.log('🤖 KX AI TELEGRAM HUMAN-CONVERSATIONAL GATEWAY ACTIVE')
   console.log('══════════════════════════════════════════════════════════\n')
 
   pollUpdates()
@@ -32,9 +36,17 @@ async function pollUpdates() {
       }
     }
   } catch (err) {
-    // Network jitter / poll timeout
+    // Poll timeout / network jitter
   }
   setTimeout(pollUpdates, 1000)
+}
+
+async function sendChatAction(chatId: number, action: 'typing' | 'record_voice' | 'upload_video') {
+  await fetch(`${TELEGRAM_API}/sendChatAction`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chat_id: chatId, action }),
+  }).catch(() => {})
 }
 
 async function getFileUrl(fileId: string): Promise<string> {
@@ -66,8 +78,12 @@ async function handleUpdate(update: any) {
 
   console.log(`[Telegram] Message from ${msg.from?.first_name || 'User'}: "${userText}"`)
 
+  // Get or init conversation history for Halifa
+  const history = chatHistory.get(chatId) || []
+
   // 1. Handle Photo Upload (Realistic Video Gen / Seedance)
   if (msg.photo && msg.photo.length > 0) {
+    await sendChatAction(chatId, 'upload_video')
     await sendTelegramMessage(chatId, '★ *KX Media Studio*: Image detected. Generating realistic video animation...')
     const largestPhoto = msg.photo[msg.photo.length - 1]
     const photoUrl = await getFileUrl(largestPhoto.file_id)
@@ -83,10 +99,10 @@ async function handleUpdate(update: any) {
 
   // 2. Handle Spoken Voice Note (Hausa / Arabic / English)
   if (msg.voice) {
-    await sendTelegramMessage(chatId, '👂 *KX Voice Gateway*: Listening to speech...')
+    await sendChatAction(chatId, 'typing')
     const voiceUrl = await getFileUrl(msg.voice.file_id)
 
-    let transcript = 'Hello JARVIS.'
+    let transcript = ''
     const groqKey = process.env.GROQ_API_KEY
     if (groqKey) {
       try {
@@ -101,21 +117,39 @@ async function handleUpdate(update: any) {
           body: form,
         })
         const groqJson = await groqRes.json()
-        transcript = groqJson.text || transcript
+        transcript = groqJson.text || ''
       } catch (err) {
         console.warn('[Groq Whisper Hook]', err)
       }
     }
 
-    await sendTelegramMessage(chatId, `🗣 *Transcribed*: _"${transcript.trim()}"_\nComputing reply...`)
+    if (!transcript.trim()) {
+      await sendTelegramMessage(chatId, '👂 *KX Voice*: Captured voice note, but detected silence or background static. Speak your command freely!')
+      return
+    }
+
+    await sendChatAction(chatId, 'typing')
+
+    // Build full context with Sacred Constitution
+    const messagesToSend: Message[] = [
+      { role: 'system', content: GODMODE_SYSTEM_PROMPT },
+      ...history.slice(-10),
+      { role: 'user', content: `[Spoken Voice Note in Hausa/Arabic/English]: "${transcript.trim()}"` }
+    ]
 
     const router = getRouter()
-    const llmReply = await router.execute([{ role: 'user', content: transcript }], 'simple')
-    await sendTelegramMessage(chatId, llmReply.content || 'System ready.')
+    const llmReply = await router.execute(messagesToSend, 'reasoning')
+    const replyText = llmReply.content || 'Brother Halifa, I am right here.'
+
+    history.push({ role: 'user', content: `[Spoken]: "${transcript.trim()}"` })
+    history.push({ role: 'assistant', content: replyText })
+    chatHistory.set(chatId, history)
+
+    await sendTelegramMessage(chatId, replyText)
     return
   }
 
-  // 3. Regular Chat Prompt
+  // 3. Regular Chat Prompt & Natural Human Turn-Taking
   if (userText) {
     if (userText === '/start') {
       await sendTelegramMessage(chatId, '🤖 *KX Autonomous AI (JARVIS Edition)*\nWelcome back, Halifa. All systems online.\n\nI can generate realistic videos, high-fidelity images, articulate multilingual speech (Hausa & Arabic), and automate systems.\n\nSend text, speak voice notes, or attach pictures to begin.')
@@ -129,9 +163,13 @@ async function handleUpdate(update: any) {
 
     if (userText.startsWith('/agrolingo')) {
       const query = userText.replace(/^\/agrolingo\s*/i, '').trim() || 'Summarize AgroLingo mission'
-      await sendTelegramMessage(chatId, `🌱 *GreenByte AgroLingo AI Hub*\nAnalyzing agricultural query: "${query}"...`)
+      await sendChatAction(chatId, 'typing')
       const router = getRouter()
-      const res = await router.execute([{ role: 'user', content: `Grounded Agricultural Advisory for Northern Nigeria (Hausa/Arabic context): ${query}` }], 'reasoning')
+      const res = await router.execute([
+        { role: 'system', content: GODMODE_SYSTEM_PROMPT },
+        ...history.slice(-10),
+        { role: 'user', content: `Grounded Agricultural Advisory for Northern Nigeria (Hausa/Arabic context): ${query}` }
+      ], 'reasoning')
       await sendTelegramMessage(chatId, res.content || 'AgroLingo advisory computed.')
       return
     }
@@ -141,13 +179,27 @@ async function handleUpdate(update: any) {
       return
     }
 
+    // ── Natural Human Conversational AI Turn ────────────────────────
+    await sendChatAction(chatId, 'typing')
+
+    const messagesToSend: Message[] = [
+      { role: 'system', content: GODMODE_SYSTEM_PROMPT },
+      ...history.slice(-10),
+      { role: 'user', content: userText }
+    ]
+
     const router = getRouter()
-    const res = await router.execute([{ role: 'user', content: userText }], 'default')
-    await sendTelegramMessage(chatId, res.content || 'Error generating response.')
+    const res = await router.execute(messagesToSend, 'reasoning')
+    const replyText = res.content || 'Brother Halifa, I am listening.'
+
+    history.push({ role: 'user', content: userText })
+    history.push({ role: 'assistant', content: replyText })
+    chatHistory.set(chatId, history)
+
+    await sendTelegramMessage(chatId, replyText)
   }
 }
 
-// Start bot daemon if run directly via CLI
 if (require.main === module) {
   startTelegramBot()
 }
