@@ -99,7 +99,7 @@ export function WelcomeScreen({ onOpenSettings }: WelcomeScreenProps) {
           </div>
         </div>
 
-        {/* Card 3: Uncensored Media Studio */}
+        {/* Card 3: Media Studio */}
         <div
           onClick={() => launchMode('media')}
           className="group relative p-5 rounded-xl bg-gradient-to-b from-white/[0.07] to-white/[0.02] border border-white/10 hover:border-[#f43f5e]/60 backdrop-blur-xl transition-all duration-300 hover:shadow-[0_0_30px_rgba(244,63,94,0.2)] hover:-translate-y-1 cursor-pointer flex items-start gap-4"
@@ -110,10 +110,10 @@ export function WelcomeScreen({ onOpenSettings }: WelcomeScreenProps) {
           <div className="flex-1">
             <div className="flex items-center justify-between mb-1">
               <h3 className="text-lg font-bold text-white group-hover:text-[#f43f5e] transition-colors">Media Studio</h3>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#f43f5e]/10 text-[#f43f5e] border border-[#f43f5e]/20">UNCENSORED</span>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#f43f5e]/10 text-[#f43f5e] border border-[#f43f5e]/20">STUDIO</span>
             </div>
             <p className="text-xs text-[#94a3b8] leading-relaxed">
-              Realistic couples video animation (Seedance 2.0 PiAPI), FLUX image creation, and ElevenLabs speech synthesis.
+              Realistic video animation (Seedance 2.0 PiAPI), FLUX high-fidelity image studio, and ElevenLabs speech synthesis.
             </p>
           </div>
         </div>

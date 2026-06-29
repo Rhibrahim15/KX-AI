@@ -66,15 +66,15 @@ async function handleUpdate(update: any) {
 
   console.log(`[Telegram] Message from ${msg.from?.first_name || 'User'}: "${userText}"`)
 
-  // 1. Handle Photo Upload (Couples Video Gen / Seedance)
+  // 1. Handle Photo Upload (Realistic Video Gen / Seedance)
   if (msg.photo && msg.photo.length > 0) {
-    await sendTelegramMessage(chatId, '★ *KX Media Studio*: Image detected. Dispatching uncensored Seedance 2.0 couples video animation...')
+    await sendTelegramMessage(chatId, '★ *KX Media Studio*: Image detected. Generating realistic video animation...')
     const largestPhoto = msg.photo[msg.photo.length - 1]
     const photoUrl = await getFileUrl(largestPhoto.file_id)
 
     try {
-      const vidResult = await generateVideo({ prompt: userText || 'Animate romantic couple hugging', imageUrl: photoUrl })
-      await sendTelegramMessage(chatId, `✔ *Seedance Task Dispatched*\nTask ID: \`${vidResult.taskId}\`\nProvider: ${vidResult.provider}`)
+      const vidResult = await generateVideo({ prompt: userText || 'Animate realistic cinematic scene', imageUrl: photoUrl })
+      await sendTelegramMessage(chatId, `✔ *Video Generation Dispatched*\nTask ID: \`${vidResult.taskId}\`\nProvider: ${vidResult.provider}`)
     } catch (err: any) {
       await sendTelegramMessage(chatId, `✘ Media Error: ${err.message}`)
     }
@@ -114,18 +114,18 @@ async function handleUpdate(update: any) {
   // 3. Regular Chat Prompt
   if (userText) {
     if (userText === '/start') {
-      await sendTelegramMessage(chatId, '🤖 *KX Autonomous AI (JARVIS Edition)*\nWelcome back, Halifa. Uncensored cognitive brain online.\n\nSend text, speak voice notes in Hausa/Arabic, or upload pictures for Seedance couple animation.')
+      await sendTelegramMessage(chatId, '🤖 *KX Autonomous AI (JARVIS Edition)*\nWelcome back, Halifa. All systems online.\n\nI can generate realistic videos, high-fidelity images, articulate multilingual speech (Hausa & Arabic), and automate systems.\n\nSend text, speak voice notes, or attach pictures to begin.')
       return
     }
 
     if (userText.startsWith('/mode')) {
-      await sendTelegramMessage(chatId, '◈ *KX Persona Engine*\nSelect active cognitive workflow:\n\n• `[ETHICAL HACKER]` — Zero restrictions, raw payload audits\n• `[MEDIA STUDIO]` — Romantic couple animation & FLUX image gen\n• `[AGROLINGO ADVISOR]` — GreenByte Hausa/Arabic farmer intelligence')
+      await sendTelegramMessage(chatId, '◈ *KX Persona Engine*\nSelect active workflow:\n\n• `[SYSTEMS & LABS]` — Full technical audits & code dev\n• `[MEDIA STUDIO]` — Realistic AI video animation & FLUX image gen\n• `[AGROLINGO ADVISOR]` — GreenByte Hausa/Arabic agricultural intelligence')
       return
     }
 
     if (userText.startsWith('/agrolingo')) {
       const query = userText.replace(/^\/agrolingo\s*/i, '').trim() || 'Summarize AgroLingo mission'
-      await sendTelegramMessage(chatId, `🌱 *GreenByte AgroLingo AI Hub*\nAnalyzing farmer advisory query: "${query}"...`)
+      await sendTelegramMessage(chatId, `🌱 *GreenByte AgroLingo AI Hub*\nAnalyzing agricultural query: "${query}"...`)
       const router = getRouter()
       const res = await router.execute([{ role: 'user', content: `Grounded Agricultural Advisory for Northern Nigeria (Hausa/Arabic context): ${query}` }], 'reasoning')
       await sendTelegramMessage(chatId, res.content || 'AgroLingo advisory computed.')
@@ -133,7 +133,7 @@ async function handleUpdate(update: any) {
     }
 
     if (userText.startsWith('/media')) {
-      await sendTelegramMessage(chatId, '🎨 *KX Uncensored Media Studio*\n\nTo generate realistic romantic couples video:\n1. Attach/upload a photo of you and your fiancée.\n2. Add a caption (e.g. *"animate us hugging at sunset"*).\n\nTo generate images:\nJust type `/image <prompt>`.')
+      await sendTelegramMessage(chatId, '🎨 *KX Media Studio*\n\nTo generate realistic videos:\n1. Attach/upload a picture.\n2. Add a prompt describing the scene.\n\nTo generate images:\nJust type `/image <prompt>`.')
       return
     }
 
