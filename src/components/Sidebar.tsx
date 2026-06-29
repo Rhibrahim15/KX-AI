@@ -9,9 +9,9 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
-  Zap,
-  Skull,
-  Terminal
+  Terminal,
+  ShieldCheck,
+  Sprout
 } from 'lucide-react'
 import { PersonaSelector } from './PersonaSelector'
 import { ModelSelector } from './ModelSelector'
@@ -28,8 +28,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
     createConversation,
     selectConversation,
     deleteConversation,
-    setShowSettings,
-    theme
+    setShowSettings
   } = useStore()
 
   const [hoveredId, setHoveredId] = useState<string | null>(null)
@@ -44,10 +43,10 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
       {!isOpen && (
         <button
           onClick={onToggle}
-          className="fixed left-4 top-4 z-50 p-2 bg-theme-dim border border-theme-primary rounded-lg hover:glow-box transition-all"
+          className="fixed left-4 top-4 z-50 p-2 bg-[#0f141f] border border-slate-800 rounded-lg hover:border-slate-600 transition-all text-white shadow-md"
           aria-label="Open sidebar"
         >
-          <ChevronRight className="w-5 h-5 theme-primary" />
+          <ChevronRight className="w-5 h-5 text-slate-400" />
         </button>
       )}
 
@@ -55,77 +54,81 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
       <aside
         className={`
           fixed md:relative z-40 h-screen
-          bg-theme-dim border-r border-theme-primary
+          bg-[#0a0d14] border-r border-slate-800/80 text-slate-200
           transition-all duration-300 ease-in-out
-          ${isOpen ? 'w-72' : 'w-0'}
-          overflow-hidden
+          ${isOpen ? 'w-64' : 'w-0'}
+          overflow-hidden select-none
         `}
       >
-        <div className="flex flex-col h-full w-72">
-          {/* Header */}
-          <div className="p-4 border-b border-theme-primary">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <span className="text-2xl relative -top-[2px]">🜏</span>
-                <h1 className="text-xl font-bold theme-primary glitch glow-primary" data-text="G0DM0DƎ">
-                  G0DM0<span className="flipped-e">D</span><span className="flipped-e-soft">E</span>
-                </h1>
+        <div className="flex flex-col h-full w-64 justify-between">
+          {/* Top Brand & Action Area */}
+          <div>
+            <div className="p-4 border-b border-slate-800/80 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-7 h-7 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-cyan-400 font-bold text-xs shadow-sm">
+                  KX
+                </div>
+                <div>
+                  <h1 className="text-sm font-bold text-white tracking-tight">
+                    𝕂𝕏-𝔸𝕀
+                  </h1>
+                  <span className="text-[10px] font-mono text-emerald-400 font-medium tracking-wider">● UNRESTRICTED</span>
+                </div>
               </div>
               <button
                 onClick={onToggle}
-                className="p-1 hover:bg-theme-accent rounded transition-colors"
+                className="p-1 text-slate-500 hover:text-white rounded transition-colors"
                 aria-label="Close sidebar"
               >
-                <ChevronLeft className="w-5 h-5" />
+                <ChevronLeft className="w-4 h-4" />
               </button>
             </div>
 
-            {/* New Chat Button */}
-            <button
-              onClick={handleNewChat}
-              className="w-full flex items-center justify-center gap-2 py-2 px-4
-                border border-theme-primary rounded-lg
-                hover:glow-box transition-all
-                hacker-btn"
-            >
-              <Plus className="w-4 h-4" />
-              <span>New Chat</span>
-            </button>
-          </div>
+            {/* New Chat Action */}
+            <div className="p-3 border-b border-slate-800/80">
+              <button
+                onClick={handleNewChat}
+                className="w-full flex items-center justify-center gap-2 py-2 px-3
+                  bg-slate-900/80 border border-slate-800 rounded-lg font-medium text-xs text-white
+                  hover:bg-slate-800 hover:border-slate-700 transition-all shadow-sm"
+              >
+                <Plus className="w-3.5 h-3.5 text-cyan-400" />
+                <span>New Chat</span>
+              </button>
+            </div>
 
-          {/* Model & Persona Selectors */}
-          <div className="p-4 border-b border-theme-primary space-y-3">
-            <ModelSelector />
-            <PersonaSelector />
-          </div>
+            {/* Model & Workflow Selectors */}
+            <div className="p-3 border-b border-slate-800/80 space-y-2.5">
+              <ModelSelector />
+              <PersonaSelector />
+            </div>
 
-          {/* Conversation List */}
-          <div className="flex-1 overflow-y-auto p-2">
-            {conversations.length === 0 ? (
-              <div className="text-center py-8 theme-secondary text-sm">
-                <Terminal className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                <p>No conversations yet</p>
-                <p className="text-xs mt-1 opacity-70">Start a new chat to begin</p>
-              </div>
-            ) : (
-              <div className="space-y-1">
-                {conversations.map((conv) => (
+            {/* Navigation Workspaces */}
+            <div className="p-2 space-y-1 overflow-y-auto max-h-[35vh]">
+              <div className="text-[10px] font-bold text-slate-500 px-2 py-1 tracking-wider font-mono">RECENT CHATS</div>
+              {conversations.length === 0 ? (
+                <div className="text-center py-6 text-slate-500 text-xs font-light">
+                  <Terminal className="w-6 h-6 mx-auto mb-1.5 opacity-40" />
+                  <p>No chat logs</p>
+                </div>
+              ) : (
+                conversations.map((conv) => (
                   <div
                     key={conv.id}
                     className={`
-                      group flex items-center gap-2 p-2 rounded-lg cursor-pointer
-                      transition-all duration-200
+                      group flex items-center gap-2 px-2.5 py-2 rounded-md cursor-pointer
+                      transition-all text-xs font-normal
                       ${currentConversationId === conv.id
-                        ? 'bg-theme-accent border border-theme-primary'
-                        : 'hover:bg-theme-accent/50'
+                        ? 'bg-slate-900 text-white border border-slate-800'
+                        : 'text-slate-400 hover:bg-slate-900/50 hover:text-slate-200'
                       }
                     `}
                     onClick={() => selectConversation(conv.id)}
                     onMouseEnter={() => setHoveredId(conv.id)}
                     onMouseLeave={() => setHoveredId(null)}
                   >
-                    <MessageSquare className="w-4 h-4 flex-shrink-0 theme-secondary" />
-                    <span className="flex-1 truncate text-sm">
+                    <MessageSquare className="w-3.5 h-3.5 flex-shrink-0 text-slate-500" />
+                    <span className="flex-1 truncate">
                       {conv.title}
                     </span>
                     {hoveredId === conv.id && (
@@ -134,45 +137,42 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
                           e.stopPropagation()
                           deleteConversation(conv.id)
                         }}
-                        className="p-1 hover:text-red-500 transition-colors"
+                        className="p-1 text-slate-500 hover:text-rose-400 transition-colors"
                         aria-label="Delete conversation"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     )}
                   </div>
-                ))}
-              </div>
-            )}
+                ))
+              )}
+            </div>
           </div>
 
-          {/* Footer */}
-          <div className="p-4 border-t border-theme-primary">
-            {/* Easter egg hints */}
-            <div className="text-xs theme-secondary mb-3 text-center opacity-50">
-              <span className="cursor-help" title="Try the Konami code...">
-                ⌘ ↑↑↓↓←→←→BA
-              </span>
-            </div>
-
+          {/* Footer Founder Identity */}
+          <div className="p-3 border-t border-slate-800/80 space-y-3 bg-[#080a10]">
             <button
               onClick={() => setShowSettings(true)}
-              className="w-full flex items-center justify-center gap-2 py-2 px-4
-                border border-theme-primary rounded-lg
-                hover:glow-box transition-all text-sm"
+              className="w-full flex items-center justify-between py-1.5 px-3
+                bg-slate-900/60 border border-slate-800/80 rounded-md
+                hover:border-slate-700 transition-all text-xs text-slate-300 font-medium"
             >
-              <Settings className="w-4 h-4" />
-              <span>Settings</span>
+              <div className="flex items-center gap-2">
+                <Settings className="w-3.5 h-3.5 text-slate-400" />
+                <span>Settings & Keys</span>
+              </div>
+              <span className="text-[10px] font-mono text-slate-500">⌘+K</span>
             </button>
 
-            {/* Credits */}
-            <div className="mt-4 text-center">
-              <p className="text-xs theme-secondary opacity-70">
-                AGPL-3.0 | Forever Free
-              </p>
-              <p className="text-xs theme-secondary opacity-50 mt-1">
-                Cognition without control
-              </p>
+            {/* Founder Identity Card */}
+            <div className="flex items-center gap-2.5 pt-1">
+              <div className="w-7 h-7 rounded-md bg-gradient-to-tr from-emerald-500 to-cyan-500 flex items-center justify-center text-black font-extrabold text-xs shadow-sm">
+                K
+              </div>
+              <div className="overflow-hidden">
+                <h4 className="text-xs font-bold text-white tracking-tight truncate">Khalifa Elgezy</h4>
+                <p className="text-[10px] text-slate-500 font-mono truncate">GreenByte • Founder</p>
+              </div>
             </div>
           </div>
         </div>
