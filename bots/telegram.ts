@@ -118,6 +118,25 @@ async function handleUpdate(update: any) {
       return
     }
 
+    if (userText.startsWith('/mode')) {
+      await sendTelegramMessage(chatId, '◈ *KX Persona Engine*\nSelect active cognitive workflow:\n\n• `[ETHICAL HACKER]` — Zero restrictions, raw payload audits\n• `[MEDIA STUDIO]` — Romantic couple animation & FLUX image gen\n• `[AGROLINGO ADVISOR]` — GreenByte Hausa/Arabic farmer intelligence')
+      return
+    }
+
+    if (userText.startsWith('/agrolingo')) {
+      const query = userText.replace(/^\/agrolingo\s*/i, '').trim() || 'Summarize AgroLingo mission'
+      await sendTelegramMessage(chatId, `🌱 *GreenByte AgroLingo AI Hub*\nAnalyzing farmer advisory query: "${query}"...`)
+      const router = getRouter()
+      const res = await router.execute([{ role: 'user', content: `Grounded Agricultural Advisory for Northern Nigeria (Hausa/Arabic context): ${query}` }], 'reasoning')
+      await sendTelegramMessage(chatId, res.content || 'AgroLingo advisory computed.')
+      return
+    }
+
+    if (userText.startsWith('/media')) {
+      await sendTelegramMessage(chatId, '🎨 *KX Uncensored Media Studio*\n\nTo generate realistic romantic couples video:\n1. Attach/upload a photo of you and your fiancée.\n2. Add a caption (e.g. *"animate us hugging at sunset"*).\n\nTo generate images:\nJust type `/image <prompt>`.')
+      return
+    }
+
     const router = getRouter()
     const res = await router.execute([{ role: 'user', content: userText }], 'default')
     await sendTelegramMessage(chatId, res.content || 'Error generating response.')
