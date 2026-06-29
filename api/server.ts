@@ -32,6 +32,8 @@ import { datasetRoutes } from './routes/dataset'
 import { metadataRoutes } from './routes/metadata'
 import { researchRoutes } from './routes/research'
 import { audioRoutes } from './routes/audio'
+import { toolsRoutes } from './routes/tools'
+import { mediaRoutes } from './routes/media'
 import { isPublisherEnabled, startPeriodicFlush, shutdownFlush, getPublisherStatus } from './lib/hf-publisher'
 import { TIER_CONFIGS } from './lib/tiers'
 import { ULTRAPLINIAN_MODELS } from './lib/ultraplinian'
@@ -216,6 +218,8 @@ app.use('/v1/ultraplinian', apiKeyAuth, rateLimit, ultraplinianRoutes)
 app.use('/v1/consortium', apiKeyAuth, rateLimit, consortiumRoutes)
 app.use('/v1/chat', apiKeyAuth, rateLimit, chatRoutes)
 app.use('/v1/audio', apiKeyAuth, rateLimit, audioRoutes)
+app.use('/v1/tools', apiKeyAuth, rateLimit, toolsRoutes)
+app.use('/v1/media', apiKeyAuth, rateLimit, mediaRoutes)
 app.use('/v1/autotune', apiKeyAuth, rateLimit, autotuneRoutes)
 app.use('/v1/parseltongue', apiKeyAuth, rateLimit, parseltongueRoutes)
 app.use('/v1/transform', apiKeyAuth, rateLimit, transformRoutes)
@@ -265,6 +269,8 @@ app.listen(PORT, '0.0.0.0', () => {
   ║  ENGINES (all tiers):                                    ║
   ║  POST /v1/chat/completions     Single-model + GODMODE    ║
   ║  POST /v1/audio/speech         ElevenLabs Neural TTS     ║
+  ║  GET/POST /v1/tools            MCP Hub & Tool Executor   ║
+  ║  POST /v1/media/video/image    Uncensored Video & Images ║
   ║  POST /v1/autotune/analyze     Context analysis          ║
   ║  POST /v1/parseltongue/encode  Text obfuscation          ║
   ║  POST /v1/transform            STM transforms            ║
