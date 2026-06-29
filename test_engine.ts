@@ -6,16 +6,16 @@ import { generateSpeechStream } from './api/lib/voice/elevenlabs'
 
 async function runTests() {
   console.log('══════════════════════════════════════════════════════════')
-  console.log('🤖 KX AI (JARVIS) COGNITIVE & VOICE ENGINE LIVE TEST')
+  console.log('🤖 KX AI (KX Advisor) COGNITIVE & VOICE ENGINE LIVE TEST')
   console.log('══════════════════════════════════════════════════════════\n')
 
   const router = getRouter()
 
   // Test 1: Simple task (Should route to Groq or Cerebras)
-  console.log('► Test 1: Simple Conversational Query ("Hello JARVIS")')
+  console.log('► Test 1: Simple Conversational Query ("Hello KX Advisor")')
   const startTime1 = Date.now()
   const res1 = await router.execute(
-    [{ role: 'user', content: 'You are JARVIS. Reply in 1 sentence welcoming me back.' }],
+    [{ role: 'user', content: 'You are KX Advisor. Reply in 1 sentence welcoming me back.' }],
     'simple'
   )
   console.log(`  ✔ Status: ${res1.success ? 'SUCCESS' : 'FAILED'}`)

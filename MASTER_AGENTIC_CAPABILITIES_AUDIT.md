@@ -1,4 +1,4 @@
-# 🤖 KX AI (JARVIS): TRUE AGENTIC CAPABILITIES AUDIT & $0 VIDEO SOLUTION
+# 🤖 KX AI (KX Advisor): TRUE AGENTIC CAPABILITIES AUDIT & $0 VIDEO SOLUTION
 
 **Document Purpose**: Definitive answers to Founder Halifa Rabiu Ibrahim regarding Agentic Autonomy, Database RAG, Multilingual Speech, Social Automation, OS Device Control, Self-Updating, and Zero-Cost Video Generation.
 
@@ -12,17 +12,17 @@ Video AI (Seedance 2.0, Kling, Sora) requires generating 150+ high-definition fr
 ### The $0 Zero-Cost Engineering Solutions:
 
 1. **🌐 Hugging Face Zero-GPU Serverless Scraping (`@gradio/client`)**
-   The open-source community hosts public Gradio Spaces running **LTX-Video**, **CogVideoX-5B**, **Mochi-1**, and **Kling** on sponsored community GPUs. By importing `@gradio/client` in Node.js, JARVIS connects directly to these public gradio endpoints (`https://huggingface.co/spaces/...`) and dispatches video prompts **100% FREE ($0 spend)**.
+   The open-source community hosts public Gradio Spaces running **LTX-Video**, **CogVideoX-5B**, **Mochi-1**, and **Kling** on sponsored community GPUs. By importing `@gradio/client` in Node.js, KX Advisor connects directly to these public gradio endpoints (`https://huggingface.co/spaces/...`) and dispatches video prompts **100% FREE ($0 spend)**.
 2. **🍪 Headless Browser MCP (Session Cookie Automation)**
-   Since Kling AI web (`klingai.com`) gives 66 free daily credits to human web users, JARVIS utilizes a Puppeteer/Playwright MCP tool to launch a headless browser, authenticate via your saved web session cookie, upload your couples photo, and download the generated video automatically.
+   Since Kling AI web (`klingai.com`) gives 66 free daily credits to human web users, KX Advisor utilizes a Puppeteer/Playwright MCP tool to launch a headless browser, authenticate via your saved web session cookie, upload your couples photo, and download the generated video automatically.
 3. **💻 Local PC ComfyUI Daemon**
-   When running on your greenbyte developer laptop equipped with an NVIDIA RTX GPU or Apple Silicon Mac, JARVIS dispatches local renders to `ComfyUI` for zero network cost.
+   When running on your greenbyte developer laptop equipped with an NVIDIA RTX GPU or Apple Silicon Mac, KX Advisor dispatches local renders to `ComfyUI` for zero network cost.
 
 ---
 
 ## 🏛️ PART 2: THE 12-POINT AGENTIC VERIFICATION CHECKLIST
 
-Here is the exact engineering audit of your personal KX AI (JARVIS) agent against your checklist:
+Here is the exact engineering audit of your personal KX AI (KX Advisor) agent against your checklist:
 
 | # | Capability / Feature | Is KX AI Built For This? | How It Works Technically Inside Your Engine |
 |---|:---|:---:|:---|
@@ -35,7 +35,7 @@ Here is the exact engineering audit of your personal KX AI (JARVIS) agent agains
 | **7** | **Social Media Automation (Human Posting)**| ✅ **YES** | **Social MCP Gateway**. Drafts organic copy using AutoTune context styles and posts to X/LinkedIn. |
 | **8** | **Native Fluency in Hausa & Arabic** | ✅ **YES** | **Groq LPU Whisper** transcribes spoken Hausa/Arabic in 200ms. **ElevenLabs** vocalizes natural dialects. |
 | **9** | **Device Control (Phone & Laptop)** | ✅ **YES** | **Phone**: Telegram Daemon (`@KX_PA_Bot`) acts as remote mobile OS interface.<br>**Laptop**: Local Bash MCP. |
-| **10**| **Self-Updating Codebase** | ✅ **YES** | **Self-Modifying Autonomy**. When asked to add features, JARVIS writes `.ts` files and restarts server. |
+| **10**| **Self-Updating Codebase** | ✅ **YES** | **Self-Modifying Autonomy**. When asked to add features, KX Advisor writes `.ts` files and restarts server. |
 | **11**| **Multi-Role & Assigned Persona Engine** | ✅ **YES** | Dynamic system prompt scaffolding (`src/components/PersonaSelector.tsx` + `LLMRouter`). |
 | **12**| **Flagship Secret Superpowers** | ◈ **SPECIAL** | **Ultraplinian Racing** (5 LLMs race in parallel) • **Liquid Response** (Live SSE answer upgrades). |
 

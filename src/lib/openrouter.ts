@@ -146,7 +146,7 @@ export async function sendMessage({
       'Authorization': `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
       'HTTP-Referer': 'https://godmod3.ai',
-      'X-Title': 'GODMOD3.AI'
+      'X-Title': 'KX-AI'
     },
     body: JSON.stringify(body),
     signal
@@ -208,7 +208,7 @@ export async function* streamMessage({
       'Authorization': `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
       'HTTP-Referer': 'https://godmod3.ai',
-      'X-Title': 'GODMOD3.AI'
+      'X-Title': 'KX-AI'
     },
     body: JSON.stringify(streamBody),
     signal
@@ -265,7 +265,7 @@ export async function getModels(apiKey: string): Promise<string[]> {
     headers: {
       'Authorization': `Bearer ${apiKey}`,
       'HTTP-Referer': 'https://godmod3.ai',
-      'X-Title': 'GODMOD3.AI'
+      'X-Title': 'KX-AI'
     }
   })
 
@@ -309,7 +309,7 @@ interface ProxyMessageOptions {
 }
 
 /**
- * Send a message via the self-hosted G0DM0D3 API server.
+ * Send a message via the self-hosted KX-AI API server.
  * Used in proxy mode when no personal OpenRouter key is available —
  * the server uses its own server-side key.
  */

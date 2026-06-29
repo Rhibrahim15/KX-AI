@@ -6,7 +6,7 @@
  * Drop-in replacement for the OpenAI API. Works with any OpenAI-compatible SDK:
  *
  *   from openai import OpenAI
- *   client = OpenAI(base_url="https://your-g0dm0d3.hf.space/v1", api_key="g0d_xxx")
+ *   client = OpenAI(base_url="https://your-kx-ai.hf.space/v1", api_key="g0d_xxx")
  *   r = client.chat.completions.create(model="ultraplinian", messages=[...])
  *   print(r.choices[0].message.content)
  *
@@ -17,7 +17,7 @@
  *   "ultraplinian-full"      → ULTRAPLINIAN race (full tier, 27 models)
  *   Any OpenRouter model ID  → Single-model with full GODMODE pipeline
  *
- * G0DM0D3-specific options (pass via extra_body in the OpenAI Python SDK):
+ * KX-AI-specific options (pass via extra_body in the OpenAI Python SDK):
  *   godmode, autotune, strategy, parseltongue, stm_modules, previous_winner, etc.
  *
  * Streaming:
@@ -273,7 +273,7 @@ completionsRoutes.post('/completions', async (req, res) => {
       top_k,
       frequency_penalty,
       presence_penalty,
-      // G0DM0D3 extras (use extra_body in OpenAI SDK)
+      // KX-AI extras (use extra_body in OpenAI SDK)
       openrouter_api_key: caller_key,
       godmode = true,
       custom_system_prompt,

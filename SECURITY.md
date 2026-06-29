@@ -2,7 +2,7 @@
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability in G0DM0D3, please report it responsibly.
+If you discover a security vulnerability in KX-AI, please report it responsibly.
 
 **Please do NOT open a public GitHub issue for security vulnerabilities.**
 
@@ -22,7 +22,7 @@ If you discover a security vulnerability in G0DM0D3, please report it responsibl
 ### Scope
 
 In scope:
-- The G0DM0D3 API server (`api/`)
+- The KX-AI API server (`api/`)
 - The frontend application (`src/`)
 - Docker / deployment configuration
 - Authentication and authorization logic

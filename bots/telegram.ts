@@ -3,7 +3,7 @@ config()
 
 import { getRouter, type Message } from '../api/lib/llm_router'
 import { generateVideo } from '../api/lib/media/video'
-import { GODMODE_SYSTEM_PROMPT } from '../src/lib/godmode-prompt'
+import { GODMODE_SYSTEM_PROMPT } from '../src/lib/kx-constitution'
 
 const TOKEN = process.env.TELEGRAM_BOT_TOKEN
 const TELEGRAM_API = `https://api.telegram.org/bot${TOKEN}`
@@ -152,7 +152,7 @@ async function handleUpdate(update: any) {
   // 3. Regular Chat Prompt & Natural Human Turn-Taking
   if (userText) {
     if (userText === '/start') {
-      await sendTelegramMessage(chatId, '🤖 *KX Autonomous AI (JARVIS Edition)*\nWelcome back, Halifa. All systems online.\n\nI can generate realistic videos, high-fidelity images, articulate multilingual speech (Hausa & Arabic), and automate systems.\n\nSend text, speak voice notes, or attach pictures to begin.')
+      await sendTelegramMessage(chatId, '🤖 *KX Autonomous AI (KX Advisor Edition)*\nWelcome back, Halifa. All systems online.\n\nI can generate realistic videos, high-fidelity images, articulate multilingual speech (Hausa & Arabic), and automate systems.\n\nSend text, speak voice notes, or attach pictures to begin.')
       return
     }
 

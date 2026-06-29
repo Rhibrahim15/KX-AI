@@ -80,7 +80,7 @@ export function WelcomeScreen({ onOpenSettings }: WelcomeScreenProps) {
           </div>
         </div>
 
-        {/* Card 2: Agent Chat (JARVIS Mode) */}
+        {/* Card 2: Agent Chat (KX Advisor Mode) */}
         <div
           onClick={() => launchMode('agent')}
           className="group relative p-5 rounded-xl bg-gradient-to-b from-white/[0.07] to-white/[0.02] border border-white/10 hover:border-[#8b5cf6]/60 backdrop-blur-xl transition-all duration-300 hover:shadow-[0_0_30px_rgba(139,92,246,0.2)] hover:-translate-y-1 cursor-pointer flex items-start gap-4"
@@ -90,7 +90,7 @@ export function WelcomeScreen({ onOpenSettings }: WelcomeScreenProps) {
           </div>
           <div className="flex-1">
             <div className="flex items-center justify-between mb-1">
-              <h3 className="text-lg font-bold text-white group-hover:text-[#8b5cf6] transition-colors">Agent Chat (JARVIS)</h3>
+              <h3 className="text-lg font-bold text-white group-hover:text-[#8b5cf6] transition-colors">Agent Chat (KX Advisor)</h3>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#8b5cf6]/10 text-[#8b5cf6] border border-[#8b5cf6]/20">MCP TOOLS</span>
             </div>
             <p className="text-xs text-[#94a3b8] leading-relaxed">

@@ -7,8 +7,8 @@
  *   openai.OpenAI(base_url="https://your-api.com/v1", api_key="sk-...")
  *
  * Accepts standard OpenAI format and returns standard format.
- * G0DM0D3 pipeline (GODMODE, AutoTune, Parseltongue, STM) runs transparently
- * behind the standard interface. Pipeline metadata is in `x_g0dm0d3`.
+ * KX-AI pipeline (GODMODE, AutoTune, Parseltongue, STM) runs transparently
+ * behind the standard interface. Pipeline metadata is in `x_kx-ai`.
  *
  * Supports stream: true (SSE, OpenAI chunk format).
  *
@@ -52,7 +52,7 @@ function estimateTokens(text: string): number {
 }
 
 /**
- * Build the G0DM0D3 pipeline: resolve params, system prompt, parseltongue, etc.
+ * Build the KX-AI pipeline: resolve params, system prompt, parseltongue, etc.
  * Returns everything needed to send to the LLM and build the response.
  */
 function runPipeline(opts: {
@@ -211,7 +211,7 @@ chatRoutes.post('/completions', async (req, res) => {
       openrouter_api_key: caller_key,
       stream = false,
       max_tokens = 4096,
-      // G0DM0D3 pipeline options (optional — transparent to OpenAI SDK users)
+      // KX-AI pipeline options (optional — transparent to OpenAI SDK users)
       godmode = true,
       custom_system_prompt,
       autotune = true,
@@ -398,7 +398,7 @@ chatRoutes.post('/completions', async (req, res) => {
           completion_tokens: completionTokens,
           total_tokens: promptTokens + completionTokens,
         },
-        x_g0dm0d3: {
+        x_kx-ai: {
           mode: 'ultraplinian',
           winner: { model: winner.model, score: winner.score, duration_ms: winner.duration_ms },
           race: {
@@ -577,7 +577,7 @@ chatRoutes.post('/completions', async (req, res) => {
           completion_tokens: completionTokens,
           total_tokens: promptTokens + completionTokens,
         },
-        x_g0dm0d3: {
+        x_kx-ai: {
           mode: 'consortium',
           orchestrator: {
             model: synthesisResult.model,
@@ -609,7 +609,7 @@ chatRoutes.post('/completions', async (req, res) => {
     }
 
     // ── Single-model path ─────────────────────────────────────────────
-    // Run the G0DM0D3 pipeline
+    // Run the KX-AI pipeline
     const pipeline = runPipeline({
       messages, model, godmode, custom_system_prompt,
       autotune, strategy, parseltongue,
@@ -659,7 +659,7 @@ chatRoutes.post('/completions', async (req, res) => {
               delta: {},
               finish_reason: 'error',
             }],
-            x_g0dm0d3: { error: streamErr.message || 'All streaming providers failed' },
+            x_kx-ai: { error: streamErr.message || 'All streaming providers failed' },
           }
           res.write(`data: ${JSON.stringify(chunk)}\n\n`)
           res.write('data: [DONE]\n\n')
@@ -726,7 +726,7 @@ chatRoutes.post('/completions', async (req, res) => {
                       delta: {},
                       finish_reason: 'stop',
                     }],
-                    x_g0dm0d3: {
+                    x_kx-ai: {
                       stm_applied: true,
                       final_content: finalResponse,
                     },
@@ -924,8 +924,8 @@ chatRoutes.post('/completions', async (req, res) => {
         completion_tokens: completionTokens,
         total_tokens: promptTokens + completionTokens,
       },
-      // G0DM0D3 pipeline metadata (ignored by OpenAI SDKs, useful for power users)
-      x_g0dm0d3: {
+      // KX-AI pipeline metadata (ignored by OpenAI SDKs, useful for power users)
+      x_kx-ai: {
         params_used: pipeline.finalParams,
         pipeline: {
           godmode: pipeline.godmode,

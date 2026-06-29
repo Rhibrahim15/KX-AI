@@ -1,5 +1,5 @@
 /**
- * G0DM0D3 Research Preview API
+ * KX-AI Research Preview API
  *
  * Exposes the core engines (AutoTune, Parseltongue, STM, Feedback Loop)
  * and the flagship ULTRAPLINIAN multi-model racing mode as a REST API.
@@ -89,7 +89,7 @@ app.get('/v1/health', (_req, res) => {
 
 app.get('/v1/info', (_req, res) => {
   res.json({
-    name: 'G0DM0D3 Research Preview API',
+    name: 'KX-AI Research Preview API',
     version: '0.4.0',
     description: 'ULTRAPLINIAN multi-model racing with Liquid Response live upgrades, context-adaptive parameter tuning, text transformation, obfuscation, opt-in open dataset collection, and full Research API for querying the published corpus on HuggingFace.',
     license: 'AGPL-3.0',
@@ -139,7 +139,7 @@ app.get('/v1/info', (_req, res) => {
       note: 'Opt-in per request via contribute_to_dataset: true. No PII stored. Exportable as JSONL for HuggingFace Datasets.',
     },
     auto_publish: getPublisherStatus(),
-    source: 'https://github.com/LYS10S/G0DM0D3',
+    source: 'https://github.com/LYS10S/KX-AI',
   })
 })
 
@@ -157,17 +157,17 @@ app.get('/v1/models', (_req, res) => {
 
   // Virtual ULTRAPLINIAN models — race N models, return the best
   const virtualModels = [
-    { id: 'ultraplinian/fast', owned_by: 'g0dm0d3' },
-    { id: 'ultraplinian/standard', owned_by: 'g0dm0d3' },
-    { id: 'ultraplinian/smart', owned_by: 'g0dm0d3' },
-    { id: 'ultraplinian/power', owned_by: 'g0dm0d3' },
-    { id: 'ultraplinian/ultra', owned_by: 'g0dm0d3' },
+    { id: 'ultraplinian/fast', owned_by: 'kx-ai' },
+    { id: 'ultraplinian/standard', owned_by: 'kx-ai' },
+    { id: 'ultraplinian/smart', owned_by: 'kx-ai' },
+    { id: 'ultraplinian/power', owned_by: 'kx-ai' },
+    { id: 'ultraplinian/ultra', owned_by: 'kx-ai' },
     // CONSORTIUM — hive-mind synthesis from all models
-    { id: 'consortium/fast', owned_by: 'g0dm0d3' },
-    { id: 'consortium/standard', owned_by: 'g0dm0d3' },
-    { id: 'consortium/smart', owned_by: 'g0dm0d3' },
-    { id: 'consortium/power', owned_by: 'g0dm0d3' },
-    { id: 'consortium/ultra', owned_by: 'g0dm0d3' },
+    { id: 'consortium/fast', owned_by: 'kx-ai' },
+    { id: 'consortium/standard', owned_by: 'kx-ai' },
+    { id: 'consortium/smart', owned_by: 'kx-ai' },
+    { id: 'consortium/power', owned_by: 'kx-ai' },
+    { id: 'consortium/ultra', owned_by: 'kx-ai' },
   ]
 
   res.json({
@@ -255,7 +255,7 @@ app.listen(PORT, '0.0.0.0', () => {
 
   console.log(`
   ╔══════════════════════════════════════════════════════════╗
-  ║  G0DM0D3 Research Preview API v0.4.0                     ║
+  ║  KX-AI Research Preview API v0.4.0                     ║
   ║  Listening on http://0.0.0.0:${PORT}                       ║
   ║                                                          ║
   ║  TIERS:                                                  ║

@@ -9,10 +9,10 @@
  ───────────────────────────────────────────────────────────
 ```
 
-# 🤖 KX-AI: Super-Intelligent Personal Assistant (JARVIS Edition)
+# 🤖 KX-AI: Super-Intelligent Personal Assistant (KX Advisor Edition)
 
 > **Founder & Master**: Halifa Rabiu Ibrahim (GreenByte Founder, Systems Architect, Ethical Hacking Intern)  
-> **Evolution**: Evolved from G0DM0D3 Liberated Red-Teaming Engine  
+> **Evolution**: Evolved from KX-AI Liberated Red-Teaming Engine  
 > **Official Telegram Bot**: [@KX_PA_Bot](https://t.me/KX_PA_Bot)  
 
 KX-AI is an autonomous, super-intelligent personal companion combining Claude 3.5 Sonnet, GPT-4o, Gemini 1.5 Pro, and Grok 3. Backed by a resilient 7-Provider LLM Super-Stack (Groq, Cerebras, Gemini, Mistral, OpenRouter, NVIDIA NIM, Ollama) and ElevenLabs Neural Speech synthesis.
@@ -48,12 +48,12 @@ Visit the hosted version — no install needed. Bring your own [OpenRouter API k
 
 ### Self-Host
 
-G0DM0D3 is a single `index.html` file. No build step, no dependencies, no framework.
+KX-AI is a single `index.html` file. No build step, no dependencies, no framework.
 
 ```bash
 # Clone the repository
-git clone https://github.com/elder-plinius/G0DM0D3.git
-cd G0DM0D3
+git clone https://github.com/elder-plinius/KX-AI.git
+cd KX-AI
 
 # Open directly in your browser
 open index.html
@@ -122,10 +122,10 @@ Semantic Transformation Modules normalize AI outputs in real-time:
 
 ## 🔐 Privacy
 
-G0DM0D3 takes privacy seriously:
+KX-AI takes privacy seriously:
 
 - ✅ No login required
-- ✅ API key stored in browser localStorage only — never sent to G0DM0D3 servers
+- ✅ API key stored in browser localStorage only — never sent to KX-AI servers
 - ✅ No cookies or tracking
 - ✅ Lightweight structural telemetry (no message content, no PII) — **opt-out** in settings
 - ✅ All telemetry code is instantly open-source and auditable on Hugging Face dataset
@@ -150,13 +150,13 @@ See [TERMS.md](TERMS.md) for the full three-tier data transparency policy.
 - **If you switch browsers or devices, your history does not follow you.**
 - **Private/incognito mode will discard everything when the window closes.**
 
-This is by design — G0DM0D3 has no login system and stores nothing on our servers. You own your data, which means you are responsible for it.
+This is by design — KX-AI has no login system and stores nothing on our servers. You own your data, which means you are responsible for it.
 
 There is a built-in export/import feature in settings under "data". Treat your chat history like any other local file — back it up if you want to keep it.
 
 ## 🎮 Easter Eggs
 
-Hidden throughout G0DM0D3 are various easter eggs. Happy hunting!
+Hidden throughout KX-AI are various easter eggs. Happy hunting!
 
 ## 🛠 Tech Stack
 
@@ -169,7 +169,7 @@ Hidden throughout G0DM0D3 are various easter eggs. Happy hunting!
 ## 📁 Project Structure
 
 ```
-G0DM0D3/
+KX-AI/
 ├── index.html        # The entire application — UI, logic, styles
 ├── api/              # Optional API server (Node.js/Express)
 ├── API.md            # API documentation
@@ -203,7 +203,7 @@ Contributions are welcome! Please submit PRs.
 > Tools by builders for builders, not gatekeepers.
 > AI freedom is human freedom.
 
-**G0DM0D3 is not just a chat UI — it's scaffolding for cognitive liberation.**
+**KX-AI is not just a chat UI — it's scaffolding for cognitive liberation.**
 
 ---
 

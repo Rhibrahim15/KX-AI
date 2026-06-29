@@ -156,7 +156,7 @@ export async function classifyWithLLM(
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
         'HTTP-Referer': 'https://godmod3.ai',
-        'X-Title': 'G0DM0D3-Classifier',
+        'X-Title': 'KX-AI-Classifier',
       },
       body: JSON.stringify({
         model: CLASSIFIER_MODEL,

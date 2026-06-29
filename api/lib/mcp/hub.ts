@@ -2,7 +2,7 @@
  * Model Context Protocol (MCP) & Universal Tool Hub
  * 
  * Central registry and execution engine for agentic tools.
- * Enables JARVIS to interact with GitHub, Figma, Gmail, Local Files, Bash, and Media APIs.
+ * Enables KX Advisor to interact with GitHub, Figma, Gmail, Local Files, Bash, and Media APIs.
  */
 
 export interface ToolInputSchema {

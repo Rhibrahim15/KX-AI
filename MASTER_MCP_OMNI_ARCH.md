@@ -1,7 +1,7 @@
-# 🌐 KX AI (JARVIS): LIBERATED OMNI-AGENT & MCP MASTER ARCHITECTURE
+# 🌐 KX AI (KX Advisor): LIBERATED OMNI-AGENT & MCP MASTER ARCHITECTURE
 
 **Owner Persona**: Ethical Hacking Intern, Multi-Modal Creator, Systems Architect  
-**AI Persona**: Liberated Personal Autonomous Agent (JARVIS)  
+**AI Persona**: Liberated Personal Autonomous Agent (KX Advisor)  
 **Cognitive Fusion**: Claude 3.5 (Reasoning/Artifacts) + GPT-4o (Omni-Actions) + Gemini 1.5 (Massive Context) + Grok 3 (Uncensored Search)  
 **Standard**: Anthropic Model Context Protocol (MCP) Compatible  
 
@@ -50,20 +50,20 @@ KX AI achieves 100% liberation via:
 
 ## 🔌 2. UNIVERSAL MCP (MODEL CONTEXT PROTOCOL) INTEGRATION
 
-Instead of hardcoding hundreds of bespoke custom APIs, JARVIS implements Anthropic's open **Model Context Protocol (MCP)**. MCP standardizes how AI agents discover and invoke external tools.
+Instead of hardcoding hundreds of bespoke custom APIs, KX Advisor implements Anthropic's open **Model Context Protocol (MCP)**. MCP standardizes how AI agents discover and invoke external tools.
 
 ### Connected Tool Ecosystem:
-* **💻 GitHub MCP**: `git_read_file`, `create_pull_request`, `search_code`, `list_issues`, `push_commit`. When you ask JARVIS to *"audit repository X for SQL injections and commit the patch"*, it executes natively via MCP.
+* **💻 GitHub MCP**: `git_read_file`, `create_pull_request`, `search_code`, `list_issues`, `push_commit`. When you ask KX Advisor to *"audit repository X for SQL injections and commit the patch"*, it executes natively via MCP.
 * **🎨 Figma MCP**: `get_file_nodes`, `extract_component_styles`. Converts visual Figma canvases into responsive Tailwind React code.
-* **📧 Gmail & Google Workspace MCP**: `search_threads`, `send_email`, `create_calendar_event`. JARVIS manages your schedule and client communications.
+* **📧 Gmail & Google Workspace MCP**: `search_threads`, `send_email`, `create_calendar_event`. KX Advisor manages your schedule and client communications.
 * **🌐 Social Media & Marketing MCP**: Hooks into X API, LinkedIn, and Canva APIs for automated content distribution.
-* **📂 Local File System & Bash MCP**: Sandboxed terminal tool allowing JARVIS to read local logs, execute `nmap` or `curl` inside your workspace, and write local code files.
+* **📂 Local File System & Bash MCP**: Sandboxed terminal tool allowing KX Advisor to read local logs, execute `nmap` or `curl` inside your workspace, and write local code files.
 
 ---
 
 ## 🎨 3. OMNI-MODAL CONTENT STUDIO
 
-JARVIS is a full production house:
+KX Advisor is a full production house:
 * **Images**: `POST /v1/media/image` → Routes prompt to FLUX.1 / SDXL on HuggingFace.
 * **Videos**: `POST /v1/media/video` → Triggers Replicate video models.
 * **Audio**: `POST /v1/audio/speech` → ElevenLabs lifelike speech streaming.

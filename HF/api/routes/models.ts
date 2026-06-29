@@ -3,7 +3,7 @@
  *
  * GET /v1/models
  *
- * Lists available G0DM0D3 "models" in standard OpenAI format.
+ * Lists available KX-AI "models" in standard OpenAI format.
  * Any OpenAI SDK's client.models.list() will work.
  */
 
@@ -21,7 +21,7 @@ interface ModelEntry {
   model_count?: number
 }
 
-const G0DM0D3_MODELS: ModelEntry[] = [
+const KX-AI_MODELS: ModelEntry[] = [
   {
     id: 'ultraplinian',
     description: 'ULTRAPLINIAN: Race 12 models in parallel, return the best (fast tier). Alias for ultraplinian-fast.',
@@ -52,11 +52,11 @@ const G0DM0D3_MODELS: ModelEntry[] = [
 ]
 
 modelsRoutes.get('/', (_req, res) => {
-  const data = G0DM0D3_MODELS.map(m => ({
+  const data = KX-AI_MODELS.map(m => ({
     id: m.id,
     object: 'model' as const,
     created: CREATED,
-    owned_by: 'g0dm0d3',
+    owned_by: 'kx-ai',
     // Extra metadata (OpenAI SDK ignores these)
     description: m.description,
     tier: m.tier,
@@ -71,10 +71,10 @@ modelsRoutes.get('/', (_req, res) => {
  * Retrieve a single model's info (OpenAI-compatible)
  */
 modelsRoutes.get('/:model_id', (req, res) => {
-  const entry = G0DM0D3_MODELS.find(m => m.id === req.params.model_id)
+  const entry = KX-AI_MODELS.find(m => m.id === req.params.model_id)
 
   if (!entry) {
-    // If it's not a G0DM0D3 model, it might be an OpenRouter model — that's fine
+    // If it's not a KX-AI model, it might be an OpenRouter model — that's fine
     res.json({
       id: req.params.model_id,
       object: 'model',
@@ -89,7 +89,7 @@ modelsRoutes.get('/:model_id', (req, res) => {
     id: entry.id,
     object: 'model',
     created: CREATED,
-    owned_by: 'g0dm0d3',
+    owned_by: 'kx-ai',
     description: entry.description,
     tier: entry.tier,
     model_count: entry.model_count,

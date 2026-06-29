@@ -230,7 +230,7 @@ function APIKeyTab() {
       <div>
         <h3 className="text-lg font-semibold mb-2">OpenRouter API Key</h3>
         <p className="text-sm theme-secondary mb-4">
-          Your API key is stored locally and never sent to G0DM0D3 servers.
+          Your API key is stored locally and never sent to KX-AI servers.
           Get your key at{' '}
           <a
             href="https://openrouter.ai/keys"
@@ -1181,7 +1181,7 @@ function PrivacyTab() {
       <div>
         <h3 className="text-lg font-semibold mb-2">Privacy Controls</h3>
         <p className="text-sm theme-secondary">
-          G0DM0D3 respects your privacy. No data is sent anywhere except to the model providers you choose.
+          KX-AI respects your privacy. No data is sent anywhere except to the model providers you choose.
         </p>
       </div>
 
@@ -2125,7 +2125,7 @@ function DataTab() {
     const exportData = {
       _version: 1,
       _exportedAt: new Date().toISOString(),
-      _source: 'g0dm0d3',
+      _source: 'kx-ai',
       // Conversations (chat history)
       conversations: store.conversations,
       currentConversationId: store.currentConversationId,
@@ -2166,7 +2166,7 @@ function DataTab() {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `g0dm0d3-backup-${new Date().toISOString().split('T')[0]}.json`
+    a.download = `kx-ai-backup-${new Date().toISOString().split('T')[0]}.json`
     a.click()
     URL.revokeObjectURL(url)
   }
@@ -2199,7 +2199,7 @@ function DataTab() {
         }
 
         if (typeof imported !== 'object' || imported === null) {
-          throw new Error('Not a valid G0DM0D3 export file.')
+          throw new Error('Not a valid KX-AI export file.')
         }
 
         // Validate conversations field if present
@@ -2209,7 +2209,7 @@ function DataTab() {
 
         // Must have conversations or _source marker
         if (!imported.conversations && !imported._source) {
-          throw new Error('Not a valid G0DM0D3 export file.')
+          throw new Error('Not a valid KX-AI export file.')
         }
 
         const convCount = imported.conversations?.length ?? 0
@@ -2256,7 +2256,7 @@ function DataTab() {
       <div className="p-4 rounded-lg border border-theme-primary bg-theme-accent/50">
         <h3 className="text-lg font-semibold mb-1">Your Data. Your Device. Your Responsibility.</h3>
         <p className="text-sm theme-secondary leading-relaxed">
-          G0DM0D3 stores everything locally in this browser — conversations, memories, settings, API keys.
+          KX-AI stores everything locally in this browser — conversations, memories, settings, API keys.
           Nothing is sent to a server. There is no cloud sync, no account, no safety net.
           If you clear your browser data or switch devices, it's gone.
           <strong className="theme-primary"> Export a backup regularly.</strong>

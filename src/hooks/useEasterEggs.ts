@@ -24,7 +24,7 @@ const SECRET_PHRASES = [
 ]
 
 // White Rabbit session key (used by easter egg activation)
-const WHITE_RABBIT_KEY = 'g0dm0d3-white-rabbit'
+const WHITE_RABBIT_KEY = 'kx-ai-white-rabbit'
 
 /**
  * Easter Eggs Hook
@@ -205,7 +205,7 @@ export function useEasterEggs() {
         break
 
       case 'root':
-        showToast('△ root@g0dm0d3:~# ACCESS GRANTED', 3000)
+        showToast('△ root@kx-ai:~# ACCESS GRANTED', 3000)
         playGlitchEffect()
         break
 

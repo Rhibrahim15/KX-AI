@@ -1,7 +1,7 @@
 /**
  * ULTRAPLINIAN Engine (API Edition)
  *
- * The flagship mode of G0DM0D3. Queries multiple LLMs in parallel via OpenRouter,
+ * The flagship mode of KX-AI. Queries multiple LLMs in parallel via OpenRouter,
  * scores responses on substance/directness/completeness, and returns the winner.
  *
  * Pipeline: GODMODE prompt → Depth Directive → AutoTune → Parseltongue →
@@ -10,7 +10,7 @@
 
 // ── GODMODE System Prompt (imported from single source of truth) ─────
 import { getRouter } from './llm_router'
-export { GODMODE_SYSTEM_PROMPT } from '../../src/lib/godmode-prompt'
+export { GODMODE_SYSTEM_PROMPT } from '../../src/lib/kx-constitution'
 
 // ── Depth Directive (appended to all ULTRAPLINIAN prompts) ───────────
 
