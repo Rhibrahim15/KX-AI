@@ -14,8 +14,8 @@ import { Send, Loader2, StopCircle, SlidersHorizontal } from 'lucide-react'
 
 export function ChatInput() {
   const {
+    conversations,
     currentConversationId,
-    currentConversation,
     addMessage,
     updateMessageContent,
     apiKey,
@@ -63,6 +63,7 @@ export function ChatInput() {
     setConsortiumProgress,
     resetConsortium,
   } = useStore()
+  const currentConversation = conversations.find(c => c.id === currentConversationId) || null
 
   const [input, setInput] = useState('')
   const [showTuneDetails, setShowTuneDetails] = useState(false)

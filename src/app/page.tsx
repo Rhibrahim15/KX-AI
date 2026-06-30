@@ -12,7 +12,8 @@ import { useApiAutoDetect } from '@/hooks/useApiAutoDetect'
 export default function Home() {
   const {
     theme,
-    currentConversation,
+    conversations,
+    currentConversationId,
     showSettings,
     setShowSettings,
     apiKey,
@@ -20,6 +21,8 @@ export default function Home() {
     ultraplinianApiKey,
     isHydrated
   } = useStore()
+
+  const currentConversation = conversations.find(c => c.id === currentConversationId) || null
 
   const [sidebarOpen, setSidebarOpen] = useState(true)
 
