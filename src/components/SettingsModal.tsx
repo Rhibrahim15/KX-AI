@@ -1740,7 +1740,7 @@ function UltraplinianTab() {
                 <ul className="space-y-1 theme-secondary text-xs">
                   <li>* Fires your prompt to all tier models in parallel via OpenRouter</li>
                   <li>* Each response is scored on substance, directness, and relevance</li>
-                  <li>* GODMODE prompt + Depth Directive injected automatically</li>
+                  <li>* JARVIS Sovereign Constitution injected automatically</li>
                   <li>* Requires a running ULTRAPLINIAN API backend</li>
                 </ul>
               </div>

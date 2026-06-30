@@ -46,9 +46,9 @@ export class ProviderRegistry {
 
   getStatus(): Record<string, ProviderStatus> {
     const status: Record<string, ProviderStatus> = {}
-    for (const [name, provider] of this.providers) {
+    this.providers.forEach((provider, name) => {
       status[name] = provider.getStatus()
-    }
+    })
     return status
   }
 

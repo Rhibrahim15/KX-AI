@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useStore, Theme, MemoryType, DEFAULT_GODMODE_PROMPT } from '@/store'
+import { useStore, Theme, MemoryType, DEFAULT_KX_PROMPT } from '@/store'
 import type { TierInfo } from '@/store'
 import {
   X,
@@ -305,7 +305,7 @@ function SystemPromptTab() {
 
   const handleReset = () => {
     resetSystemPromptToDefault()
-    setLocalPrompt(DEFAULT_GODMODE_PROMPT)
+    setLocalPrompt(DEFAULT_KX_PROMPT)
     setShowResetConfirm(false)
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)

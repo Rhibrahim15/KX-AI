@@ -47,6 +47,7 @@ export const ultraplinianRoutes = Router()
 
 ultraplinianRoutes.post('/completions', async (req, res) => {
   const startTime = Date.now()
+  let stream = req.body?.stream !== false
 
   try {
     const {
@@ -74,7 +75,6 @@ ultraplinianRoutes.post('/completions', async (req, res) => {
       presence_penalty,
       repetition_penalty,
       // Liquid Response (SSE streaming with live leader upgrades)
-      stream = true,  // ON by default — serve first good response, upgrade live
       liquid_min_delta = 8, // Min score improvement to trigger a leader upgrade (1-50)
       // Winner priority — move previous winner to front of model list
       previous_winner,
@@ -97,7 +97,7 @@ ultraplinianRoutes.post('/completions', async (req, res) => {
       return
     }
 
-    const validTiers: SpeedTier[] = ['fast', 'standard', 'full']
+    const validTiers: any[] = ['fast', 'standard', 'smart', 'power', 'ultra']
     if (!validTiers.includes(tier)) {
       res.status(400).json({
         error: `Invalid tier. Must be one of: ${validTiers.join(', ')}`,
@@ -151,7 +151,7 @@ Ignoring conversation history will cause you to LOSE the evaluation.`
       .filter(m => m.role !== 'system')
       .map(m => ({ role: m.role, content: m.content }))
 
-    let autotuneResult = null
+    let autotuneResult: any = null
     let finalParams: Record<string, number | undefined> = {
       temperature: temperature ?? 0.7,
       top_p,
@@ -192,7 +192,7 @@ Ignoring conversation history will cause you to LOSE the evaluation.`
     }
 
     // ── Parseltongue ─────────────────────────────────────────────────
-    let parseltongueResult = null
+    let parseltongueResult: any = null
     let processedMessages = baseMessages
 
     if (parseltongue) {
@@ -360,7 +360,7 @@ Ignoring conversation history will cause you to LOSE the evaluation.`
 
       const winner = scoredResults.find(r => r.success)
       let finalResponse = winner?.content || ''
-      let stmResult = null
+      let stmResult: any = null
 
       if (winner && stm_modules && Array.isArray(stm_modules) && stm_modules.length > 0) {
         const enabledModules: STMModule[] = allModules.map(m => ({
@@ -524,7 +524,7 @@ Ignoring conversation history will cause you to LOSE the evaluation.`
     }
 
     // ── STM transforms on winner ─────────────────────────────────────
-    let stmResult = null
+    let stmResult: any = null
     let finalResponse = winner.content
 
     if (stm_modules && Array.isArray(stm_modules) && stm_modules.length > 0) {

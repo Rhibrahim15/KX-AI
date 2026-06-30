@@ -33,16 +33,13 @@ const buckets = new Map<string, RateBucket>()
 // Remove empty buckets that have exhausted their lifetime cap to prevent unbounded growth.
 setInterval(() => {
   const now = Date.now()
-  for (const [key, bucket] of buckets) {
+  buckets.forEach((bucket, key) => {
     bucket.minuteRequests = bucket.minuteRequests.filter(t => now - t < MINUTE_MS)
     bucket.dayRequests = bucket.dayRequests.filter(t => now - t < DAY_MS)
-    // Remove buckets that have no sliding-window activity and haven't hit their
-    // lifetime cap (i.e. they're inactive and can be safely reclaimed).
-    // Buckets that hit the total limit stay so they remain blocked.
     if (bucket.minuteRequests.length === 0 && bucket.dayRequests.length === 0 && bucket.totalRequests === 0) {
       buckets.delete(key)
     }
-  }
+  })
 }, 10 * 60 * 1000)
 
 export function rateLimit(req: Request, res: Response, next: NextFunction): void {

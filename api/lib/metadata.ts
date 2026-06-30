@@ -111,7 +111,7 @@ registerMetadataStore({
 
 // ── Recording ────────────────────────────────────────────────────────
 
-export function recordEvent(event: Omit<MetadataEvent, 'id' | 'timestamp'>): string {
+export function recordEvent(event: any): string {
   const id = randomUUID()
   const record: MetadataEvent = {
     ...event,

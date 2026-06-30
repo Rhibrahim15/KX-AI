@@ -133,12 +133,11 @@ export function ChatInput() {
     return () => clearTimeout(timer)
   }, [input, parseltongueConfig])
 
-  // Proxy mode: when no personal OpenRouter key, route through self-hosted API
-  const proxyMode = !apiKey && !!ultraplinianApiUrl && !!ultraplinianApiKey
+  // Proxy mode: Route directly through self-hosted GreenByte API
+  const proxyMode = true
 
   const handleSubmit = async () => {
     if (!input.trim() || !currentConversationId || isStreaming) return
-    if (!apiKey && !proxyMode) return
 
     const originalMessage = input.trim()
     setInput('')
@@ -762,13 +761,13 @@ export function ChatInput() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder={(apiKey || proxyMode) ? "Enter your message... (Shift+Enter for new line)" : "Set your API key in Settings first"}
-              disabled={(!apiKey && !proxyMode) || isStreaming}
+              placeholder="Command JARVIS or query GreenByte Titan Hub... (Shift+Enter for new line)"
+              disabled={isStreaming}
               rows={1}
-              className="w-full px-4 py-3 pr-12 bg-theme-bg border border-theme-primary rounded-lg
-                resize-none focus:outline-none focus:glow-box
-                placeholder:theme-secondary disabled:opacity-50
-                transition-all duration-200"
+              className="w-full px-4 py-3 pr-12 bg-[#0a0d14] border border-white/[0.08] rounded-lg
+                resize-none focus:outline-none focus:border-cyan-400/50 text-white
+                placeholder:text-slate-500 disabled:opacity-50
+                transition-all duration-200 font-sans text-sm"
               style={{ minHeight: '48px', maxHeight: '200px' }}
             />
 
@@ -793,10 +792,10 @@ export function ChatInput() {
           ) : (
             <button
               onClick={handleSubmit}
-              disabled={!input.trim() || (!apiKey && !proxyMode)}
-              className="p-3 bg-theme-accent border border-theme-primary rounded-lg
-                hover:border-slate-600 shadow-sm transition-all
-                disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={!input.trim()}
+              className="p-3 bg-[#0f141f] border border-white/[0.08] rounded-lg text-cyan-400
+                hover:bg-cyan-400/10 hover:border-cyan-400/40 shadow-sm transition-all
+                disabled:opacity-30 disabled:cursor-not-allowed"
               aria-label="Send message"
             >
               {isStreaming ? (

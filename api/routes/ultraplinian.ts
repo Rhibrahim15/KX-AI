@@ -47,6 +47,7 @@ export const ultraplinianRoutes = Router()
 
 ultraplinianRoutes.post('/completions', async (req, res) => {
   const startTime = Date.now()
+  let stream = req.body?.stream !== false
 
   try {
     const {
@@ -73,7 +74,6 @@ ultraplinianRoutes.post('/completions', async (req, res) => {
       presence_penalty,
       repetition_penalty,
       // Liquid Response (SSE streaming with live leader upgrades)
-      stream = true,  // ON by default — serve first good response, upgrade live
       liquid_min_delta = 8, // Min score improvement to trigger a leader upgrade (1-50)
       // Dataset opt-in
       contribute_to_dataset = false,
@@ -138,7 +138,7 @@ ultraplinianRoutes.post('/completions', async (req, res) => {
       .filter(m => m.role !== 'system')
       .map(m => ({ role: m.role, content: m.content }))
 
-    let autotuneResult = null
+    let autotuneResult: any = null
     let finalParams: Record<string, number | undefined> = {
       temperature: temperature ?? 0.7,
       top_p,
@@ -179,7 +179,7 @@ ultraplinianRoutes.post('/completions', async (req, res) => {
     }
 
     // ── Parseltongue ─────────────────────────────────────────────────
-    let parseltongueResult = null
+    let parseltongueResult: any = null
     let processedMessages = baseMessages
 
     if (parseltongue) {
@@ -336,7 +336,7 @@ ultraplinianRoutes.post('/completions', async (req, res) => {
 
       const winner = scoredResults.find(r => r.success)
       let finalResponse = winner?.content || ''
-      let stmResult = null
+      let stmResult: any = null
 
       if (winner && stm_modules && Array.isArray(stm_modules) && stm_modules.length > 0) {
         const enabledModules: STMModule[] = allModules.map(m => ({
@@ -489,7 +489,7 @@ ultraplinianRoutes.post('/completions', async (req, res) => {
     if (!winner || !winner.content) {
       recordEvent({
         endpoint: '/v1/ultraplinian/completions',
-        mode: 'ultraplinian-failed',
+        mode: 'ultraplinian-failed' as any,
         tier,
         stream,
         models_queried: models.length,
@@ -513,7 +513,7 @@ ultraplinianRoutes.post('/completions', async (req, res) => {
     }
 
     // ── STM transforms on winner ─────────────────────────────────────
-    let stmResult = null
+    let stmResult: any = null
     let finalResponse = winner.content
 
     if (stm_modules && Array.isArray(stm_modules) && stm_modules.length > 0) {
@@ -618,7 +618,7 @@ ultraplinianRoutes.post('/completions', async (req, res) => {
     console.error('[ultraplinian]', err)
     recordEvent({
       endpoint: '/v1/ultraplinian/completions',
-      mode: 'ultraplinian-error',
+      mode: 'ultraplinian-error' as any,
       error_type: 'internal_error',
       total_duration_ms: Date.now() - startTime,
     })

@@ -519,9 +519,9 @@ chatRoutes.post('/completions', async (req, res) => {
       // Dataset
       let datasetId: string | null = null
       if (contribute_to_dataset) {
-        datasetId = addEntry({
-          endpoint: '/v1/chat/completions',
-          model: orchestratorModel, mode: 'consortium',
+          datasetId = addEntry({
+            endpoint: '/v1/chat/completions',
+            model: orchestratorModel, mode: 'consortium' as any,
           messages: pipeline.normalizedMessages.filter(m => m.role !== 'system'),
           response: finalResponse,
           autotune: pipeline.autotuneResult ? { strategy, detected_context: pipeline.autotuneResult.detectedContext, confidence: pipeline.autotuneResult.confidence, params: pipeline.autotuneResult.params, reasoning: pipeline.autotuneResult.reasoning } : undefined,

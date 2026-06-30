@@ -93,9 +93,9 @@ const MAX_BATCH_CACHE = 50
 
 function evictStaleCache() {
   const now = Date.now()
-  for (const [key, entry] of batchContentCache) {
+  batchContentCache.forEach((entry, key) => {
     if (entry.expires < now) batchContentCache.delete(key)
-  }
+  })
 }
 
 // ── Core: List Files in HF Repo ──────────────────────────────────────

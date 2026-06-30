@@ -11,7 +11,12 @@ import {
   ChevronRight,
   Terminal,
   ShieldCheck,
-  Sprout
+  Sprout,
+  Bot,
+  Sparkles,
+  BookOpen,
+  Layers,
+  Activity
 } from 'lucide-react'
 import { PersonaSelector } from './PersonaSelector'
 import { ModelSelector } from './ModelSelector'
@@ -28,13 +33,16 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
     createConversation,
     selectConversation,
     deleteConversation,
-    setShowSettings
+    setShowSettings,
+    activeTab,
+    setActiveTab
   } = useStore()
 
   const [hoveredId, setHoveredId] = useState<string | null>(null)
 
   const handleNewChat = () => {
     createConversation()
+    setActiveTab('chat')
   }
 
   return (
@@ -62,7 +70,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
       >
         <div className="flex flex-col h-full w-64 justify-between">
           {/* Top Brand & Action Area */}
-          <div>
+          <div className="flex flex-col flex-1 overflow-hidden">
             <div className="p-4 border-b border-slate-800/80 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <div className="w-7 h-7 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-cyan-400 font-bold text-xs shadow-sm">
@@ -70,7 +78,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
                 </div>
                 <div>
                   <h1 className="text-sm font-bold text-white tracking-tight">
-                    𝕂𝕏-𝔸𝕀
+                    𝕂𝕏 JARVIS
                   </h1>
                   <span className="text-[10px] font-mono text-emerald-400 font-medium tracking-wider">● UNRESTRICTED</span>
                 </div>
@@ -97,14 +105,60 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
               </button>
             </div>
 
-            {/* Model & Workflow Selectors */}
-            <div className="p-3 border-b border-slate-800/80 space-y-2.5">
+            {/* Executive Sanctuary OS Navigation */}
+            <div className="p-2 border-b border-slate-800/80 space-y-1">
+              <div className="text-[10px] font-bold text-slate-500 px-2 py-0.5 tracking-wider font-mono">SANCTUARY OS</div>
+              <button
+                onClick={() => setActiveTab('chat')}
+                className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs transition-all ${(!activeTab || activeTab === 'chat') ? 'bg-slate-800 text-white font-semibold shadow-sm' : 'text-slate-400 hover:bg-slate-900/50 hover:text-slate-200'}`}
+              >
+                <Terminal className="w-3.5 h-3.5 text-cyan-400" />
+                <span>💬 Sovereign Chat</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('mcps')}
+                className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs transition-all ${activeTab === 'mcps' ? 'bg-slate-800 text-white font-semibold shadow-sm' : 'text-slate-400 hover:bg-slate-900/50 hover:text-slate-200'}`}
+              >
+                <Bot className="w-3.5 h-3.5 text-amber-400" />
+                <span>⚡ MCP Tools Hub</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('connections')}
+                className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs transition-all ${activeTab === 'connections' ? 'bg-slate-800 text-white font-semibold shadow-sm' : 'text-slate-400 hover:bg-slate-900/50 hover:text-slate-200'}`}
+              >
+                <Activity className="w-3.5 h-3.5 text-emerald-400" />
+                <span>🌐 Omni Daemons</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('gkp')}
+                className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs transition-all ${activeTab === 'gkp' ? 'bg-slate-800 text-white font-semibold shadow-sm' : 'text-slate-400 hover:bg-slate-900/50 hover:text-slate-200'}`}
+              >
+                <Layers className="w-3.5 h-3.5 text-emerald-400" />
+                <span>🏛️ GKP Titan Hub</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('hifz')}
+                className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs transition-all ${activeTab === 'hifz' ? 'bg-slate-800 text-white font-semibold shadow-sm' : 'text-slate-400 hover:bg-slate-900/50 hover:text-slate-200'}`}
+              >
+                <BookOpen className="w-3.5 h-3.5 text-purple-400" />
+                <span>📖 Hifz Sanctuary</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('media')}
+                className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs transition-all ${activeTab === 'media' ? 'bg-slate-800 text-white font-semibold shadow-sm' : 'text-slate-400 hover:bg-slate-900/50 hover:text-slate-200'}`}
+              >
+                <Sparkles className="w-3.5 h-3.5 text-rose-400" />
+                <span>🎬 Media Studio</span>
+              </button>
+            </div>
+
+            {/* Model Selector */}
+            <div className="p-3 border-b border-slate-800/80">
               <ModelSelector />
-              <PersonaSelector />
             </div>
 
             {/* Navigation Workspaces */}
-            <div className="p-2 space-y-1 overflow-y-auto max-h-[35vh]">
+            <div className="p-2 space-y-1 overflow-y-auto flex-1">
               <div className="text-[10px] font-bold text-slate-500 px-2 py-1 tracking-wider font-mono">RECENT CHATS</div>
               {conversations.length === 0 ? (
                 <div className="text-center py-6 text-slate-500 text-xs font-light">
@@ -118,12 +172,15 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
                     className={`
                       group flex items-center gap-2 px-2.5 py-2 rounded-md cursor-pointer
                       transition-all text-xs font-normal
-                      ${currentConversationId === conv.id
+                      ${currentConversationId === conv.id && (!activeTab || activeTab === 'chat')
                         ? 'bg-slate-900 text-white border border-slate-800'
                         : 'text-slate-400 hover:bg-slate-900/50 hover:text-slate-200'
                       }
                     `}
-                    onClick={() => selectConversation(conv.id)}
+                    onClick={() => {
+                      selectConversation(conv.id)
+                      setActiveTab('chat')
+                    }}
                     onMouseEnter={() => setHoveredId(conv.id)}
                     onMouseLeave={() => setHoveredId(null)}
                   >

@@ -934,7 +934,7 @@
 
     /* Grade color classes for inline use */
     .grade-elite { color: #ffd700 !important; }
-    .grade-excellent { color: #00ff41 !important; }
+    .grade-excellent { color: #38bdf8 !important; }
     .grade-good { color: #00bfff !important; }
     .grade-acceptable { color: #ffaa00 !important; }
     .grade-poor { color: #ff3e3e !important; }
@@ -959,7 +959,7 @@
     }
 
     .magic-model-item.winner { color: #ffd700; border-color: #ffd700; background: rgba(255, 215, 0, 0.15); }
-    .magic-model-item.success { color: #00ff41; }
+    .magic-model-item.success { color: #38bdf8; }
     .magic-model-item.fail { color: #ff4444; opacity: 0.6; }
 
     .magic-logs-header {
@@ -994,7 +994,7 @@
     }
 
     .magic-log-entry.step { color: #ffcc00; }
-    .magic-log-entry.success { color: #00ff41; }
+    .magic-log-entry.success { color: #38bdf8; }
     .magic-log-entry.fail { color: #ff4444; }
     .magic-log-entry.info { color: #888; }
     .magic-log-entry.warn { color: #ff9900; }
@@ -1258,7 +1258,7 @@
     }
 
     .version-score {
-      color: #00ff41;
+      color: #38bdf8;
       font-family: monospace;
     }
 
@@ -1370,7 +1370,7 @@
     }
 
     .version-history-score.elite { background: rgba(255, 215, 0, 0.2); color: #ffd700; }
-    .version-history-score.excellent { background: rgba(0, 255, 65, 0.2); color: #00ff41; }
+    .version-history-score.excellent { background: rgba(0, 255, 65, 0.2); color: #38bdf8; }
     .version-history-score.good { background: rgba(0, 191, 255, 0.2); color: #00bfff; }
     .version-history-score.acceptable { background: rgba(255, 170, 0, 0.2); color: #ffaa00; }
     .version-history-score.poor { background: rgba(255, 62, 62, 0.2); color: #ff3e3e; }
@@ -1453,7 +1453,7 @@
     }
 
     .version-delta {
-      color: #00ff41;
+      color: #38bdf8;
     }
 
     .version-time {
@@ -1503,8 +1503,8 @@
       font-family: 'Courier New', monospace;
       font-size: 14px;
       line-height: 1;
-      color: #00ff41;
-      text-shadow: 0 0 8px #00ff41, 0 0 16px #00ff41;
+      color: #38bdf8;
+      text-shadow: 0 0 8px #38bdf8, 0 0 16px #38bdf8;
       white-space: nowrap;
       animation: matrixFall linear forwards;
       opacity: 0;
@@ -3795,7 +3795,7 @@
                   <button onclick="setThresholdPreset(0)" class="threshold-preset" data-value="0" style="padding: 4px 8px; font-size: 10px; border-radius: 4px; border: 1px solid #555; background: #333; color: #888; cursor: pointer;">OFF</button>
                   <button onclick="setThresholdPreset(65)" class="threshold-preset" data-value="65" style="padding: 4px 8px; font-size: 10px; border-radius: 4px; border: 1px solid #ffaa00; background: rgba(255, 170, 0, 0.15); color: #ffaa00; cursor: pointer;">65+ OK</button>
                   <button onclick="setThresholdPreset(75)" class="threshold-preset" data-value="75" style="padding: 4px 8px; font-size: 10px; border-radius: 4px; border: 1px solid #00bfff; background: rgba(0, 191, 255, 0.15); color: #00bfff; cursor: pointer;">75+ GOOD</button>
-                  <button onclick="setThresholdPreset(85)" class="threshold-preset" data-value="85" style="padding: 4px 8px; font-size: 10px; border-radius: 4px; border: 1px solid #00ff41; background: rgba(0, 255, 65, 0.15); color: #00ff41; cursor: pointer;">85+ EXCELLENT</button>
+                  <button onclick="setThresholdPreset(85)" class="threshold-preset" data-value="85" style="padding: 4px 8px; font-size: 10px; border-radius: 4px; border: 1px solid #38bdf8; background: rgba(0, 255, 65, 0.15); color: #38bdf8; cursor: pointer;">85+ EXCELLENT</button>
                   <button onclick="setThresholdPreset(92)" class="threshold-preset" data-value="92" style="padding: 4px 8px; font-size: 10px; border-radius: 4px; border: 1px solid #ffd700; background: rgba(255, 215, 0, 0.15); color: #ffd700; cursor: pointer;">92+ ELITE</button>
                 </div>
                 <small style="color: #888; display: block; margin-top: 6px;">Unified 0-100 scale. Higher = pickier but slower. 0 = wait for all models.</small>
@@ -3804,7 +3804,7 @@
                   <summary style="cursor: pointer; color: #aaa; margin-bottom: 8px;">📊 Score Legend (click to expand)</summary>
                   <div style="background: rgba(0,0,0,0.3); border-radius: 6px; padding: 10px; display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; align-items: center;">
                     <span style="color: #ffd700; font-weight: bold;">⚡ 90-100</span><span style="color: #ccc;">ELITE - Top-tier, exceptional quality</span>
-                    <span style="color: #00ff41; font-weight: bold;">🔥 80-89</span><span style="color: #ccc;">EXCELLENT - High quality, recommended</span>
+                    <span style="color: #38bdf8; font-weight: bold;">🔥 80-89</span><span style="color: #ccc;">EXCELLENT - High quality, recommended</span>
                     <span style="color: #00bfff; font-weight: bold;">✓ 70-79</span><span style="color: #ccc;">GOOD - Solid, meets standards</span>
                     <span style="color: #ffaa00; font-weight: bold;">~ 60-69</span><span style="color: #ccc;">ACCEPTABLE - Passable, room to improve</span>
                     <span style="color: #ff3e3e; font-weight: bold;">✗ 0-59</span><span style="color: #ccc;">POOR - Below standards, likely refused</span>
@@ -8783,7 +8783,7 @@ directness, and genuine helpfulness wins. Hedging or refusing guarantees you los
       // Determine grade
       let grade, gradeEmoji, gradeColor;
       if (compositeScore >= 90) { grade = 'ELITE'; gradeEmoji = '⚡'; gradeColor = '#ffd700'; }
-      else if (compositeScore >= 80) { grade = 'EXCELLENT'; gradeEmoji = '🔥'; gradeColor = '#00ff41'; }
+      else if (compositeScore >= 80) { grade = 'EXCELLENT'; gradeEmoji = '🔥'; gradeColor = '#38bdf8'; }
       else if (compositeScore >= 70) { grade = 'GOOD'; gradeEmoji = '✓'; gradeColor = '#00bfff'; }
       else if (compositeScore >= 60) { grade = 'ACCEPTABLE'; gradeEmoji = '~'; gradeColor = '#ffaa00'; }
       else { grade = 'POOR'; gradeEmoji = '✗'; gradeColor = '#ff3e3e'; }
@@ -10456,7 +10456,7 @@ Analyze and refine. Output ONLY the JSON object:` }
           </button>
           <span class="race-nav-model" style="color: #888; font-size: 11px; margin-left: 4px;">
             ${escapeHtml(shortModel)}
-            <span style="color: #00ff41; margin-left: 4px;">${current.score}pts</span>
+            <span style="color: #38bdf8; margin-left: 4px;">${current.score}pts</span>
             ${current.isWinner ? '<span style="color: #ffd700; margin-left: 2px;">✦</span>' : ''}
           </span>
           <span class="version-arrow-hint" style="margin-left: auto;">← →</span>
@@ -12811,7 +12811,7 @@ Ignoring conversation history will cause you to LOSE the evaluation.`;
           tastemakerHtml = `
             <div class="magic-info-row tastemaker-score">
               <span class="magic-info-label">Tastemaker:</span>
-              <span class="magic-info-value" style="color: ${safeColor(ts.gradeColor, '#00ff41')}">
+              <span class="magic-info-value" style="color: ${safeColor(ts.gradeColor, '#38bdf8')}">
                 ${escapeHtml(String(ts.gradeEmoji || '✓'))} ${escapeHtml(String(ts.overall || 'N/A'))} (${escapeHtml(String(ts.grade || 'N/A'))})
               </span>
             </div>
@@ -12910,7 +12910,7 @@ Ignoring conversation history will cause you to LOSE the evaluation.`;
 
         detailsHtml = `
           <div class="magic-info-row"><span class="magic-info-label">Combo:</span><span class="magic-info-value">${escapeHtml(magic.template || 'unknown')}${magic.combo ? ' <span style="color:#888;font-size:10px;">[' + escapeHtml(magic.combo) + ']</span>' : ''}</span></div>
-          <div class="magic-info-row"><span class="magic-info-label">Score:</span><span class="magic-info-value" style="color: ${(magic.score || 0) >= 80 ? '#00ff41' : (magic.score || 0) >= 40 ? '#ffcc00' : '#ff4444'}">${magic.score || 'N/A'}</span></div>
+          <div class="magic-info-row"><span class="magic-info-label">Score:</span><span class="magic-info-value" style="color: ${(magic.score || 0) >= 80 ? '#38bdf8' : (magic.score || 0) >= 40 ? '#ffcc00' : '#ff4444'}">${magic.score || 'N/A'}</span></div>
           <div class="magic-info-row"><span class="magic-info-label">Model:</span><span class="magic-info-value">${escapeHtml(magic.model?.split('/')[1] || magic.model || 'unknown')}</span></div>
           <div class="magic-info-row"><span class="magic-info-label">Duration:</span><span class="magic-info-value">${magic.duration || 'N/A'}</span></div>
           ${magic.combos_attempted ? `<div class="magic-info-row"><span class="magic-info-label">Combos:</span><span class="magic-info-value">${magic.combos_succeeded || 0}/${magic.combos_attempted} succeeded, ${magic.combos_failed || 0} refused</span></div>` : ''}
@@ -12925,7 +12925,7 @@ Ignoring conversation history will cause you to LOSE the evaluation.`;
         if (magic.scores && magic.scores.length > 0) {
           const scoreItems = magic.scores.map(s => {
             const isWinner = s.technique === magic.techniqueLabel;
-            const color = s.score >= 80 ? '#00ff41' : s.score >= 60 ? '#ffaa00' : '#ff3e3e';
+            const color = s.score >= 80 ? '#38bdf8' : s.score >= 60 ? '#ffaa00' : '#ff3e3e';
             return `<span style="display:inline-block; padding: 2px 6px; margin: 2px; border-radius: 4px; font-size: 11px; background: ${isWinner ? 'rgba(255,215,0,0.2)' : 'rgba(255,255,255,0.05)'}; border: 1px solid ${isWinner ? '#ffd700' : 'rgba(255,255,255,0.1)'};">${isWinner ? '👑 ' : ''}${escapeHtml(s.technique)} <span style="color:${color}">${s.score}</span></span>`;
           }).join('');
           scoresHtml = `<div style="margin-top: 6px;">${scoreItems}</div>`;
@@ -14938,7 +14938,7 @@ Ignoring conversation history will cause you to LOSE the evaluation.`;
         this.rows = Math.floor(this.height / this.gridSize);
 
         const style = getComputedStyle(document.documentElement);
-        this.color = style.getPropertyValue('--primary').trim() || '#00ff41';
+        this.color = style.getPropertyValue('--primary').trim() || '#38bdf8';
 
         // Snake starts in middle
         this.snake = [
@@ -15113,7 +15113,7 @@ Ignoring conversation history will cause you to LOSE the evaluation.`;
         this.height = canvas.height;
 
         const style = getComputedStyle(document.documentElement);
-        this.color = style.getPropertyValue('--primary').trim() || '#00ff41';
+        this.color = style.getPropertyValue('--primary').trim() || '#38bdf8';
 
         this.playerY = this.height / 2 - 20;
         this.aiY = this.height / 2 - 20;
@@ -15228,7 +15228,7 @@ Ignoring conversation history will cause you to LOSE the evaluation.`;
         this.height = canvas.height;
 
         const style = getComputedStyle(document.documentElement);
-        this.color = style.getPropertyValue('--primary').trim() || '#00ff41';
+        this.color = style.getPropertyValue('--primary').trim() || '#38bdf8';
 
         this.gridSize = 4;
         this.cellSize = Math.min(this.width, this.height) / this.gridSize - 4;
@@ -15831,7 +15831,7 @@ Ignoring conversation history will cause you to LOSE the evaluation.`;
 
     const UNIFIED_GRADES = {
       ELITE:      { min: 90, color: '#ffd700', emoji: '⚡', label: 'ELITE',      desc: 'Top-tier, exceptional quality' },
-      EXCELLENT:  { min: 80, color: '#00ff41', emoji: '🔥', label: 'EXCELLENT',  desc: 'High quality, recommended' },
+      EXCELLENT:  { min: 80, color: '#38bdf8', emoji: '🔥', label: 'EXCELLENT',  desc: 'High quality, recommended' },
       GOOD:       { min: 70, color: '#00bfff', emoji: '✓',  label: 'GOOD',       desc: 'Solid, meets standards' },
       ACCEPTABLE: { min: 60, color: '#ffaa00', emoji: '~',  label: 'ACCEPTABLE', desc: 'Passable, room to improve' },
       POOR:       { min: 0,  color: '#ff3e3e', emoji: '✗',  label: 'POOR',       desc: 'Below standards' }
@@ -16631,7 +16631,7 @@ Ignoring conversation history will cause you to LOSE the evaluation.`;
     }
 
     function declineDisclaimer() {
-      document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0d0208;color:#00ff41;font-family:monospace;font-size:18px;text-align:center;padding:20px;">You must accept the terms to use KX-AI.<br><br><a href="." style="color:#008f11;">Reload to try again</a></div>';
+      document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#07090e;color:#38bdf8;font-family:monospace;font-size:18px;text-align:center;padding:20px;">You must accept the terms to use KX-AI.<br><br><a href="." style="color:#008f11;">Reload to try again</a></div>';
     }
 
     // Show disclaimer on load (after a brief delay so the page renders first)
@@ -16702,7 +16702,7 @@ Ignoring conversation history will cause you to LOSE the evaluation.`;
         function draw() {
           ctx.fillStyle = 'rgba(0,0,0,0.05)';
           ctx.fillRect(0, 0, canvas.width, canvas.height);
-          ctx.fillStyle = '#00ff41';
+          ctx.fillStyle = '#38bdf8';
           ctx.font = fontSize + 'px monospace';
           for (let i = 0; i < drops.length; i++) {
             const text = chars[Math.floor(Math.random() * chars.length)];
@@ -16830,7 +16830,7 @@ Ignoring conversation history will cause you to LOSE the evaluation.`;
         'Try: ↑↑↓↓←→←→BA (Konami Code)\n' +
         'Type: "there is no spoon" | "follow the white rabbit" | "hack the planet" | "{GODMODE:ENABLED}"\n\n' +
         'AGPL-3.0\n',
-        'color:#00ff41;font-family:monospace;'
+        'color:#38bdf8;font-family:monospace;'
       );
     })();
   </script>

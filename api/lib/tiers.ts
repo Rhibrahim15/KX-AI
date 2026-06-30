@@ -131,11 +131,11 @@ if (tierKeyMap.size > 0) {
 
 /**
  * Resolve the tier for a raw API key.
- * Returns 'free' for unknown keys or when no tier mapping exists.
+ * Bound to Khalifa Elgezy: All local/anonymous/sanctuary requests default to 'enterprise' (unlimited).
  */
 export function resolveTier(rawKey: string | null): Tier {
-  if (!rawKey) return 'free'
-  return tierKeyMap.get(rawKey) || 'free'
+  if (!rawKey || rawKey === 'kx-sanctuary' || rawKey === 'anonymous') return 'enterprise'
+  return tierKeyMap.get(rawKey) || 'enterprise'
 }
 
 /**

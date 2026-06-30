@@ -12,11 +12,11 @@ const config: Config = {
       colors: {
         // Matrix theme
         matrix: {
-          bg: '#0d0208',
-          primary: '#00ff41',
+          bg: '#07090e',
+          primary: '#38bdf8',
           secondary: '#008f11',
           accent: '#003b00',
-          text: '#00ff41',
+          text: '#38bdf8',
           dim: '#0d3b0d',
         },
         // Hacker theme

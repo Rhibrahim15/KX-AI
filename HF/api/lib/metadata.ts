@@ -90,7 +90,7 @@ const MAX_EVENTS = 50000 // ~50k events before eviction
 
 // ── Recording ────────────────────────────────────────────────────────
 
-export function recordEvent(event: Omit<MetadataEvent, 'id' | 'timestamp'>): string {
+export function recordEvent(event: any): string {
   const id = randomUUID()
   const record: MetadataEvent = {
     ...event,

@@ -88,7 +88,7 @@ feedbackRoutes.post('/', (req, res) => {
       accepted: true,
       total_feedback: feedbackState.history.length,
       context_type,
-      learned: feedbackState.learnedProfiles[context_type].sampleCount >= 3,
+      learned: (feedbackState.learnedProfiles as any)[context_type]?.sampleCount >= 3,
     })
   } catch (err: any) {
     res.status(500).json({ error: err.message })

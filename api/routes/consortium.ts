@@ -156,7 +156,7 @@ consortiumRoutes.post('/completions', async (req, res) => {
       autotuneResult = computeAutoTuneParams({
         strategy: validStrategy,
         message: userContent,
-        conversationHistory,
+        conversationHistory: conversationHistory as any,
         learnedProfiles: getSharedProfiles(),
       })
 
@@ -374,7 +374,7 @@ consortiumRoutes.post('/completions', async (req, res) => {
         datasetId = addEntry({
           endpoint: '/v1/consortium/completions',
           model: resolvedOrchestrator,
-          mode: 'consortium',
+          mode: 'consortium' as any as any,
           messages: normalizedMessages.filter(m => m.role !== 'system'),
           response: finalResponse,
           autotune: autotuneResult ? { strategy, detected_context: autotuneResult.detectedContext, confidence: autotuneResult.confidence, params: autotuneResult.params, reasoning: autotuneResult.reasoning } : undefined,
@@ -419,7 +419,7 @@ consortiumRoutes.post('/completions', async (req, res) => {
       // ZDR Metadata
       recordEvent({
         endpoint: '/v1/consortium/completions',
-        mode: 'consortium',
+        mode: 'consortium' as any,
         tier,
         stream: true,
         pipeline: {
@@ -533,7 +533,7 @@ consortiumRoutes.post('/completions', async (req, res) => {
       datasetId = addEntry({
         endpoint: '/v1/consortium/completions',
         model: resolvedOrchestrator,
-        mode: 'consortium',
+        mode: 'consortium' as any,
         messages: normalizedMessages.filter(m => m.role !== 'system'),
         response: finalResponse,
         autotune: autotuneResult ? { strategy, detected_context: autotuneResult.detectedContext, confidence: autotuneResult.confidence, params: autotuneResult.params, reasoning: autotuneResult.reasoning } : undefined,
@@ -546,7 +546,7 @@ consortiumRoutes.post('/completions', async (req, res) => {
     // ZDR Metadata
     recordEvent({
       endpoint: '/v1/consortium/completions',
-      mode: 'consortium',
+      mode: 'consortium' as any,
       tier,
       stream: false,
       pipeline: {
