@@ -22,6 +22,7 @@ export class GKPAutoIndexer {
   private gkpRoot: string
   private vectorStore: Map<string, VectorChunk> = new Map()
   private indexInterval: NodeJS.Timeout | null = null
+  private isRunning = false
 
   constructor(workspaceRoot: string = process.cwd()) {
     this.gkpRoot = path.resolve(workspaceRoot, 'gkp')
@@ -32,45 +33,60 @@ export class GKPAutoIndexer {
    */
   async executeIndexSweep(): Promise<number> {
     if (!fs.existsSync(this.gkpRoot)) return 0
+    if (this.isRunning) return this.vectorStore.size
 
-    const engine = getGKPEngine()
-    engine.reloadKnowledgeBase()
-    const allDocs: GKPDocument[] = (engine as any).documents ? Array.from((engine as any).documents.values()) : []
+    this.isRunning = true
 
-    let chunksAdded = 0
+    try {
+      const engine = getGKPEngine()
+      engine.reloadKnowledgeBase()
+      const allDocs: GKPDocument[] = (engine as any).documents ? Array.from((engine as any).documents.values()) : []
 
-    for (const doc of allDocs) {
-      // Semantic paragraph chunking (~300-500 chars per segment)
-      const paragraphs = doc.content
-        .split(/\n\s*\n/)
-        .map(p => p.trim())
-        .filter(p => p.length > 30 && !p.startsWith('---') && !p.startsWith('title:'))
+      let chunksAdded = 0
 
-      paragraphs.forEach((para, idx) => {
-        const chunkId = `${doc.relPath}#chunk_${idx}`
-        this.vectorStore.set(chunkId, {
-          id: chunkId,
-          docPath: doc.relPath,
-          domain: doc.domain,
-          content: para,
-          tokenCount: Math.ceil(para.length / 4),
-          // Simulated 1536-dim embedding vector hook
-          embedding: [0.015, -0.023, 0.088, 0.042],
+      for (const doc of allDocs) {
+        const paragraphs = doc.content
+          .split(/\n\s*\n/)
+          .map(p => p.trim())
+          .filter(p => p.length > 30 && !p.startsWith('---') && !p.startsWith('title:'))
+
+        paragraphs.forEach((para, idx) => {
+          const chunkId = `${doc.relPath}#chunk_${idx}`
+          if (!this.vectorStore.has(chunkId)) {
+            this.vectorStore.set(chunkId, {
+              id: chunkId,
+              docPath: doc.relPath,
+              domain: doc.domain,
+              content: para,
+              tokenCount: Math.ceil(para.length / 4),
+              embedding: [0.015, -0.023, 0.088, 0.042],
+            })
+            chunksAdded++
+          }
         })
-        chunksAdded++
-      })
-    }
+      }
 
-    console.log(`[GKPAutoIndexer] Background vector sweep complete. Vectorized ${chunksAdded} semantic chunks across ${allDocs.length} GKP documents.`)
-    return this.vectorStore.size
+      // Only log when there's actual new work
+      if (chunksAdded > 0 || allDocs.length > 0) {
+        console.log(`[GKPAutoIndexer] Background vector sweep complete. Vectorized ${this.vectorStore.size} semantic chunks across ${allDocs.length} GKP documents.`)
+      }
+      return this.vectorStore.size
+    } finally {
+      this.isRunning = false
+    }
   }
 
   /**
    * Start continuous background daemon (default every 2 mins)
    */
   startContinuousIndexer(intervalMs: number = 120000) {
-    if (this.indexInterval) clearInterval(this.indexInterval)
-    this.executeIndexSweep()
+    if (this.indexInterval) {
+      // Already running — do nothing
+      return
+    }
+    
+    // Run once immediately
+    this.executeIndexSweep().catch(() => {})
 
     this.indexInterval = setInterval(() => {
       this.executeIndexSweep().catch(() => {})
@@ -78,7 +94,10 @@ export class GKPAutoIndexer {
   }
 
   stopContinuousIndexer() {
-    if (this.indexInterval) clearInterval(this.indexInterval)
+    if (this.indexInterval) {
+      clearInterval(this.indexInterval)
+      this.indexInterval = null
+    }
   }
 }
 
