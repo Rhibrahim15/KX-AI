@@ -418,7 +418,7 @@ export function ModelSelector() {
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex items-center justify-between px-3 py-2
           bg-theme-bg border border-theme-primary rounded-lg
-          hover:glow-box transition-all text-sm"
+          hover:border-slate-600 shadow-sm transition-all text-sm"
       >
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4" />

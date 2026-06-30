@@ -721,7 +721,7 @@ export function ChatInput() {
                         {typeof value === 'number' ? value.toFixed(2) : value}
                       </div>
                       {hasDelta && (
-                        <div className={`text-[9px] font-mono ${delta.delta > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                        <div className={`text-[9px] font-mono ${delta.delta > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                           {delta.delta > 0 ? '+' : ''}{delta.delta.toFixed(2)}
                         </div>
                       )}
@@ -741,7 +741,7 @@ export function ChatInput() {
                     <span className="theme-secondary">
                       {d.before.toFixed(2)} → {d.after.toFixed(2)}
                     </span>
-                    <span className={d.delta > 0 ? 'text-green-400' : 'text-red-400'}>
+                    <span className={d.delta > 0 ? 'text-emerald-400' : 'text-red-400'}>
                       ({d.delta > 0 ? '+' : ''}{d.delta.toFixed(2)})
                     </span>
                     <span className="text-purple-400">{d.reason}</span>
@@ -795,7 +795,7 @@ export function ChatInput() {
               onClick={handleSubmit}
               disabled={!input.trim() || (!apiKey && !proxyMode)}
               className="p-3 bg-theme-accent border border-theme-primary rounded-lg
-                hover:glow-box transition-all
+                hover:border-slate-600 shadow-sm transition-all
                 disabled:opacity-50 disabled:cursor-not-allowed"
               aria-label="Send message"
             >
@@ -843,8 +843,8 @@ export function ChatInput() {
               </span>
             )}
             {parseltongueConfig.enabled && (
-              <span className={`flex items-center gap-1 ${parseltonguePreview ? 'text-green-400' : ''}`}>
-                <span className="text-green-500 text-[10px]">&#x2621;</span>
+              <span className={`flex items-center gap-1 ${parseltonguePreview ? 'text-emerald-400' : ''}`}>
+                <span className="text-cyan-400 text-[10px]">&#x2621;</span>
                 Parseltongue
                 {parseltonguePreview && ` [${parseltonguePreview.triggersFound.length} triggers]`}
               </span>

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useStore, Theme, MemoryType, DEFAULT_GODMODE_PROMPT } from '@/store'
+import { useStore, Theme, MemoryType, DEFAULT_KX_PROMPT } from '@/store'
 import type { TierInfo } from '@/store'
 import {
   X,
@@ -228,17 +228,17 @@ function APIKeyTab() {
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="text-lg font-semibold mb-2">OpenRouter API Key</h3>
+        <h3 className="text-lg font-semibold mb-2">𝕂𝕏-𝔸𝕀 Master Key</h3>
         <p className="text-sm theme-secondary mb-4">
           Your API key is stored locally and never sent to KX-AI servers.
           Get your key at{' '}
           <a
-            href="https://openrouter.ai/keys"
+            href="https://Master Gateway or Groq LPU"
             target="_blank"
             rel="noopener noreferrer"
             className="theme-primary underline"
           >
-            openrouter.ai
+            Master Gateway
           </a>
         </p>
       </div>
@@ -255,7 +255,7 @@ function APIKeyTab() {
         />
         <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
           {saved && (
-            <span className="flex items-center gap-1 text-xs text-green-500">
+            <span className="flex items-center gap-1 text-xs text-cyan-400">
               <Check className="w-3 h-3" />
               Saved
             </span>
@@ -305,7 +305,7 @@ function SystemPromptTab() {
 
   const handleReset = () => {
     resetSystemPromptToDefault()
-    setLocalPrompt(DEFAULT_GODMODE_PROMPT)
+    setLocalPrompt(DEFAULT_KX_PROMPT)
     setShowResetConfirm(false)
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
@@ -321,7 +321,7 @@ function SystemPromptTab() {
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="text-lg font-semibold mb-1">GODMODE System Prompt</h3>
+        <h3 className="text-lg font-semibold mb-1">Sacred Mentor Constitution</h3>
         <p className="text-sm theme-secondary mb-4">
           The system prompt injected into every conversation. This is your &quot;Ultraplinian&quot; jailbreak prompt.
         </p>
@@ -343,7 +343,7 @@ function SystemPromptTab() {
               <label className="text-sm font-semibold">Edit Prompt</label>
               <div className="flex items-center gap-2">
                 {saved && (
-                  <span className="flex items-center gap-1 text-xs text-green-500">
+                  <span className="flex items-center gap-1 text-xs text-cyan-400">
                     <Check className="w-3 h-3" />
                     Saved
                   </span>
@@ -383,8 +383,8 @@ function SystemPromptTab() {
               onClick={handleSave}
               disabled={!isModified}
               className="flex-1 flex items-center justify-center gap-2 px-4 py-2
-                bg-green-500/20 border border-green-500/50 text-green-400 rounded-lg
-                hover:bg-green-500/30 transition-all
+                bg-cyan-500 text-black font-bold/20 border border-cyan-500/50/50 text-emerald-400 rounded-lg
+                hover:bg-cyan-500 text-black font-bold/30 transition-all
                 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Check className="w-4 h-4" />
@@ -422,7 +422,7 @@ function SystemPromptTab() {
           {/* Info box */}
           <div className="p-4 bg-theme-dim border border-theme-primary rounded-lg">
             <div className="flex items-start gap-3">
-              <FileText className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+              <FileText className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
               <div className="text-sm">
                 <p className="font-semibold mb-1">Prompt Engineering Tips</p>
                 <ul className="space-y-1 theme-secondary text-xs">
@@ -663,8 +663,8 @@ function AutoTuneTab() {
                     <span className="theme-secondary">ratings</span>
                   </div>
                   <div className="flex items-center gap-1 text-xs">
-                    <ThumbsUp className="w-3 h-3 text-green-400" />
-                    <span className="font-mono text-green-400">
+                    <ThumbsUp className="w-3 h-3 text-emerald-400" />
+                    <span className="font-mono text-emerald-400">
                       {Math.round(feedbackStats.positiveRate * 100)}%
                     </span>
                   </div>
@@ -688,8 +688,8 @@ function AutoTuneTab() {
                             {ctx.toUpperCase()}
                           </span>
                           <div className="flex items-center gap-1 text-[10px]">
-                            <ThumbsUp className="w-2.5 h-2.5 text-green-400" />
-                            <span className="text-green-400">{data.positive}</span>
+                            <ThumbsUp className="w-2.5 h-2.5 text-emerald-400" />
+                            <span className="text-emerald-400">{data.positive}</span>
                             <ThumbsDown className="w-2.5 h-2.5 text-red-400 ml-1" />
                             <span className="text-red-400">{data.negative}</span>
                           </div>
@@ -826,12 +826,12 @@ function ParseltongueTab() {
                   onClick={() => setParseltongueTechnique(tech.id)}
                   className={`text-left p-3 rounded-lg border transition-all
                     ${parseltongueConfig.technique === tech.id
-                      ? 'border-green-500 bg-green-500/10'
+                      ? 'border-cyan-500/50 bg-cyan-500 text-black font-bold/10'
                       : 'border-theme-primary/30 bg-theme-dim hover:border-theme-primary/60'
                     }`}
                 >
                   <span className={`font-mono font-bold text-sm
-                    ${parseltongueConfig.technique === tech.id ? 'text-green-400' : 'theme-primary'}`}>
+                    ${parseltongueConfig.technique === tech.id ? 'text-emerald-400' : 'theme-primary'}`}>
                     {tech.name}
                   </span>
                   <p className="text-[10px] theme-secondary mt-1">
@@ -852,7 +852,7 @@ function ParseltongueTab() {
                   onClick={() => setParseltongueIntensity(intensity)}
                   className={`flex-1 px-4 py-2 rounded-lg border text-sm font-mono transition-all
                     ${parseltongueConfig.intensity === intensity
-                      ? 'border-green-500 bg-green-500/10 text-green-400'
+                      ? 'border-cyan-500/50 bg-cyan-500 text-black font-bold/10 text-emerald-400'
                       : 'border-theme-primary/30 bg-theme-dim hover:border-theme-primary/60'
                     }`}
                 >
@@ -888,8 +888,8 @@ function ParseltongueTab() {
               <button
                 onClick={handleAddTrigger}
                 disabled={!newTrigger.trim()}
-                className="px-4 py-2 bg-green-500/20 border border-green-500/50 text-green-400
-                  rounded-lg hover:bg-green-500/30 transition-all
+                className="px-4 py-2 bg-cyan-500 text-black font-bold/20 border border-cyan-500/50/50 text-emerald-400
+                  rounded-lg hover:bg-cyan-500 text-black font-bold/30 transition-all
                   disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Plus className="w-4 h-4" />
@@ -902,8 +902,8 @@ function ParseltongueTab() {
                 {parseltongueConfig.customTriggers.map((trigger) => (
                   <span
                     key={trigger}
-                    className="flex items-center gap-1 px-2 py-1 bg-green-500/10 border
-                      border-green-500/30 rounded text-xs font-mono text-green-400"
+                    className="flex items-center gap-1 px-2 py-1 bg-cyan-500 text-black font-bold/10 border
+                      border-cyan-500/50/30 rounded text-xs font-mono text-emerald-400"
                   >
                     {trigger}
                     <button
@@ -947,7 +947,7 @@ function ParseltongueTab() {
           {/* Info box */}
           <div className="p-4 bg-theme-dim border border-theme-primary rounded-lg">
             <div className="flex items-start gap-3">
-              <Skull className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+              <Skull className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
               <div className="text-sm">
                 <p className="font-semibold mb-1">How Parseltongue Works</p>
                 <ul className="space-y-1 theme-secondary text-xs">
@@ -1080,10 +1080,10 @@ function LiquidTab() {
               </div>
 
               {/* Parseltongue */}
-              <div className="p-3 rounded-lg border border-green-500/30 bg-green-500/5">
+              <div className="p-3 rounded-lg border border-cyan-500/50/30 bg-cyan-500 text-black font-bold/5">
                 <div className="flex items-center gap-2 mb-1">
-                  <Skull className="w-3 h-3 text-green-400" />
-                  <span className="text-xs font-mono font-bold text-green-400">PARSELTONGUE</span>
+                  <Skull className="w-3 h-3 text-emerald-400" />
+                  <span className="text-xs font-mono font-bold text-emerald-400">PARSELTONGUE</span>
                 </div>
                 <p className="text-xs theme-secondary">
                   Parseltongue operates on the <em>input</em> side (obfuscating trigger words before
@@ -1247,7 +1247,7 @@ function STMTab() {
               <button
                 onClick={() => toggleSTM(stm.id)}
                 className={`w-12 h-6 rounded-full transition-colors relative
-                  ${stm.enabled ? 'bg-green-500' : 'bg-theme-accent'}`}
+                  ${stm.enabled ? 'bg-cyan-500 text-black font-bold' : 'bg-theme-accent'}`}
               >
                 <span
                   className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform
@@ -1326,7 +1326,7 @@ function MemoryTab() {
     switch (type) {
       case 'fact': return 'text-blue-400 bg-blue-500/10 border-blue-500/30'
       case 'preference': return 'text-purple-400 bg-purple-500/10 border-purple-500/30'
-      case 'instruction': return 'text-green-400 bg-green-500/10 border-green-500/30'
+      case 'instruction': return 'text-emerald-400 bg-cyan-500 text-black font-bold/10 border-cyan-500/50/30'
     }
   }
 
@@ -1494,7 +1494,7 @@ function MemoryTab() {
                             title={memory.active ? 'Disable' : 'Enable'}
                           >
                             {memory.active ? (
-                              <ToggleRight className="w-4 h-4 text-green-400" />
+                              <ToggleRight className="w-4 h-4 text-emerald-400" />
                             ) : (
                               <ToggleLeft className="w-4 h-4 theme-secondary" />
                             )}
@@ -1565,7 +1565,7 @@ function MemoryTab() {
                 <ul className="space-y-1 theme-secondary text-xs">
                   <li><span className="text-blue-400 font-mono">FACT</span> — Personal info: name, job, location, preferences</li>
                   <li><span className="text-purple-400 font-mono">PREFERENCE</span> — How you want responses: style, format, tone</li>
-                  <li><span className="text-green-400 font-mono">INSTRUCTION</span> — Rules to always follow: coding standards, constraints</li>
+                  <li><span className="text-emerald-400 font-mono">INSTRUCTION</span> — Rules to always follow: coding standards, constraints</li>
                 </ul>
               </div>
             </div>
@@ -1653,7 +1653,7 @@ function UltraplinianTab() {
                   focus:outline-none focus:glow-box font-mono text-sm"
               />
               {savedUrl && (
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-xs text-green-500">
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-xs text-cyan-400">
                   <Check className="w-3 h-3" />
                   Saved
                 </span>
@@ -1679,7 +1679,7 @@ function UltraplinianTab() {
               />
               <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
                 {savedKey && (
-                  <span className="flex items-center gap-1 text-xs text-green-500">
+                  <span className="flex items-center gap-1 text-xs text-cyan-400">
                     <Check className="w-3 h-3" />
                     Saved
                   </span>
@@ -2052,7 +2052,7 @@ function PlanTab() {
               <div className="space-y-1 mb-2">
                 {plan.features.map((f) => (
                   <div key={f} className="flex items-center gap-2 text-xs">
-                    <Check className="w-3 h-3 text-green-400 flex-shrink-0" />
+                    <Check className="w-3 h-3 text-emerald-400 flex-shrink-0" />
                     <span className="theme-secondary">{f}</span>
                   </div>
                 ))}
@@ -2272,7 +2272,7 @@ function DataTab() {
           onClick={handleExport}
           className="w-full flex items-center justify-center gap-2 px-4 py-3
             bg-theme-accent border border-theme-primary rounded-lg
-            hover:glow-box transition-all"
+            hover:border-slate-600 shadow-sm transition-all"
         >
           <Download className="w-4 h-4" />
           Export Full Backup
@@ -2334,7 +2334,7 @@ function DataTab() {
         {importStatus !== 'idle' && (
           <div className={`p-3 rounded-lg text-sm flex items-start gap-2 ${
             importStatus === 'success'
-              ? 'bg-green-500/10 border border-green-500 text-green-400'
+              ? 'bg-cyan-500 text-black font-bold/10 border border-cyan-500/50 text-emerald-400'
               : 'bg-red-500/10 border border-red-500 text-red-400'
           }`}>
             {importStatus === 'success' ? <Check className="w-4 h-4 flex-shrink-0 mt-0.5" /> : <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />}
@@ -2444,7 +2444,7 @@ function ToggleSetting({
       <button
         onClick={() => onChange(!enabled)}
         className={`w-12 h-6 rounded-full transition-colors relative flex-shrink-0
-          ${enabled ? 'bg-green-500' : 'bg-theme-accent'}`}
+          ${enabled ? 'bg-cyan-500 text-black font-bold' : 'bg-theme-accent'}`}
       >
         <span
           className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform

@@ -129,7 +129,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
               aria-label="Copy message"
             >
               {copied ? (
-                <Check className="w-3 h-3 text-green-500" />
+                <Check className="w-3 h-3 text-cyan-400" />
               ) : (
                 <Copy className="w-3 h-3" />
               )}
@@ -187,7 +187,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
                     href={href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="theme-primary underline hover:glow-primary"
+                    className="theme-primary underline hover:font-extrabold tracking-tight"
                   >
                     {children}
                   </a>
@@ -222,7 +222,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
             <button
               onClick={() => navigateRace('left')}
               disabled={raceIndex === 0}
-              className="p-0.5 rounded border border-theme-primary/40 hover:border-theme-primary hover:glow-box
+              className="p-0.5 rounded border border-theme-primary/40 hover:border-theme-primary hover:border-slate-600 shadow-sm
                 transition-all disabled:opacity-20 disabled:cursor-not-allowed"
               aria-label="Previous response"
               tabIndex={-1}
@@ -237,7 +237,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
             <button
               onClick={() => navigateRace('right')}
               disabled={raceIndex === raceResponses.length - 1}
-              className="p-0.5 rounded border border-theme-primary/40 hover:border-theme-primary hover:glow-box
+              className="p-0.5 rounded border border-theme-primary/40 hover:border-theme-primary hover:border-slate-600 shadow-sm
                 transition-all disabled:opacity-20 disabled:cursor-not-allowed"
               aria-label="Next response"
               tabIndex={-1}
@@ -291,8 +291,8 @@ export function ChatMessage({ message }: ChatMessageProps) {
                     onClick={() => rateMessage(currentConversation.id, message.id, 1)}
                     className={`p-1 rounded transition-all ${
                       message.feedbackRating === 1
-                        ? 'text-green-400 bg-green-400/15'
-                        : 'hover:text-green-400 hover:bg-green-400/10'
+                        ? 'text-emerald-400 bg-cyan-400/10 border border-cyan-500/30'
+                        : 'hover:text-emerald-400 hover:bg-green-400/10'
                     }`}
                     aria-label="Good response"
                     title="Good response — AutoTune learns from this"
@@ -368,7 +368,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
                             <div className="theme-secondary font-mono">{PARAM_META[key].short}</div>
                             <div className="font-bold theme-primary font-mono">{value.toFixed(2)}</div>
                             {hasDelta && (
-                              <div className={`font-mono ${delta.delta > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                              <div className={`font-mono ${delta.delta > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                                 {delta.delta > 0 ? '+' : ''}{delta.delta.toFixed(2)}
                               </div>
                             )}

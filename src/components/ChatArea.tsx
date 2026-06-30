@@ -127,7 +127,7 @@ export function ChatArea() {
         <button
           onClick={scrollToBottom}
           className="absolute bottom-24 right-6 z-10 p-2 rounded-full border border-theme-primary
-            bg-theme-dim/90 backdrop-blur-sm hover:glow-box transition-all hover:scale-110 shadow-lg"
+            bg-theme-dim/90 backdrop-blur-sm hover:border-slate-600 shadow-sm transition-all hover:scale-110 shadow-lg"
           aria-label="Scroll to bottom"
         >
           <ArrowDown className="w-4 h-4" />
@@ -153,7 +153,7 @@ function SuggestedPrompt({ prompt }: { prompt: string }) {
     <button
       onClick={handleClick}
       className="px-3 py-2 text-sm border border-theme-primary rounded-lg
-        hover:glow-box transition-all hover:scale-105"
+        hover:border-slate-600 shadow-sm transition-all hover:scale-105"
     >
       {prompt}
     </button>
