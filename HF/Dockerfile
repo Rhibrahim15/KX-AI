@@ -1,15 +1,4 @@
-# G0DM0D3 Research Preview API
-# Deploy on Hugging Face Spaces (Docker SDK) or any container host.
-#
-# Build:  docker build -t g0dm0d3-api .
-# Run:    docker run -p 7860:7860 \
-#           -e OPENROUTER_API_KEY=sk-or-... \
-#           -e GODMODE_API_KEY=your-secret-key \
-#           g0dm0d3-api
-#
-# OPENROUTER_API_KEY: Your OpenRouter key (powers all model calls)
-# GODMODE_API_KEY:    Auth key callers must send as Bearer token
-
+# KX Sanctuary OS
 FROM node:20-slim
 
 WORKDIR /app
@@ -18,10 +7,13 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm ci --omit=dev 2>/dev/null || npm install --omit=dev
 
-# Copy source (api + engine libs)
+# Copy all engine source, bots, bibles, and built static UI
 COPY api/ ./api/
-COPY src/lib/ ./src/lib/
-COPY src/stm/ ./src/stm/
+COPY bots/ ./bots/
+COPY src/ ./src/
+COPY gkp/ ./gkp/
+COPY out/ ./out/
+COPY public/ ./public/
 
 # Create non-root user for security
 RUN addgroup --system app && adduser --system --ingroup app app
