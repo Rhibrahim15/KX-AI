@@ -1,3 +1,13 @@
+---
+title: KX Sanctuary OS
+emoji: 🏛️
+colorFrom: indigo
+colorTo: green
+sdk: docker
+app_port: 7860
+pinned: false
+license: agpl-3.0
+---
 ```
  ██╗  ██╗██╗  ██╗       █████╗ ██╗
  ██║ ██╔╝╚██╗██╔╝      ██╔══██╗██║
