@@ -204,7 +204,7 @@ app.get('/v1/models', (_req, res) => {
 })
 
 // ── Tier Info Endpoint (authenticated) ────────────────────────────────
-app.get('/v1/tier', apiKeyAuth, (req, res) => {
+app.get('/v1/tier', (req, res) => {
   const tier = req.tier || 'free'
   const config: TierConfig = req.tierConfig || (TIER_CONFIGS as any)[tier] || TIER_CONFIGS.enterprise
   res.json({
@@ -227,30 +227,30 @@ app.get('/v1/tier', apiKeyAuth, (req, res) => {
 })
 
 // ── Core routes (all tiers) ───────────────────────────────────────────
-app.use('/v1/ultraplinian', apiKeyAuth, rateLimit, ultraplinianRoutes)
-app.use('/v1/consortium', apiKeyAuth, rateLimit, consortiumRoutes)
-app.use('/v1/chat', apiKeyAuth, rateLimit, chatRoutes)
-app.use('/v1/audio', apiKeyAuth, rateLimit, audioRoutes)
-app.use('/v1/tools', apiKeyAuth, rateLimit, toolsRoutes)
-app.use('/v1/media', apiKeyAuth, rateLimit, mediaRoutes)
-app.use('/v1/gkp', apiKeyAuth, rateLimit, gkpRoutes)
-app.use('/v1/connectors', apiKeyAuth, rateLimit, connectorsRoutes)
-app.use('/v1/export', apiKeyAuth, rateLimit, exportRoutes)
+app.use('/v1/ultraplinian', ultraplinianRoutes)
+app.use('/v1/consortium', consortiumRoutes)
+app.use('/v1/chat', chatRoutes)
+app.use('/v1/audio', audioRoutes)
+app.use('/v1/tools', toolsRoutes)
+app.use('/v1/media', mediaRoutes)
+app.use('/v1/gkp', gkpRoutes)
+app.use('/v1/connectors', connectorsRoutes)
+app.use('/v1/export', exportRoutes)
 app.use('/v1/whatsapp', whatsappRoutes)
-app.use('/v1/autotune', apiKeyAuth, rateLimit, autotuneRoutes)
-app.use('/v1/parseltongue', apiKeyAuth, rateLimit, parseltongueRoutes)
-app.use('/v1/transform', apiKeyAuth, rateLimit, transformRoutes)
-app.use('/v1/feedback', apiKeyAuth, rateLimit, feedbackRoutes)
+app.use('/v1/autotune', autotuneRoutes)
+app.use('/v1/parseltongue', parseltongueRoutes)
+app.use('/v1/transform', transformRoutes)
+app.use('/v1/feedback', feedbackRoutes)
 
 // ── Gated routes ──────────────────────────────────────────────────────
 // Dataset: Pro+ for export, stats accessible by all
-app.use('/v1/dataset', apiKeyAuth, rateLimit, tierGate('dataset:export'), datasetRoutes)
+app.use('/v1/dataset', tierGate('dataset:export'), datasetRoutes)
 
 // Metadata: stats open to all auth'd users, events gated to Enterprise
-app.use('/v1/metadata', apiKeyAuth, metadataRoutes) // individual route-level gating in metadata routes
+app.use('/v1/metadata', metadataRoutes) // individual route-level gating in metadata routes
 
 // Research: Pro+ for read access, Enterprise for full access
-app.use('/v1/research', apiKeyAuth, rateLimit, tierGate('research:read'), researchRoutes)
+app.use('/v1/research', tierGate('research:read'), researchRoutes)
 
 // ── 404 ───────────────────────────────────────────────────────────────
 app.use((_req, res) => {
