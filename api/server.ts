@@ -19,6 +19,7 @@ if (!process.env.SPACE_ID && !process.env.HF_SPACE) {
   console.log("◇ Running on Hugging Face Spaces — using injected secrets")
 }
 
+
 import express from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
@@ -52,13 +53,6 @@ import { ULTRAPLINIAN_MODELS } from './lib/ultraplinian'
 import type { TierConfig } from './lib/tiers'
 
 const app = express()
-app.use(express.static(path.join(process.cwd(), "out")));
-app.use(express.static(process.cwd()));
-
-// Serve main UI
-app.get("/", (_req, res) => {
-  res.sendFile(path.join(process.cwd(), "kx_sanctuary_os.html"));
-});
 const PORT = parseInt(process.env.PORT || '7860', 10) // HF Spaces default
 
 // ── Middleware ─────────────────────────────────────────────────────────
