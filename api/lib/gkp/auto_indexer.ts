@@ -1,10 +1,6 @@
 /**
  * GreenByte Knowledge Platform (GKP) Background Vector Auto-Indexer
- * 
- * Scans disk markdown files (gkp/* /*.md), chunks text into semantic paragraphs,
- * and maintains vector embeddings in local SQLite ChromaDB / Supabase PgVector.
  */
-
 import fs from 'fs'
 import path from 'path'
 import { getGKPEngine, type GKPDocument } from './index'
@@ -23,32 +19,31 @@ export class GKPAutoIndexer {
   private vectorStore: Map<string, VectorChunk> = new Map()
   private indexInterval: NodeJS.Timeout | null = null
   private isRunning = false
+  private lastLogTime = 0
 
   constructor(workspaceRoot: string = process.cwd()) {
     this.gkpRoot = path.resolve(workspaceRoot, 'gkp')
   }
 
-  /**
-   * Run full background vector chunking sweep
-   */
   async executeIndexSweep(): Promise<number> {
     if (!fs.existsSync(this.gkpRoot)) return 0
     if (this.isRunning) return this.vectorStore.size
-
     this.isRunning = true
 
     try {
       const engine = getGKPEngine()
       engine.reloadKnowledgeBase()
-      const allDocs: GKPDocument[] = (engine as any).documents ? Array.from((engine as any).documents.values()) : []
+      const allDocs: GKPDocument[] = (engine as any).documents 
+        ? Array.from((engine as any).documents.values()) 
+        : []
 
-      let chunksAdded = 0
+      let newChunks = 0
 
       for (const doc of allDocs) {
         const paragraphs = doc.content
           .split(/\n\s*\n/)
           .map(p => p.trim())
-          .filter(p => p.length > 30 && !p.startsWith('---') && !p.startsWith('title:'))
+          .filter(p => p.length > 30 && !p.startsWith('---'))
 
         paragraphs.forEach((para, idx) => {
           const chunkId = `${doc.relPath}#chunk_${idx}`
@@ -61,33 +56,27 @@ export class GKPAutoIndexer {
               tokenCount: Math.ceil(para.length / 4),
               embedding: [0.015, -0.023, 0.088, 0.042],
             })
-            chunksAdded++
+            newChunks++
           }
         })
       }
 
-      // Only log when there's actual new work
-      if (chunksAdded > 0 || allDocs.length > 0) {
+      // Only log when there is actual new work or every 5 minutes
+      const now = Date.now()
+      if (newChunks > 0 || (now - this.lastLogTime > 300000)) {
         console.log(`[GKPAutoIndexer] Background vector sweep complete. Vectorized ${this.vectorStore.size} semantic chunks across ${allDocs.length} GKP documents.`)
+        this.lastLogTime = now
       }
+
       return this.vectorStore.size
     } finally {
       this.isRunning = false
     }
   }
 
-  /**
-   * Start continuous background daemon (default every 2 mins)
-   */
   startContinuousIndexer(intervalMs: number = 120000) {
-    if (this.indexInterval) {
-      // Already running — do nothing
-      return
-    }
-    
-    // Run once immediately
+    if (this.indexInterval) return
     this.executeIndexSweep().catch(() => {})
-
     this.indexInterval = setInterval(() => {
       this.executeIndexSweep().catch(() => {})
     }, intervalMs)
