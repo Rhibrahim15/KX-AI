@@ -3,665 +3,356 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KX Autonomous AI - Sanctuary OS</title>
+  <title>KX Sanctuary OS • v0.4</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
-    /* ── LINEAR / VERCEL / APPLE BILLION-DOLLAR MINIMALIST DESIGN SYSTEM ── */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;family=Space+Grotesk:wght@500;600&amp;display=swap');
+    
     :root {
-      --bg-void: #07090e;
-      --bg-shell: #0a0d14;
-      --bg-panel: #0f141f;
-      --bg-input: #131926;
-      --border-subtle: rgba(255, 255, 255, 0.06);
-      --border-focus: rgba(255, 255, 255, 0.16);
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --text-dim: #475569;
-      --accent-cyan: #38bdf8;
-      --accent-emerald: #10b981;
-      --accent-rose: #f43f5e;
-      --accent-violet: #8b5cf6;
+      --primary: #6366f1;
+    }
+    
+    body {
+      font-family: 'Inter', system_ui, sans-serif;
+    }
+    
+    .font-display {
+      font-family: 'Space Grotesk', 'Inter', sans-serif;
+      font-weight: 600;
     }
 
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
+    .glass {
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.08);
     }
 
-    html, body {
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background-color: var(--bg-void);
-      color: var(--text-main);
-      font-family: -apple-system, BlinkMacSystemFont, "Inter", "Geist", "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
-      font-size: 13px;
-      line-height: 1.5;
-      -webkit-font-smoothing: antialiased;
-      user-select: none;
-      letter-spacing: -0.01em;
+    .nav-active {
+      background: #6366f1;
+      color: white;
+      border-radius: 9999px;
     }
 
-    button {
-      font-family: inherit;
-      border: none;
-      background: none;
-      cursor: pointer;
-      color: inherit;
-      transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    input, textarea {
-      font-family: inherit;
-      border: none;
-      background: none;
-      color: inherit;
-      outline: none;
-    }
-
-    /* ── ANIMATIONS ────────────────────────────────────────────────── */
-    @keyframes bootIgnition {
-      0% { opacity: 1; transform: scale(1); }
-      75% { opacity: 1; transform: scale(1); }
-      100% { opacity: 0; transform: scale(1.02); visibility: hidden; pointer-events: none; }
-    }
-    @keyframes progressSlide {
-      0% { width: 0%; }
-      100% { width: 100%; }
-    }
-    @keyframes subtlePulse {
-      0%, 100% { opacity: 0.4; }
-      50% { opacity: 0.8; }
-    }
-    @keyframes msgEntry {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* ── 1. OS BOOT SPLASH SCREEN ──────────────────────────────────── */
-    #boot-splash {
-      position: fixed;
-      inset: 0;
-      z-index: 9999;
-      background-color: #05070a;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      animation: bootIgnition 2.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-    .boot-symbol {
-      width: 52px;
-      height: 52px;
-      margin-bottom: 20px;
-    }
-    .boot-header {
-      font-size: 16px;
-      font-weight: 700;
-      letter-spacing: 0.2em;
-      color: #fff;
-      margin-bottom: 6px;
-    }
-    .boot-kernel {
-      font-size: 11px;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      color: var(--text-dim);
-      letter-spacing: 0.1em;
-      margin-bottom: 28px;
-    }
-    .boot-loader {
-      width: 180px;
-      height: 2px;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 2px;
-      overflow: hidden;
-    }
-    .boot-bar {
-      height: 100%;
-      background-color: var(--accent-cyan);
-      animation: progressSlide 1.8s cubic-bezier(0.65, 0, 0.35, 1) forwards;
-    }
-
-    /* ── 2. MAIN APP LAYOUT ────────────────────────────────────────── */
-    #os-shell {
-      display: flex;
-      width: 100vw;
-      height: 100vh;
-      background-color: var(--bg-void);
-    }
-
-    /* Left Sidebar */
-    aside.sidebar {
-      width: 240px;
-      height: 100%;
-      background-color: var(--bg-shell);
-      border-right: 1px solid var(--border-subtle);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: 16px 12px;
-      z-index: 40;
-    }
-    .workspace-switcher {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 6px 8px 14px;
-      border-bottom: 1px solid var(--border-subtle);
+    .message {
+      max-width: 80%;
+      padding: 14px 18px;
+      border-radius: 20px;
       margin-bottom: 12px;
     }
-    .logo-mark {
-      width: 28px;
-      height: 28px;
-      border-radius: 7px;
-      background: #111827;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .workspace-meta h3 {
-      font-size: 13px;
-      font-weight: 600;
-      color: #fff;
-    }
-    .workspace-meta p {
-      font-size: 11px;
-      color: var(--text-dim);
+
+    .user-msg {
+      background: #6366f1;
+      color: white;
+      border-bottom-right-radius: 6px;
     }
 
-    .nav-group {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-    .nav-category {
-      font-size: 10px;
-      font-weight: 700;
-      color: var(--text-dim);
-      letter-spacing: 0.08em;
-      padding: 12px 8px 6px;
-    }
-    .nav-btn {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 10px;
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text-muted);
-      cursor: pointer;
-    }
-    .nav-btn:hover {
-      background-color: rgba(255, 255, 255, 0.03);
-      color: #fff;
-    }
-    .nav-btn.active {
-      background-color: rgba(255, 255, 255, 0.06);
-      color: #fff;
-      font-weight: 600;
-    }
-    .nav-pill {
-      margin-left: auto;
-      font-size: 10px;
-      font-family: monospace;
-      padding: 1px 6px;
-      border-radius: 4px;
-      background: rgba(255, 255, 255, 0.04);
-      color: var(--text-dim);
+    .ai-msg {
+      background: #1f2937;
+      border-bottom-left-radius: 6px;
     }
 
-    .profile-card {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px;
-      border-radius: 8px;
-      background-color: rgba(255, 255, 255, 0.02);
-      border: 1px solid var(--border-subtle);
+    .section {
+      display: none;
     }
-    .profile-pic {
-      width: 28px;
-      height: 28px;
-      border-radius: 6px;
-      background-color: #1e293b;
-      color: var(--accent-cyan);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 12px;
-    }
-    .profile-desc h4 {
-      font-size: 12px;
-      font-weight: 600;
-      color: #fff;
-    }
-    .profile-desc span {
-      font-size: 10px;
-      color: var(--accent-emerald);
-    }
-
-    /* Center Main Viewport */
-    main.arena {
-      flex: 1;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      background-color: var(--bg-void);
-    }
-
-    header.app-header {
-      height: 48px;
-      border-bottom: 1px solid var(--border-subtle);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 24px;
-      background-color: var(--bg-shell);
-    }
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 12px;
-      color: var(--text-dim);
-    }
-    .header-left span.current {
-      color: var(--text-main);
-      font-weight: 600;
-    }
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-    .model-badge {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 11px;
-      font-family: monospace;
-      color: var(--text-muted);
-      padding: 4px 10px;
-      border-radius: 6px;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid var(--border-subtle);
-    }
-    .indicator-live {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background-color: var(--accent-emerald);
-    }
-
-    /* Chat Stream Viewport */
-    .stream-container {
-      flex: 1;
-      overflow-y: auto;
-      padding: 32px 0;
-      display: flex;
-      flex-direction: column;
-      gap: 28px;
-    }
-
-    .turn {
-      display: flex;
-      gap: 16px;
-      max-width: 760px;
-      width: 100%;
-      margin: 0 auto;
-      padding: 0 24px;
-      animation: msgEntry 0.25s ease-out;
-    }
-    .turn.user {
-      flex-direction: row-reverse;
-    }
-
-    .turn-icon {
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 12px;
-    }
-    .turn-icon.ai {
-      background-color: #111827;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: #fff;
-    }
-    .turn-icon.usr {
-      background-color: #0f172a;
-      color: var(--accent-cyan);
-      border: 1px solid rgba(56, 189, 248, 0.3);
-    }
-
-    .content-area {
-      flex: 1;
-      font-size: 13.5px;
-      line-height: 1.6;
-      color: #cbd5e1;
-    }
-    .turn.user .content-area {
-      background-color: #1e293b;
-      color: #fff;
-      padding: 10px 16px;
-      border-radius: 12px;
-      border-top-right-radius: 2px;
-      max-width: 580px;
-    }
-
-    /* Minimalist Component Blocks */
-    .audio-block {
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      padding: 8px 14px;
-      background-color: var(--bg-panel);
-      border: 1px solid var(--border-subtle);
-      border-radius: 8px;
-      margin-top: 10px;
-      font-size: 12px;
-      color: var(--text-main);
-      cursor: pointer;
-    }
-    .audio-block:hover {
-      border-color: rgba(255, 255, 255, 0.15);
-    }
-    .code-block {
-      background-color: #0d111a;
-      border: 1px solid var(--border-subtle);
-      border-radius: 8px;
-      padding: 14px 16px;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
-      font-size: 12px;
-      color: var(--accent-cyan);
-      margin: 12px 0;
-      overflow-x: auto;
-    }
-    .media-preview {
-      margin-top: 12px;
-      border-radius: 8px;
-      overflow: hidden;
-      border: 1px solid var(--border-subtle);
-      max-width: 440px;
-      background: #000;
-    }
-
-    /* Bottom Prompt Dock */
-    .prompt-dock {
-      padding: 16px 24px 24px;
-      background-color: var(--bg-void);
-    }
-    .input-shell {
-      max-width: 760px;
-      margin: 0 auto;
-      background-color: var(--bg-input);
-      border: 1px solid var(--border-subtle);
-      border-radius: 14px;
-      padding: 12px 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      transition: border-color 0.2s ease;
-    }
-    .input-shell:focus-within {
-      border-color: rgba(255, 255, 255, 0.22);
-    }
-    .textarea-box {
-      width: 100%;
-      font-size: 13.5px;
-      color: #fff;
-      resize: none;
-      min-height: 24px;
-      max-height: 140px;
-    }
-    .textarea-box::placeholder {
-      color: var(--text-dim);
-    }
-    .dock-controls {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-top: 1px solid rgba(255, 255, 255, 0.04);
-      padding-top: 8px;
-    }
-    .tools-list {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .tool-pill {
-      padding: 4px 8px;
-      border-radius: 6px;
-      font-size: 12px;
-      color: var(--text-dim);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .tool-pill:hover {
-      background-color: rgba(255, 255, 255, 0.04);
-      color: var(--text-muted);
-    }
-    .submit-mark {
-      padding: 6px 14px;
-      border-radius: 8px;
-      background-color: #fff;
-      color: #000;
-      font-weight: 600;
-      font-size: 12px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .submit-mark:hover {
-      background-color: #e2e8f0;
-    }
-
-    /* Right Inspector */
-    aside.inspector {
-      width: 280px;
-      background-color: var(--bg-shell);
-      border-left: 1px solid var(--border-subtle);
-      padding: 20px 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-    .inspector-label {
-      font-size: 10px;
-      font-weight: 700;
-      color: var(--text-dim);
-      letter-spacing: 0.08em;
-    }
-    .meta-card {
-      background-color: rgba(255, 255, 255, 0.015);
-      border: 1px solid var(--border-subtle);
-      border-radius: 8px;
-      padding: 10px 12px;
-    }
-    .meta-card span.key {
+    
+    .section.active {
       display: block;
-      font-size: 10px;
-      color: var(--text-dim);
-      margin-bottom: 2px;
     }
-    .meta-card span.val {
-      font-size: 12px;
-      font-family: monospace;
-      color: var(--text-muted);
+
+    .api-status {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 9999px;
     }
   </style>
 </head>
-<body>
-
-  <!-- 1. OS IGNITION SPLASH SCREEN -->
-  <div id="boot-splash">
-    <div class="boot-symbol">
-      <svg viewBox="0 0 100 100" fill="none">
-        <rect width="100" height="100" rx="24" fill="#0d121c" border="1px solid #334155" />
-        <path d="M28 28 L48 50 L28 72" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
-        <path d="M72 28 L48 50 L72 72" stroke="#38bdf8" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
-      </svg>
-    </div>
-    <div class="boot-header">KX SANCTUARY OS</div>
-    <div class="boot-kernel">KERNEL v0.4.0 • INITIALIZING COGNITIVE SANCTUARY...</div>
-    <div class="boot-loader">
-      <div class="boot-bar"></div>
+<body class="bg-zinc-950 text-zinc-200">
+  <!-- Header -->
+  <div class="border-b border-white/10 bg-zinc-900">
+    <div class="max-w-screen-xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-x-3">
+        <div class="w-9 h-9 bg-indigo-600 rounded-2xl flex items-center justify-center">
+          <i class="fa-solid fa-infinity text-white text-2xl"></i>
+        </div>
+        <div>
+          <span class="font-display text-2xl font-semibold tracking-tighter">KX Sanctuary</span>
+          <span class="text-xs px-2 py-0.5 bg-white/10 rounded-full ml-1.5">v0.4</span>
+        </div>
+      </div>
+      
+      <div class="flex items-center gap-x-2 text-sm">
+        <div class="flex items-center gap-x-2 px-3 py-1.5 bg-zinc-900 border border-white/10 rounded-2xl">
+          <div class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+          <span class="text-emerald-400 text-xs font-medium">LIVE</span>
+        </div>
+        <div class="text-xs px-3 py-1.5 bg-zinc-900 border border-white/10 rounded-2xl">
+          <span class="text-zinc-400">Free Tier</span>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- 2. MAIN APP SHELL -->
-  <div id="os-shell">
-    
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
-      <div>
-        <div class="workspace-switcher">
-          <div class="logo-mark">
-            <svg width="16" height="16" viewBox="0 0 100 100" fill="none">
-              <path d="M20 20 L45 50 L20 80" stroke="#fff" stroke-width="12" stroke-linecap="round" />
-              <path d="M80 20 L45 50 L80 80" stroke="#38bdf8" stroke-width="12" stroke-linecap="round" />
-            </svg>
-          </div>
-          <div class="workspace-meta">
-            <h3>KX Advisor</h3>
-            <p>GreenByte Sanctuary</p>
-          </div>
-        </div>
+  <div class="max-w-screen-xl mx-auto px-6 pt-8">
+    <!-- Navigation -->
+    <div class="flex gap-2 mb-8">
+      <button onclick="showSection('chat')" class="nav-btn px-5 py-2.5 text-sm flex items-center gap-x-2 rounded-2xl bg-zinc-900 border border-white/10 hover:bg-zinc-800" id="nav-chat">
+        <i class="fa-solid fa-comments"></i>
+        <span>Chat</span>
+      </button>
+      <button onclick="showSection('media')" class="nav-btn px-5 py-2.5 text-sm flex items-center gap-x-2 rounded-2xl bg-zinc-900 border border-white/10 hover:bg-zinc-800" id="nav-media">
+        <i class="fa-solid fa-image"></i>
+        <span>Generate</span>
+      </button>
+      <button onclick="showSection('tools')" class="nav-btn px-5 py-2.5 text-sm flex items-center gap-x-2 rounded-2xl bg-zinc-900 border border-white/10 hover:bg-zinc-800" id="nav-tools">
+        <i class="fa-solid fa-plug"></i>
+        <span>Connectors</span>
+      </button>
+    </div>
 
-        <div class="nav-group">
-          <div class="nav-category">WORKSPACES</div>
-          <div class="nav-btn active">
-            <span>💬</span><span>Chat Sanctuary</span><span class="nav-pill">LPU</span>
-          </div>
-          <div class="nav-btn" onclick="alert('Stepping into GreenByte Virtual OS Room VFS...')">
-            <span>🏛️</span><span>GreenByte Room</span><span class="nav-pill">VFS</span>
-          </div>
-          <div class="nav-btn" onclick="alert('Opening Realistic Media Studio...')">
-            <span>🎨</span><span>Media Studio</span><span class="nav-pill">SEEDANCE</span>
-          </div>
-          <div class="nav-btn" onclick="alert('Consulting AgroLingo RAG Corpus...')">
-            <span>🌱</span><span>AgroLingo Hub</span><span class="nav-pill">RAG</span>
-          </div>
+    <!-- CHAT SECTION -->
+    <div id="chat" class="section active">
+      <div class="max-w-3xl mx-auto">
+        <div class="glass rounded-3xl p-1 shadow-2xl">
+          <div class="bg-zinc-900 rounded-[22px] p-6">
+            <!-- Chat Header -->
+            <div class="flex items-center justify-between mb-6 px-1">
+              <div>
+                <div class="font-semibold">KX Assistant</div>
+                <div class="text-xs text-emerald-400">Online • Powered by Ultraplinian</div>
+              </div>
+              <div class="text-xs px-3 py-1 bg-emerald-900/30 text-emerald-400 rounded-full">Free</div>
+            </div>
 
-          <div class="nav-category" style="margin-top:16px">DAEMONS</div>
-          <div class="nav-btn" style="font-size:12px"><span>⚡</span> Telegram (@KX_PA_Bot)</div>
-          <div class="nav-btn" style="font-size:12px"><span>🎮</span> Discord Server Bot</div>
-          <div class="nav-btn" style="font-size:12px"><span>💬</span> WhatsApp Cloud API</div>
+            <!-- Messages -->
+            <div id="chat-messages" class="h-[420px] overflow-y-auto pr-2 mb-4 space-y-1">
+              <div class="ai-msg message text-sm">
+                Hello! I'm KX, your autonomous AI. How can I help you today?
+              </div>
+            </div>
+
+            <!-- Input -->
+            <div class="flex gap-2">
+              <input id="chat-input" 
+                     type="text" 
+                     class="flex-1 bg-zinc-800 border border-white/10 text-sm px-4 py-3.5 rounded-2xl focus:outline-none focus:border-indigo-500/50"
+                     placeholder="Type your message..."
+                     onkeypress="if (event.key === 'Enter') sendMessage()">
+              <button onclick="sendMessage()" 
+                      class="px-7 bg-indigo-600 hover:bg-indigo-500 transition-colors rounded-2xl text-sm font-medium flex items-center justify-center">
+                <i class="fa-solid fa-paper-plane"></i>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
+    </div>
 
-      <div class="profile-card">
-        <div class="profile-pic">K</div>
-        <div class="profile-desc">
-          <h4>Khalifa Elgezy</h4>
-          <span>● B.Sc. CS 2:1</span>
+    <!-- MEDIA GENERATION -->
+    <div id="media" class="section">
+      <div class="max-w-3xl mx-auto">
+        <div class="glass rounded-3xl p-6">
+          <div class="mb-6">
+            <div class="font-semibold text-lg">Media Generation</div>
+            <div class="text-xs text-zinc-400">Uncensored • Powered by KX Media Engine</div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Image -->
+            <div class="bg-zinc-900 border border-white/10 rounded-2xl p-5">
+              <div class="flex items-center gap-x-3 mb-4">
+                <i class="fa-solid fa-image text-xl text-violet-400"></i>
+                <div>
+                  <div class="font-medium">Image</div>
+                  <div class="text-xs text-zinc-500">Flux / SD3 / Playground</div>
+                </div>
+              </div>
+              <textarea id="image-prompt" placeholder="A cyberpunk samurai in neon Tokyo..." 
+                        class="w-full bg-zinc-800 border border-white/10 rounded-2xl p-4 text-sm h-24 resize-y"></textarea>
+              <button onclick="generateImage()" 
+                      class="mt-3 w-full py-3 bg-violet-600 hover:bg-violet-500 transition-colors rounded-2xl text-sm font-medium">
+                Generate Image
+              </button>
+            </div>
+
+            <!-- Video -->
+            <div class="bg-zinc-900 border border-white/10 rounded-2xl p-5">
+              <div class="flex items-center gap-x-3 mb-4">
+                <i class="fa-solid fa-video text-xl text-rose-400"></i>
+                <div>
+                  <div class="font-medium">Video</div>
+                  <div class="text-xs text-zinc-500">Kling / Runway / Pika</div>
+                </div>
+              </div>
+              <textarea id="video-prompt" placeholder="A serene mountain lake at sunrise..." 
+                        class="w-full bg-zinc-800 border border-white/10 rounded-2xl p-4 text-sm h-24 resize-y"></textarea>
+              <button onclick="generateVideo()" 
+                      class="mt-3 w-full py-3 bg-rose-600 hover:bg-rose-500 transition-colors rounded-2xl text-sm font-medium">
+                Generate Video
+              </button>
+            </div>
+          </div>
         </div>
       </div>
-    </aside>
+    </div>
 
-    <!-- CENTER ARENA -->
-    <main class="arena">
-      <header class="app-header">
-        <div class="header-left">
-          <span>Sanctuary</span><span>/</span><span class="current">Executive Mentorship Matrix</span>
-        </div>
-        <div class="header-right">
-          <div class="model-badge">
-            <span class="indicator-live"></span>
-            <span>Groq LPU • Llama 3.3 70B</span>
+    <!-- CONNECTORS -->
+    <div id="tools" class="section">
+      <div class="max-w-3xl mx-auto">
+        <div class="glass rounded-3xl p-6">
+          <div class="font-semibold text-lg mb-4">Connected Platforms</div>
+          
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+            <div class="flex items-center gap-x-3 px-4 py-3 bg-zinc-900 border border-white/10 rounded-2xl">
+              <i class="fa-brands fa-telegram text-xl"></i>
+              <div>
+                <div class="text-sm font-medium">Telegram</div>
+                <div class="text-emerald-400 text-xs">Connected</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-x-3 px-4 py-3 bg-zinc-900 border border-white/10 rounded-2xl">
+              <i class="fa-brands fa-discord text-xl"></i>
+              <div>
+                <div class="text-sm font-medium">Discord</div>
+                <div class="text-emerald-400 text-xs">Connected</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-x-3 px-4 py-3 bg-zinc-900 border border-white/10 rounded-2xl">
+              <i class="fa-brands fa-whatsapp text-xl"></i>
+              <div>
+                <div class="text-sm font-medium">WhatsApp</div>
+                <div class="text-emerald-400 text-xs">Connected</div>
+              </div>
+            </div>
           </div>
-          <span style="font-size:11px;color:var(--text-dim);font-family:monospace">0% AI-Flag</span>
+          
+          <div class="mt-6 text-xs text-center text-zinc-400">
+            All gateways are active and ready
+          </div>
         </div>
-      </header>
+      </div>
+    </div>
+  </div>
 
-      <div class="stream-container" id="messages-list">
+  <script>
+    function showSection(section) {
+      document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+      document.getElementById(section).classList.add('active');
+      
+      document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('bg-indigo-600', 'text-white'));
+      document.getElementById('nav-' + section).classList.add('bg-indigo-600', 'text-white');
+    }
+
+    // Chat functionality
+    async function sendMessage() {
+      const input = document.getElementById('chat-input');
+      const messages = document.getElementById('chat-messages');
+      
+      if (!input.value.trim()) return;
+
+      // Add user message
+      const userMsg = document.createElement('div');
+      userMsg.className = 'message user-msg text-sm ml-auto';
+      userMsg.innerHTML = input.value;
+      messages.appendChild(userMsg);
+      
+      const userText = input.value;
+      input.value = '';
+
+      // Add loading
+      const loading = document.createElement('div');
+      loading.className = 'ai-msg message text-sm';
+      loading.innerHTML = `<span class="text-zinc-400">Thinking...</span>`;
+      messages.appendChild(loading);
+      messages.scrollTop = messages.scrollHeight;
+
+      try {
+        const res = await fetch('/v1/chat/completions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: "gpt-4o",
+            messages: [{ role: "user", content: userText }]
+          })
+        });
+
+        const data = await res.json();
+        loading.remove();
+
+        const aiMsg = document.createElement('div');
+        aiMsg.className = 'ai-msg message text-sm';
         
-        <!-- Turn 1: Initialization -->
-        <div class="turn ai">
-          <div class="turn-icon ai">KX</div>
-          <div class="content-area">
-            <p style="color:#fff;font-weight:600;margin-bottom:4px">Assalamu Alaikum wa Rahmatullah, Brother Khalifa Elgezy.</p>
-            <p>Welcome to your permanent sanctuary. All 7 cognitive providers, GKP background auto-indexers, and Qur'anic Hifz tracking modules are operating in peace. Your public discretion shield is 100% active.</p>
-            <div class="audio-block" onclick="alert('Playing ElevenLabs human vocal playback...')">
-              <span style="color:var(--accent-cyan)">▶</span><span>ElevenLabs Expressive Articulation</span><span style="margin-left:auto;color:var(--text-dim);font-family:monospace">0:05</span>
-            </div>
-          </div>
-        </div>
+        if (data.choices && data.choices[0]) {
+          aiMsg.innerHTML = data.choices[0].message.content;
+        } else {
+          aiMsg.innerHTML = "Sorry, I couldn't generate a response.";
+        }
+        
+        messages.appendChild(aiMsg);
+        messages.scrollTop = messages.scrollHeight;
+      } catch (err) {
+        loading.remove();
+        const errorMsg = document.createElement('div');
+        errorMsg.className = 'ai-msg message text-sm text-red-400';
+        errorMsg.innerHTML = "Failed to connect to the API.";
+        messages.appendChild(errorMsg);
+        messages.scrollTop = messages.scrollHeight;
+      }
+    }
 
-        <!-- Turn 2: User Prompt -->
-        <div class="turn user">
-          <div class="turn-icon usr">K</div>
-          <div class="content-area">
-            Give me a disciplined daily Golang backend practice routine aligned with my 1-year Qur'anic Hifz schedule. No generic motivation.
-          </div>
-        </div>
+    // Image Generation
+    async function generateImage() {
+      const prompt = document.getElementById('image-prompt').value.trim();
+      if (!prompt) return alert("Please enter a prompt");
 
-        <!-- Turn 3: JARVIS Mentor Reply -->
-        <div class="turn ai">
-          <div class="turn-icon ai">KX</div>
-          <div class="content-area">
-            <p>Fatigue is the physical sensation of building institutional capacity. To master Golang distributed systems while completing Hifz within 12 months, we eliminate context switching. Here is your verifiable daily regimen:</p>
-            <div class="code-block">
-              // 04:30 AM — Fajr & Qur'anic Hifz (Fresh Memory Weights)<br>
-              await memorizationPortion({ duration: '45m', reviewPrior: true })<br><br>
-              // 08:30 AM — Deep Concurrency Engineering (Golang Channels & Goroutines)<br>
-              go executeGreenByteDaemon(ctx)
-            </div>
-            <p>When exhaustion sets in after grant rejections, close the IDE. The soil and the farmers validate *AgroLingo AI*, not committee paperwork.</p>
-          </div>
-        </div>
+      const btns = document.querySelectorAll('#media button');
+      btns.forEach(b => b.disabled = true);
 
-      </div>
+      try {
+        const res = await fetch('/v1/media/video/image', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: 'image', prompt })
+        });
+        
+        const data = await res.json();
+        alert("Image generation started! Check your results in a few seconds.");
+      } catch (e) {
+        alert("Failed to generate image.");
+      } finally {
+        btns.forEach(b => b.disabled = false);
+      }
+    }
 
-      <!-- Prompt Input Bar -->
-      <div class="prompt-dock">
-        <div class="input-shell">
-          <textarea class="textarea-box" rows="1" placeholder="Consult your companion, create GKP files, or dispatch Seedance media..."></textarea>
-          <div class="dock-controls">
-            <div class="tools-list">
-              <span class="tool-pill">📎 Attach GKP</span>
-              <span class="tool-pill">🖼️ Media Studio</span>
-              <span class="tool-pill">🎤 Voice Note</span>
-              <span class="tool-pill" style="color:var(--accent-cyan)">🌐 Surf Internet</span>
-            </div>
-            <button class="submit-mark" onclick="alert('Dispatched!')">
-              <span>Dispatch</span><span>↵</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    </main>
+    // Video Generation
+    async function generateVideo() {
+      const prompt = document.getElementById('video-prompt').value.trim();
+      if (!prompt) return alert("Please enter a prompt");
 
-    <!-- RIGHT INSPECTOR PANEL -->
-    <aside class="inspector">
-      <span class="inspector-label">SYSTEM PROVENANCE</span>
-      <div class="meta-card">
-        <span class="key">COGNITIVE ENGINE</span>
-        <span class="val">Groq LPU (Sub-1s)</span>
-      </div>
-      <div class="meta-card">
-        <span class="key">ACTIVE RAG KNOWLEDGE</span>
-        <span class="val" style="color:var(--accent-emerald)">profile.md • gkp/</span>
-      </div>
-      <div class="meta-card">
-        <span class="key">ANTI-AI DETECTOR</span>
-        <span class="val">100% Human Cadence</span>
-      </div>
-      <div class="meta-card">
-        <span class="key">OMNICHANNEL BOTS</span>
-        <span class="val">Telegram • Discord • WA</span>
-      </div>
-    </aside>
+      const btns = document.querySelectorAll('#media button');
+      btns.forEach(b => b.disabled = true);
 
-  </div>
+      try {
+        const res = await fetch('/v1/media/video/image', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: 'video', prompt })
+        });
+        
+        const data = await res.json();
+        alert("Video generation started!");
+      } catch (e) {
+        alert("Failed to generate video.");
+      } finally {
+        btns.forEach(b => b.disabled = false);
+      }
+    }
 
+    // Auto-focus chat input
+    window.onload = function() {
+      document.getElementById('chat-input').focus();
+      document.getElementById('nav-chat').classList.add('bg-indigo-600', 'text-white');
+    }
+  </script>
 </body>
 </html>
