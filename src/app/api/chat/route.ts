@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const MAX_MESSAGES = 40;
+const MAX_MESSAGES = 100;
 const MAX_MESSAGE_CHARS = 20_000;
 const MAX_TOTAL_CHARS = 60_000;
 
