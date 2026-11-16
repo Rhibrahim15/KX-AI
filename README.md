@@ -103,6 +103,7 @@ See [.env.example](.env.example).
 - `KX_AI_BACKEND_TOKEN`: must match backend `API_AUTH_TOKEN`; server-only, never use a `NEXT_PUBLIC_` prefix.
 - `KX_WEB_ACCESS_PASSWORD`: private web workspace password; required in production.
 - `KX_WEB_SESSION_SECRET`: independent random signing secret (minimum 32 characters); required in production.
+- `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`: shared Upstash Redis REST credentials; required in production for atomic login throttling (5 attempts per client IP per 15-minute window). Local development may omit them.
 - `DATABASE_URL`: reserved for the persistence milestone; current chat does not use it.
 
 ## Framework and model defaults
@@ -117,7 +118,7 @@ The web runtime is being upgraded to Next.js 16 with React 19. The private acces
 - Telegram's current bot still uses legacy in-process history; it has not been moved to the shared repository or router.
 - Discord and WhatsApp are not integrated with the rebuilt runtime.
 - RAG, MCP tools, GitHub/file execution, TTS and media generation are not operational on the rebuilt chat path. Media requests return HTTP 501.
-- The access gate is a private single-password gate, not a full identity system. Shared brute-force protection, distributed rate limiting, usage budgets and monitoring are not implemented. **Do not expose KX publicly until these controls are added and tested.**
+- The access gate is a private single-password gate, not a full identity system. Login attempts are throttled through shared Upstash Redis in production; the limiter fails closed when its configuration or service is unavailable. Distributed BFF/backend request limits, provider usage budgets and monitoring are still not implemented. **Do not expose KX publicly until these remaining controls are added and tested.**
 
 ## Repository layout
 

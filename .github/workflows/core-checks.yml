@@ -52,4 +52,5 @@ jobs:
       - run: npm run typecheck:api
       - run: npm run typecheck:core
       - run: npm run test:core
+      - run: npm audit --omit=dev --audit-level=high
       - run: npm run build
