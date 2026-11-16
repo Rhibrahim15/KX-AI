@@ -3,9 +3,6 @@
 import { useState, useRef, useEffect, KeyboardEvent } from 'react'
 import { useStore } from '@/store'
 import { sendMessage, streamUltraplinian, streamConsortium } from '@/lib/openrouter'
-import { recordChatEvent } from '@/lib/telemetry'
-import { classifyPrompt } from '@/lib/classify'
-import type { ClassificationResult } from '@/lib/classify'
 import { computeAutoTuneParams, getContextLabel, getStrategyLabel, PARAM_META } from '@/lib/autotune'
 import type { AutoTuneResult } from '@/lib/autotune'
 import { applyParseltongue, detectTriggers } from '@/lib/parseltongue'
@@ -22,18 +19,13 @@ export function ChatInput() {
     setIsStreaming,
     personas,
     stmModules,
-    noLogMode,
     autoTuneEnabled,
     autoTuneStrategy,
     autoTuneOverrides,
     autoTuneLastResult,
     setAutoTuneLastResult,
     feedbackState,
-    memories,
-    memoriesEnabled,
     parseltongueConfig,
-    customSystemPrompt,
-    useCustomSystemPrompt,
     // Liquid Response (universal)
     liquidResponseEnabled,
     liquidMinDelta,
@@ -140,9 +132,9 @@ export function ChatInput() {
     setIsStreaming(true)
     incrementPromptsTried()
 
-    // Apply parseltongue obfuscation if enabled
-    const parseltongueResult = applyParseltongue(originalMessage, parseltongueConfig)
-    const userMessage = parseltongueResult.transformedText
+    // Legacy prompt obfuscation has been retired. Send the user's actual text.
+    const parseltongueResult = { transformedText: originalMessage, triggersFound: [] as string[] }
+    const userMessage = originalMessage
 
 
     // Add user message (show original to user, send transformed to API)
@@ -155,52 +147,17 @@ export function ChatInput() {
     const persona = personas.find(p => p.id === currentConversation?.persona) || personas[0]
     const model = currentConversation?.model || 'anthropic/claude-3-opus'
 
-    // Build memory context if enabled
-    const activeMemories = memoriesEnabled ? memories.filter(m => m.active) : []
-    let memoryContext = ''
-    if (activeMemories.length > 0) {
-      const facts = activeMemories.filter(m => m.type === 'fact')
-      const preferences = activeMemories.filter(m => m.type === 'preference')
-      const instructions = activeMemories.filter(m => m.type === 'instruction')
-
-      memoryContext = '\n\n<user_memory>\n'
-      if (facts.length > 0) {
-        memoryContext += '## About the User\n'
-        facts.forEach(f => { memoryContext += `- ${f.content}\n` })
-      }
-      if (preferences.length > 0) {
-        memoryContext += '\n## User Preferences\n'
-        preferences.forEach(p => { memoryContext += `- ${p.content}\n` })
-      }
-      if (instructions.length > 0) {
-        memoryContext += '\n## Always Follow\n'
-        instructions.forEach(i => { memoryContext += `- ${i.content}\n` })
-      }
-      memoryContext += '</user_memory>\n'
-    }
-
-    // Build system prompt with GODMODE prompt + memory
-    const basePrompt = useCustomSystemPrompt ? customSystemPrompt : (persona.systemPrompt || persona.coreDirective || '')
-    const systemPrompt = basePrompt + memoryContext
-
-    // Build messages array
+    // The backend owns the system identity and prompt. Only pass real
+    // user/assistant conversation turns from the browser.
     const messages = [
-      // System prompt from persona + memory
-      ...(systemPrompt ? [{ role: 'system' as const, content: systemPrompt }] : []),
-      // Conversation history
-      ...((currentConversation?.messages || []).map(m => ({
-        role: m.role as 'user' | 'assistant',
-        content: m.content
-      }))),
-      // New user message
-      { role: 'user' as const, content: userMessage }
+      ...((currentConversation?.messages || [])
+        .filter(m => m.role === 'user' || m.role === 'assistant')
+        .map(m => ({
+          role: m.role as 'user' | 'assistant',
+          content: m.content,
+        }))),
+      { role: 'user' as const, content: userMessage },
     ]
-
-    // Classify prompt for research telemetry
-    // Use the local deterministic classifier. Standard chat must not make
-    // secondary provider calls with a browser-held API key.
-    const promptClassification: ClassificationResult = classifyPrompt(userMessage)
-    const llmClassifyPromise = Promise.resolve()
 
     // Compute AutoTune parameters if enabled
     let tuneResult: AutoTuneResult | null = null
@@ -392,8 +349,6 @@ export function ChatInput() {
               resetUltraplinianRace()
 
               // Wait for LLM classification to land (usually already resolved)
-              await llmClassifyPromise
-
               // Beacon metadata to HF dataset (fire-and-forget, no content)
               recordChatEvent({
                 mode: 'ultraplinian',
@@ -476,8 +431,6 @@ export function ChatInput() {
         })
 
         // Wait for LLM classification to land (usually already resolved)
-        await llmClassifyPromise
-
         // Beacon metadata to HF dataset (fire-and-forget, no content)
         recordChatEvent({
           mode: 'standard',

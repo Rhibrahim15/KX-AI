@@ -724,8 +724,7 @@ export const useStore = create<AppState>()(
           'currentPersona', 'autoTuneEnabled', 'autoTuneStrategy',
           'autoTuneOverrides', 'feedbackState', 'parseltongueConfig',
           'memories', 'memoriesEnabled', 'customSystemPrompt', 'useCustomSystemPrompt',
-          'consortiumEnabled', 'consortiumTier', 'liquidResponseEnabled', 'liquidMinDelta',
-          'ultraplinianEnabled', 'ultraplinianTier',
+          'liquidResponseEnabled', 'liquidMinDelta',
           'datasetGenerationEnabled', 'noLogMode', 'showMagic', 'promptsTried',
         ]
         for (const key of allowed) {
@@ -779,6 +778,9 @@ export const useStore = create<AppState>()(
           state.setApiKey("");
           state.setUltraplinianApiKey("");
           state.setUltraplinianApiUrl("");
+          state.setUltraplinianEnabled(false);
+          state.setConsortiumEnabled(false);
+          state.setAutoTuneEnabled(false);
           state.setDefaultModel('kx-auto');
           state.setHydrated()
         }

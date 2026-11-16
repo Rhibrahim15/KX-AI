@@ -17,8 +17,8 @@ This report supersedes the June 30, 2026 audit. A source file existing is not pr
 | Provider routing | Implemented; core tested | Groq, OpenRouter, Cerebras and Mistral OpenAI-compatible adapters. Per-provider timeout. HTTP 400 stops failover; provider outage can fail over. |
 | Context manager | Implemented; unit tested | Approximate token budgeting, pinned-message inclusion, deduplication and chronological output. |
 | Web application | Root `src/` app is canonical candidate | Navigation and welcome page simplified; arbitrary model picker replaced by server-managed automatic routing. |
-| Web chat transport | Implemented; full UI build under verification | Standard chat calls a same-origin Next.js BFF. The BFF strips browser system prompts, validates user/assistant messages and forwards the backend token server-side. |
-| Browser credentials | Improved | Standard chat does not send a provider key. Optional legacy keys are excluded from Zustand persistence and backup exports; older persisted values are cleared on hydration. |
+| Web chat transport | Implemented; full build passed | Standard chat calls a password-gated same-origin Next.js BFF. The BFF strips browser system prompts, validates user/assistant messages and forwards the backend token server-side. The composer no longer uses an obsolete direct backend shortcut. |
+| Browser credentials | Improved | Standard chat does not send a provider key. Legacy provider keys/endpoints are excluded from persistence/backup and old values are cleared on hydration. |
 | Visitor authentication | Implemented on rebuild branch | Password login issues a signed 12-hour HttpOnly cookie. Middleware protects pages and API endpoints and fails closed in production if access secrets are missing. Login is same-origin only. |
 | Rate limiting | Not implemented | Distributed login throttling, BFF/backend request limits and provider usage budgets are still required before public access. |
 | Persistent memory | Not active | Prisma schema and repository adapter boundary exist. Prisma package/client, migrations and live persistence are not wired. |
@@ -41,6 +41,8 @@ This report supersedes the June 30, 2026 audit. A source file existing is not pr
 - `src/app/api/chat/route.ts`: same-origin BFF to the protected backend.
 - `api/server.ts`: shared core wiring, explicit CORS, production bearer auth and honest 501 media response.
 - `middleware.ts` + `/login` + `/api/access`: private password gate, signed short-lived session cookie, same-origin login and production fail-closed behavior.
+- Simplified Settings UI for themes, accurate privacy details, and local conversation export/import/deletion.
+- Disabled the legacy telemetry beacon and retired prompt obfuscation; the composer sends real user text and relies on the backend identity prompt.
 - Core unit tests and GitHub Actions production-build workflow.
 - Rewritten product, architecture, deployment and roadmap documentation.
 

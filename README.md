@@ -13,8 +13,8 @@ The active rebuild is on `rebuild/foundation`; `main` remains unchanged. The wor
 | Core API | Shared identity prompt, context manager and typed provider router are wired into the Express entrypoint on the rebuild branch |
 | Provider routing | Groq, OpenRouter, Cerebras and Mistral adapters; configured order; provider timeout; HTTP 400 stops failover |
 | Context | Approximate token budget, pinned messages, deduplication and chronological history selection |
-| Web chat | Root Next.js app under `src/`; standard chat uses a same-origin BFF at `/api/chat` |
-| Credentials | Standard chat credentials stay on the backend. Optional legacy keys are session-only and excluded from browser persistence and backups |
+| Web chat | Root Next.js app under `src/`; standard chat uses the access-gated same-origin BFF at `/api/chat` |
+| Credentials | Standard chat credentials stay on the backend. Legacy multi-model routes are disabled and old browser keys are cleared. |
 | Memory | Prisma schema and repository boundary prepared; Prisma dependencies, migrations and live persistence are not wired yet |
 | Messaging channels | Existing Telegram/Discord/WhatsApp code is retained but not yet migrated to the shared core or proven end to end |
 | Knowledge and media | Preview/legacy areas only. Media API explicitly returns HTTP 501 rather than fake success |
@@ -86,6 +86,8 @@ Open `http://localhost:3000`. API health check: `http://localhost:7860/v1/health
 ```bash
 npm run typecheck
 npm run typecheck:api
+npm run typecheck
+npm run typecheck:api
 npm run typecheck:core
 npm run test:core
 npm run build
@@ -111,6 +113,7 @@ See [.env.example](.env.example).
 
 - Chat history is not yet persisted in PostgreSQL. The current browser workspace stores conversations locally; the API receives the message history with each request.
 - The root app's model selector is intentionally replaced with server-managed automatic routing. The server reports the actual provider and model used.
+- Standard chat sends only user/assistant turns; the backend supplies the single KX identity prompt. Legacy prompt obfuscation and usage-metadata beacons are disabled.
 - Telegram voice-note transcription is being extracted into a shared service; the existing bot has not yet been migrated to persistent shared sessions.
 - Discord and WhatsApp are not yet integrated with the new runtime.
 - Knowledge retrieval, MCP tools and media generation are not claimed as operational. Media requests return HTTP 501.

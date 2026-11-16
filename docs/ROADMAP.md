@@ -34,6 +34,8 @@
 - [x] Replace standard browser-to-provider calls with a same-origin BFF
 - [x] Keep the backend token server-side and remove legacy provider keys from browser persistence/backups
 - [x] Replace arbitrary model picker with honest server-managed routing
+- [x] Replace oversized legacy Settings tabs with real appearance, privacy and local data controls
+- [x] Disable legacy prompt obfuscation and metadata beacon in standard chat
 - [x] Remove misleading claims and hide unverified tools from primary navigation
 - [ ] Pass the production build on the latest revision
 - [x] Add private password gate with signed HttpOnly session and fail-closed production behavior
