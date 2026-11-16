@@ -29,8 +29,8 @@ See [verified status](docs/STATUS.md), [architecture](docs/ARCHITECTURE.md), and
 Browser
   │
   ▼
-Next.js app (src/)
-  ├── private access middleware
+Next.js 16 app (src/)
+  ├── private access proxy (`proxy.ts`)
   └── POST /api/chat (same-origin BFF)
         │ server-only backend token
         ▼
@@ -47,7 +47,7 @@ The API is currently stateless. The browser sends the conversation turns with ea
 
 ## Local development
 
-Requirements: Node.js 20+ and npm.
+Requirements: Node.js 20.9+ (Node 22 LTS recommended) and npm.
 
 ```bash
 git clone https://github.com/Rhibrahim15/KX-AI.git
@@ -81,6 +81,7 @@ Open `http://localhost:3000`. API health: `http://localhost:7860/v1/health`.
 ## Quality checks
 
 ```bash
+npm run lint
 npm run typecheck
 npm run typecheck:api
 npm run typecheck:core
@@ -88,7 +89,7 @@ npm run test:core
 npm run build
 ```
 
-GitHub Actions runs these checks for rebuild pushes and pull requests. The core suite currently covers context handling and provider failover semantics. A green build does not prove live provider credentials, persistence, messaging channels or deployment.
+GitHub Actions runs lint, type checks, unit tests, dependency audits and the Next.js production build for rebuild pushes and pull requests. The core suite currently covers context handling and provider failover semantics. A green build does not prove live provider credentials, persistence, messaging channels or deployment.
 
 ## Configuration
 
@@ -103,6 +104,10 @@ See [.env.example](.env.example).
 - `KX_WEB_ACCESS_PASSWORD`: private web workspace password; required in production.
 - `KX_WEB_SESSION_SECRET`: independent random signing secret (minimum 32 characters); required in production.
 - `DATABASE_URL`: reserved for the persistence milestone; current chat does not use it.
+
+## Framework and model defaults
+
+The web runtime is being upgraded to Next.js 16 with React 19. The private access gate uses Next.js 16's `proxy.ts` convention. Groq defaults to `openai/gpt-oss-120b`; OpenRouter defaults to the `openrouter/free` model router. Both remain configurable through environment variables.
 
 ## Important limitations
 

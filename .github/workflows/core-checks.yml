@@ -11,12 +11,13 @@ on:
 
 jobs:
   core:
+    if: ${{ !contains(github.event.head_commit.message || '', '[refresh-lock]') && !contains(github.event.pull_request.title || '', '[LOCK REFRESH]') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
       - run: npm ci
       - name: Dependency audit report
@@ -46,6 +47,7 @@ jobs:
             }
           }
           NODE
+      - run: npm run lint
       - run: npm run typecheck
       - run: npm run typecheck:api
       - run: npm run typecheck:core

@@ -29,14 +29,14 @@ const providerDefaults = [
     keyName: "GROQ_API_KEY",
     baseUrl: "https://api.groq.com/openai/v1",
     modelName: "GROQ_MODEL",
-    defaultModel: "llama-3.3-70b-versatile",
+    defaultModel: "openai/gpt-oss-120b",
   },
   {
     provider: "openrouter",
     keyName: "OPENROUTER_API_KEY",
     baseUrl: "https://openrouter.ai/api/v1",
     modelName: "OPENROUTER_MODEL",
-    defaultModel: "meta-llama/llama-3.3-70b-instruct",
+    defaultModel: "openrouter/free",
   },
   {
     provider: "cerebras",

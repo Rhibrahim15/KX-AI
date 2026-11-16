@@ -1,0 +1,96 @@
+name: Refresh dependency lock
+
+on:
+  push:
+    branches:
+      - rebuild/foundation
+    paths:
+      - package.json
+      - .github/workflows/refresh-dependency-lock.yml
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    if: ${{ contains(github.event.head_commit.message || '', '[refresh-lock]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Resolve current dependency versions
+        run: |
+          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+          npm audit fix --package-lock-only --ignore-scripts --no-fund || true
+
+      - name: Commit refreshed lockfile
+        shell: bash
+        run: |
+          if ! git diff --quiet -- package-lock.json package.json; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add package-lock.json package.json
+            git commit -m "chore(deps): refresh patched dependency lockfile [refresh-lock]"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          else
+            echo "Dependency lockfile is already current."
+          fi
+
+      - name: Install from refreshed lockfile
+        run: npm ci --no-audit --no-fund
+
+      - name: Audit all and production dependencies
+        shell: bash
+        run: |
+          npm audit --json > /tmp/kx-audit-all.json || true
+          npm audit --omit=dev --json > /tmp/kx-audit-production.json || true
+          node <<'NODE'
+          const fs = require("node:fs");
+          let hasHighOrCritical = false;
+
+          for (const [label, file] of [
+            ["All dependencies", "/tmp/kx-audit-all.json"],
+            ["Production dependencies", "/tmp/kx-audit-production.json"],
+          ]) {
+            const report = JSON.parse(fs.readFileSync(file, "utf8"));
+            const counts = report.metadata?.vulnerabilities ?? {};
+            console.log(`${label}: ${JSON.stringify(counts)}`);
+
+            for (const [name, vulnerability] of Object.entries(report.vulnerabilities ?? {})) {
+              console.log(
+                `- ${name}: severity=${vulnerability.severity}; direct=${vulnerability.isDirect}; range=${vulnerability.range}; fix=${JSON.stringify(vulnerability.fixAvailable)}`,
+              );
+              for (const item of vulnerability.via ?? []) {
+                if (typeof item === "object") {
+                  console.log(`  advisory: ${item.title} — ${item.url}`);
+                }
+              }
+            }
+
+            hasHighOrCritical ||= (counts.high ?? 0) > 0 || (counts.critical ?? 0) > 0;
+          }
+
+          if (hasHighOrCritical) {
+            console.error("High or critical dependency advisories remain. Review the audit report before release.");
+            process.exitCode = 1;
+          }
+          NODE
+
+      - name: Lint
+        run: npm run lint
+      - name: Type-check web
+        run: npm run typecheck
+      - name: Type-check API
+        run: npm run typecheck:api
+      - name: Type-check core contracts
+        run: npm run typecheck:core
+      - name: Test core
+        run: npm run test:core
+      - name: Build production web app
+        run: npm run build

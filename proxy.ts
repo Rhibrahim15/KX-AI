@@ -60,7 +60,7 @@ async function hasValidSession(request: NextRequest, secret: string): Promise<bo
   }
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   if (pathname === "/login" || pathname === "/api/access") {
