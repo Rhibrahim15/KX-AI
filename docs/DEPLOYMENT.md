@@ -8,11 +8,13 @@ Target topology: Next.js on Vercel → Express API on Railway → PostgreSQL via
 
 Do **not** expose the web application publicly yet.
 
-The backend requires a bearer token in production, and the Next.js BFF keeps that token server-side. However, the BFF does not yet authenticate individual visitors or apply reliable rate limiting. An unrestricted visitor could still make requests through the BFF and spend the founder's provider quota.
+The backend requires a bearer token in production, and the Next.js BFF keeps that token server-side. The rebuild branch now includes a password gate, a signed 12-hour HttpOnly session cookie, and middleware that protects pages and API routes. Production startup fails closed when the access password or 32-character session secret is missing.
+
+The gate does **not** replace rate limiting: the public login endpoint still needs shared brute-force protection, and the chat BFF/backend need distributed request and usage limits. An authorized session could otherwise consume the founder's provider quota.
 
 Before public release, implement and verify:
-- Visitor authentication or a reliable hosting-level access gate.
-- Rate limiting at the BFF and backend.
+- Shared rate limiting on login, BFF and backend.
+- Request/usage budgets and abuse monitoring.
 - Request/usage limits and abuse monitoring.
 - Secret rotation and tested incident recovery.
 - Persistent storage and backup/restore verification.
@@ -68,6 +70,8 @@ Server-only environment variables:
 |---|---|
 | `KX_AI_BACKEND_URL` | HTTPS Railway API origin, e.g. `https://<service>.up.railway.app` |
 | `KX_AI_BACKEND_TOKEN` | Same secret value as Railway's `API_AUTH_TOKEN` |
+| `KX_WEB_ACCESS_PASSWORD` | Strong private workspace password |
+| `KX_WEB_SESSION_SECRET` | Independent random signing secret, at least 32 characters |
 
 Do not prefix these variables with `NEXT_PUBLIC_`. The server-side route `src/app/api/chat/route.ts` reads them and forwards the backend token. The browser calls only the same-origin `/api/chat` route.
 
@@ -78,7 +82,9 @@ Do not prefix these variables with `NEXT_PUBLIC_`. The server-side route `src/ap
 - `GET /v1/health` is public for hosting-platform health checks.
 - `CORS_ORIGINS` must be an explicit comma-separated list. Wildcard origins are rejected.
 - The BFF-to-API request is server-to-server. CORS is not visitor authentication.
-- Visitor authentication and rate limiting are still missing from the BFF. Treat the app as private-development-only until both are in place.
+- The password gate protects visitors with a signed 12-hour HttpOnly cookie. Middleware fails closed in production if either web access secret is missing.
+- The login endpoint checks the same-origin request and compares passwords with a timing-safe comparison.
+- Shared brute-force protection, distributed rate limiting and provider usage budgets are still missing. Keep the app private until these are configured.
 
 ## 5. Database and persistence milestone
 
@@ -115,7 +121,7 @@ After the required deployment gates are met:
 4. A provider failure causes documented failover; HTTP 400 does not fail over.
 5. A media request returns explicit `501` until media generation is implemented.
 6. After persistence is complete, restart the backend and verify the conversation remains available.
-7. Visitor access and rate limits reject unauthorized or excessive requests.
+7. The password gate rejects unauthenticated visitors; shared rate limits reject excessive login, BFF and backend requests.
 8. Backups are restored successfully in a test environment.
 
 ## 8. Secret hygiene

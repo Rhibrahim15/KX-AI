@@ -18,7 +18,7 @@ The active rebuild is on `rebuild/foundation`; `main` remains unchanged. The wor
 | Memory | Prisma schema and repository boundary prepared; Prisma dependencies, migrations and live persistence are not wired yet |
 | Messaging channels | Existing Telegram/Discord/WhatsApp code is retained but not yet migrated to the shared core or proven end to end |
 | Knowledge and media | Preview/legacy areas only. Media API explicitly returns HTTP 501 rather than fake success |
-| Production access | Not ready for public exposure. The web BFF still needs visitor authentication and rate limiting |
+| Production access | Password gate and signed 12-hour HttpOnly sessions are implemented; shared rate limiting and usage budgets are still required before public exposure |
 
 See [docs/STATUS.md](docs/STATUS.md) for the verified status and [docs/ROADMAP.md](docs/ROADMAP.md) for the build gates.
 
@@ -84,12 +84,14 @@ Open `http://localhost:3000`. API health check: `http://localhost:7860/v1/health
 ## Quality checks
 
 ```bash
+npm run typecheck
+npm run typecheck:api
 npm run typecheck:core
 npm run test:core
 npm run build
 ```
 
-The GitHub Actions workflow runs these commands on rebuild pushes and pull requests. The full Next.js production build is included so frontend integration errors are not hidden by passing core-only tests.
+The GitHub Actions workflow checks the Next.js application, active API entrypoint, core contracts and unit tests on rebuild pushes and pull requests. The full Next.js production build is included so frontend integration errors are not hidden by passing core-only tests.
 
 ## Configuration
 
@@ -101,6 +103,8 @@ See [.env.example](.env.example).
 - `CORS_ORIGINS`: explicit allowed browser origins; wildcard origins are rejected.
 - `KX_AI_BACKEND_URL`: backend origin used by the Next.js BFF.
 - `KX_AI_BACKEND_TOKEN`: must match backend `API_AUTH_TOKEN`; server-only, never use a `NEXT_PUBLIC_` prefix.
+- `KX_WEB_ACCESS_PASSWORD`: private web workspace password; required in production.
+- `KX_WEB_SESSION_SECRET`: independent random signing secret (minimum 32 characters); required in production.
 - `DATABASE_URL`: reserved for the persistence milestone; the current chat path does not use it yet.
 
 ## Important limitations
@@ -110,7 +114,7 @@ See [.env.example](.env.example).
 - Telegram voice-note transcription is being extracted into a shared service; the existing bot has not yet been migrated to persistent shared sessions.
 - Discord and WhatsApp are not yet integrated with the new runtime.
 - Knowledge retrieval, MCP tools and media generation are not claimed as operational. Media requests return HTTP 501.
-- The BFF hides backend credentials but does **not yet authenticate visitors**. Do not expose the web app publicly until a visitor access gate and reliable rate limiting are implemented. Backend bearer authentication alone does not protect an unrestricted public BFF.
+- The BFF is protected by a password gate and signed 12-hour HttpOnly cookie. This does not provide distributed brute-force protection, request throttling or provider usage budgets. Do not expose the web app publicly until reliable shared rate limiting and monitoring are configured.
 
 ## Security
 

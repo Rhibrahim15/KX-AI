@@ -7,6 +7,7 @@ import {
   MessageSquare,
   Trash2,
   Settings,
+  LogOut,
   ChevronLeft,
   ChevronRight,
   BookOpen,
@@ -173,13 +174,29 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
           </div>
 
           <div className="border-t border-white/[0.07] bg-[#080a10] p-3">
-            <button
-              onClick={() => setShowSettings(true)}
-              className="flex w-full items-center gap-2 rounded-lg border border-white/[0.07] px-3 py-2 text-xs text-slate-300 transition hover:border-white/20 hover:bg-white/[0.035] hover:text-white"
-            >
-              <Settings className="h-3.5 w-3.5 text-slate-500" />
-              Settings
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowSettings(true)}
+                className="flex flex-1 items-center gap-2 rounded-lg border border-white/[0.07] px-3 py-2 text-xs text-slate-300 transition hover:border-white/20 hover:bg-white/[0.035] hover:text-white"
+              >
+                <Settings className="h-3.5 w-3.5 text-slate-500" />
+                Settings
+              </button>
+              <button
+                onClick={async () => {
+                  try {
+                    await fetch('/api/access', { method: 'DELETE' })
+                  } finally {
+                    window.location.replace('/login')
+                  }
+                }}
+                className="flex items-center justify-center rounded-lg border border-white/[0.07] px-3 py-2 text-xs text-slate-400 transition hover:border-rose-300/20 hover:bg-rose-300/[0.05] hover:text-rose-200"
+                aria-label="Lock workspace"
+                title="Lock workspace"
+              >
+                <LogOut className="h-3.5 w-3.5" />
+              </button>
+            </div>
             <div className="mt-3 flex items-center gap-2.5 px-1">
               <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/[0.08] text-[10px] font-semibold text-slate-200">
                 K

@@ -36,8 +36,8 @@
 - [x] Replace arbitrary model picker with honest server-managed routing
 - [x] Remove misleading claims and hide unverified tools from primary navigation
 - [ ] Pass the production build on the latest revision
-- [ ] Add visitor authentication/access gate
-- [ ] Add reliable rate limiting and usage budgets
+- [x] Add private password gate with signed HttpOnly session and fail-closed production behavior
+- [ ] Add shared login brute-force protection, distributed rate limiting and usage budgets
 - [ ] Add user-visible provider status, retry and error states
 - [ ] Verify accessibility, mobile layout and keyboard interaction
 
