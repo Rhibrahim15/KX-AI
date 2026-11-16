@@ -19,6 +19,33 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
+      - name: Dependency audit report
+        shell: bash
+        run: |
+          npm audit --json > /tmp/kx-audit-all.json || true
+          npm audit --omit=dev --json > /tmp/kx-audit-production.json || true
+          node <<'NODE'
+          const fs = require('node:fs');
+
+          for (const [label, path] of [
+            ['All dependencies', '/tmp/kx-audit-all.json'],
+            ['Production dependencies', '/tmp/kx-audit-production.json'],
+          ]) {
+            const report = JSON.parse(fs.readFileSync(path, 'utf8'));
+            const counts = report.metadata?.vulnerabilities ?? {};
+            console.log(`\n${label}: ${JSON.stringify(counts)}`);
+
+            for (const [name, vulnerability] of Object.entries(report.vulnerabilities ?? {})) {
+              const advisories = (vulnerability.via ?? [])
+                .filter((item) => typeof item === 'object')
+                .map((item) => `${item.title} (${item.url})`);
+              console.log(
+                `- ${name}: ${vulnerability.severity}; direct=${vulnerability.isDirect}; range=${vulnerability.range}; fix=${JSON.stringify(vulnerability.fixAvailable)}`,
+              );
+              for (const advisory of advisories) console.log(`  advisory: ${advisory}`);
+            }
+          }
+          NODE
       - run: npm run typecheck
       - run: npm run typecheck:api
       - run: npm run typecheck:core
