@@ -150,7 +150,7 @@ app.post("/v1/chat/completions", async (req, res) => {
 
 // Media is deliberately unavailable until a real provider integration and
 // task-status lifecycle exist. Never return a success-shaped placeholder.
-app.all("/v1/media/*", (_req, res) => {
+app.all("/v1/media/video/image", (_req, res) => {
   res.status(501).json({
     error: "Media generation is not implemented on this API version.",
     code: "NOT_IMPLEMENTED",
