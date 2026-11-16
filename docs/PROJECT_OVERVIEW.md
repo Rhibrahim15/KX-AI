@@ -1,222 +1,103 @@
-# KX Sanctuary OS — Project Overview
+# KX Sanctuary OS — Project overview
 
-> The single authoritative description of the project: what it is, why it exists, what it must become, and how we
-> will know it succeeded.
-> **Version:** 1.0 · **Date:** 2026-06-30 · **Status:** Living document (updated as the build progresses)
+**Version:** 2.0  
+**Updated:** 16 November 2026  
+**Status:** Private development rebuild; not production deployed.
 
----
+## 1. What KX is
 
-## 1. Description — What is KX Sanctuary OS?
+KX Sanctuary OS (KX-AI) is a personal, multilingual AI assistant for Halifa Rabiu Ibrahim and his work across software engineering, GreenByte and AgroLingo AI.
 
-**KX Sanctuary OS (KX-AI)** is a personal, autonomous, agentic AI assistant. It is built by and for
-**Halifa Rabiu Ibrahim**, founder of **GreenByte**, and it exists to be his lifelong intellectual partner —
-not a product for a market, not a demo, not a wrapper around one LLM.
+The intended role is a dependable intellectual partner: it should advise, critique, guide, improve and notify. It should not flatter, invent actions, fabricate evidence or claim a tool succeeded when it did not.
 
-Concretely, KX Sanctuary OS is being built as a **hybrid system** closer to Jarvis/Siri/Friday than to a chatbot:
+KX is intended to become one assistant identity across a web workspace and messaging channels, supported by persistent memory, dependable provider routing and carefully permissioned tools. That is the product vision, not a claim that every capability is already operational.
 
-```
-        YOU (voice / text / photo / file)
-                     │
-   ┌─────────────────▼──────────────────┐
-   │  OMNICHANNEL FRONT DOORS           │
-   │  Web PWA · Telegram · Discord ·    │
-   │  WhatsApp (· VoIP, VSCode later)   │
-   └─────────────────┬──────────────────┘
-                     │
-   ┌─────────────────▼──────────────────┐
-   │  PERCEPTION LAYER                  │
-   │  Whisper ASR (EN/HA/AR auto) ·     │
-   │  image/file intake · language ID   │
-   └─────────────────┬──────────────────┘
-                     │
-   ┌─────────────────▼──────────────────┐
-   │  COGNITIVE CORE                    │
-   │  ContextManager (memory window) ·  │
-   │  LLM Router w/ failover ·          │
-   │  system identity & judgment rules  │
-   └─────────────────┬──────────────────┘
-                     │
-   ┌─────────────────▼──────────────────┐
-   │  MEMORY & KNOWLEDGE                │
-   │  PostgreSQL sessions (Prisma) ·    │
-   │  RAG corpus · pinned facts ·       │
-   │  tasks/deadlines/appointments      │
-   └─────────────────┬──────────────────┘
-                     │
-   ┌─────────────────▼──────────────────┐
-   │  HANDS (TOOLS / EXECUTION)         │
-   │  Web search · GitHub · files ·     │
-   │  media generation · automation     │
-   └────────────────────────────────────┘
-```
+## 2. Mission
 
-It runs on infrastructure chosen for durability and cost: **Next.js PWA (root `src/` app) on Vercel**, **Node.js + Express +
-TypeScript on Railway**, **PostgreSQL (Prisma)** for memory, and a chain of **mostly-free LLM providers**
-(Groq, Cerebras, Gemini, Mistral, OpenRouter, NVIDIA NIM, Ollama) so that no single rate-limit can take it down.
+Build a practical personal AI system that can be maintained by its founder, works naturally in English, Hausa and Arabic, remembers information that the user has chosen to retain, and performs useful actions through verified tools.
 
----
+The engineering priorities are:
 
-## 2. The founder context — Why this exists
+1. **Honesty:** distinguish completed work, planned work, assumptions and limitations.
+2. **Continuity:** one identity and context model across channels.
+3. **Memory:** durable, user-reviewable session and long-term memory.
+4. **Agency with permission:** real tools, explicit authorization and confirmation for consequential actions.
+5. **Maintainability:** one active frontend, one API, typed boundaries and reproducible builds.
+6. **Cost discipline:** use a small provider set and bounded context; avoid unnecessary external services.
 
-Halifa Rabiu Ibrahim is a developer, systems architect, and ethical-hacking intern who runs **GreenByte**,
-whose flagship project **AgroLingo AI** is a Hausa-first agricultural intelligence platform for Northern
-Nigerian farmers (weather, pest/disease diagnosis, farm economics, market intelligence).
+## 3. Current implementation
 
-The working reality this project solves:
+As of 16 November 2026, the rebuild branch contains:
 
-- **Too many brains, no coordinator.** Excellent free AI APIs (Groq, Cerebras, Gemini, Mistral, NVIDIA,
-  OpenRouter) — each rate-limited, each forgetful, each in its own tab.
-- **Tools without a mind.** Telegram/Discord/WhatsApp bots, ElevenLabs voices, video generators (Kling,
-  Seedance, MiniMax, Luma), image models (FLUX, Imagen), search APIs (Tavily, SerpAPI) — all paid for or
-  provisioned, all disconnected.
-- **No memory, no continuity.** A personal advisor that forgets yesterday cannot mentor anyone for a lifetime.
-- **No honesty layer.** Chatbots agree with everything. Halifa needs something that **criticizes his code,
-  challenges his plans, and warns him of risks** — an advisor, not a yes-man.
+- A root Next.js application under `src/`.
+- A same-origin chat BFF that forwards to the backend with a server-side bearer token.
+- A private password gate using a signed 12-hour HttpOnly session cookie.
+- An Express API that applies the shared KX prompt and ContextManager.
+- A typed provider router for Groq, OpenRouter, Cerebras and Mistral.
+- HTTP 400 fatal semantics, provider failover and bounded request sizes.
+- A simplified composer and settings interface.
+- A Prisma schema and repository boundary prepared for future persistence.
+- A reusable Telegram voice-note transcription service not yet wired into the bot.
 
-KX Sanctuary OS is the unification: **one identity, one memory, many mouths (channels), many brains
-(providers), and — as the build progresses — real hands (tools).**
+The core TypeScript checks, six unit tests and Next.js production build passed in CI on commit `252bf98`. The latest branch also archives the duplicate frontend scaffold, old HTML prototypes and superseded root-level project documents. `main` remains untouched while the draft pull request is reviewed.
 
----
+## 4. What is not yet working
 
-## 3. Mission
+The current rebuild must not be described as a complete autonomous or omnichannel assistant.
 
-> **Build one real, autonomous, omnichannel personal AI — with persistent memory, honest judgment, and
-> working hands — that serves Halifa Rabiu Ibrahim daily across English, Hausa, and Arabic, and can be
-> fully maintained and deployed by him alone, at near-zero recurring cost.**
+- **Server-side memory:** not wired. Conversations are currently stored in the browser; PostgreSQL persistence is a future milestone.
+- **Telegram:** the existing bot remains on a legacy router and in-memory Map; it has not been migrated to the shared runtime.
+- **Discord and WhatsApp:** existing source code is unverified/incomplete.
+- **RAG:** retained research/GKP files are not connected to the new chat path.
+- **Tools:** search, GitHub actions, file operations and MCP are not exposed as working tools in the new runtime.
+- **Voice output and media:** not implemented in the rebuilt path. Media routes return HTTP 501.
+- **Autonomy:** no scheduled tasks or proactive notifications are active.
+- **Public operations:** distributed rate limits, provider usage budgets, monitoring, backups and recovery procedures are outstanding. The deployment must remain private.
 
-What the mission means operationally:
+The exact status and next acceptance criteria live in [STATUS.md](STATUS.md) and [ROADMAP.md](ROADMAP.md).
 
-| Pillar of the mission | Concrete commitment |
+## 5. Product principles
+
+- Real results over impressive claims.
+- One source of truth for identity and current capability.
+- User messages must never silently disappear from model context.
+- HTTP 400 from a provider is treated as a request defect, not an outage.
+- Unsupported features return explicit errors.
+- Memory and sensitive context require review, access control and deletion paths.
+- Every capability needs an observable acceptance test before it is called complete.
+
+## 6. Target capability areas
+
+| Area | Long-term direction |
 |---|---|
-| **One identity** | The same system prompt, standards, and personality across every channel and provider. KX is the same entity on web, Telegram, Discord, and WhatsApp. |
-| **Real memory** | Sessions and important facts persist in PostgreSQL. "Pinned" facts survive context-window trimming. Nothing is lost on restart. |
-| **Honest judgment** | KX advises, criticizes, guides, improves, and notifies — it does not flatter. Brutal honesty toward the founder is a feature, not a failure mode. |
-| **Working hands** | Every tool (search, GitHub, media, files) must perform a real API call with real results. An endpoint that cannot act returns an honest error (501/502), never a fake "success". |
-| **Zero simulation** | No feature is reported as working until it has been executed against the live provider and observed working. |
-| **Cost discipline** | Free tiers first, token frugality always (hybrid context windowing, capped history, no wasteful calls), paid fallbacks only where value is proven. |
-| **Maintainability** | Clean layered architecture (types → context → adapters → router → repositories → controllers) so Halifa — a developer himself — can extend and repair it without archaeology. |
+| Cognitive core | Typed multi-provider routing with explicit error semantics |
+| Perception | Voice, image and document intake; English/Hausa/Arabic support |
+| Memory | PostgreSQL sessions, pinned facts, tasks and user-controlled long-term memory |
+| Knowledge | Curated project corpus and retrieval with source attribution |
+| Tools | Search, GitHub, files and integrations with authorization and audit logs |
+| Voice | Optional multilingual transcription and speech output |
+| Omnichannel | Web, Telegram, Discord and WhatsApp using one identity/repository |
+| Autonomy | Scheduled reminders and user-approved proactive notifications |
+
+These are target capabilities. See the verified status before relying on any of them.
+
+## 7. Deployment direction
+
+The preferred future topology is:
+- Vercel for the root Next.js web app.
+- Railway for the long-running Express API and messaging processes.
+- PostgreSQL with Prisma for durable session storage.
+- Provider credentials stored only in backend environment variables.
+
+No live deployment is claimed. The current system is a private development build.
+
+## 8. Non-goals
+
+- No unconditional-obedience or “uncensored 100%” promise. Hosted models have provider policies and limits.
+- No simulated tools, fake media jobs or fabricated success.
+- No commercial multi-user SaaS, billing or tenant architecture until the personal system is reliable.
+- No unnecessary provider/database/tool sprawl before the core restart and recovery tests pass.
 
 ---
 
-## 4. Vision
-
-> **A Jarvis-class personal agent: it listens and speaks (EN/HA/AR), it executes, it lives everywhere Halifa
-> is, it never goes down, and it remembers everything that matters — for years.**
-
-The vision expresses itself through these long-term properties:
-
-1. **Omniscience of context** — it knows the founder's projects (GreenByte, AgroLingo AI), his standards,
-   his religion and culture, his goals. It never asks "who are you?" twice.
-2. **Omnipresence** — WebApp/PWA, Telegram, Discord, WhatsApp today; VoIP calls, mobile, and a VSCode
-   companion later. The channel is an interface detail, not a different assistant.
-3. **True multilingualism** — English, Hausa, and Arabic in *both* directions (hearing via Whisper with
-   automatic language detection; speaking via neural TTS). Code-switching (Hausa/English mix) is normal, not
-   an edge case.
-4. **Agency** — not just answering: running searches, managing GitHub repos, drafting documents, generating
-   images/video for AgroLingo content, tracking deadlines, and proactively notifying the founder.
-5. **Indestructible cognition** — a failover chain meant for the free-tier world: when Groq throttles,
-   Cerebras answers; when hosted providers all fail, Ollama answers locally.
-6. **Mentor matrix** — five verbs define its behavior: **ADVISE** (strategy), **CRITICIZE** (code/schema
-   flaws, immediately and honestly), **GUIDE** (step-by-step breakdowns), **IMPROVE** (refactors, drafts),
-   **NOTIFY** (vulnerabilities, deadlines, market shifts).
-
-### The obedience question (answered honestly)
-
-The founder asked for "80–90% obedience / uncensored behavior, with 100% accepted as impossible." The
-engineering position, stated plainly:
-
-- **Hosted providers (Groq, Gemini, Mistral, OpenRouter, NVIDIA, Cerebras) have hard content filters.** No
-  system prompt removes them. We can maximize compliance through: a strong sovereign system prompt,
-  choosing the least-restrictive *appropriate* models per task, temperature/structure choices, and routing
-  policy — and we will be honest about the residual refusals.
-- **True 90%+ uncensored operation requires self-hosted weights (Ollama with uncensored community models)
-  on hardware we control.** That is a legitimate later phase, not a promise we make today.
-- **Never claim 100%.** Any system that promises that is lying to its owner.
-
----
-
-## 5. Design philosophy (the code of conduct of this repo)
-
-1. **Real > impressive.** A working Telegram voice note beats ten fake dashboards.
-2. **Stub means visible.** Unfinished endpoints return `501 Not Implemented` with a reason — never a
-   success-shaped lie.
-3. **Brutal honesty flows both ways.** The assistant tells the founder the truth; the codebase tells its
-   readers the truth (see `docs/STATUS.md`).
-4. **The house order: Foundation → Plumbing → Rooms.** Types first, then context/plumbing, then adapters,
-   then the router with context handoff, then persistence, then controllers, then UI. No hacking the router
-   before the data contracts exist.
-5. **Token frugality.** Hybrid context windowing (~8k token target, 20-message cap, pinned facts preserved),
-   `/4`-length token estimation, deduplicated history. Sufficiency, not extravagance.
-6. **Every shared contract is typed.** TypeScript strict where it matters; interfaces before implementations.
-7. **Restartable by design.** If Railway drops the container, memory lives in PostgreSQL — not in a Map.
-8. **One source of truth.** This `docs/` folder is authoritative. Old Master/paper/phase documents are
-   archived, not resurrected.
-
----
-
-## 6. Capability pillars (target system)
-
-| # | Pillar | Description | Current state |
-|---|---|---|---|
-| 1 | **Cognitive core** | Multi-provider LLM failover with context handoff; adjudicated by a clean typed router | Provider clients exist; clean router = Phase 0 |
-| 2 | **Perception** | Groq Whisper ASR with auto language detection for Telegram/WhatsApp voice notes; image intake | Telegram voice = real; web audio = Phase 4 |
-| 3 | **Memory** | PostgreSQL sessions via Prisma; pinned facts (`isImportant`); task/deadline/appointment categories; provider affinity remembered | Designed; Phase 0–1 |
-| 4 | **Knowledge / RAG** | Curated corpus (GKP documents) embedded and retrieved into context | Corpus exists (`gkp/`); legacy indexer exists; requires re-wiring in Phase 5 |
-| 5 | **Hands (tools)** | Web search (Tavily/SerpAPI), GitHub read/write, file operations, media generation | Client code partially exists; verification + wiring = Phase 3–4 |
-| 6 | **Voice out** | ElevenLabs neural TTS replies | Client exists (`api/lib/voice/elevenlabs.ts`); wiring = Phase 4 |
-| 7 | **Media studio** | Image (FLUX.1 / Imagen) and video (Kling, Seedance-PiAPI, MiniMax Hailuo, Luma) generation with honest task polling | Clients exist; endpoint verification = Phase 4 |
-| 8 | **Omnichannel** | PWA (Vercel), Telegram, Discord, WhatsApp (Cloud API) | Telegram strongest; others partial |
-| 9 | **AgroLingo intelligence** | KX serves as Chief Research Officer for GreenByte's AgroLingo AI (Hausa-first agronomy, pests, markets) | Knowledge-side = Phase 5; product it self |
-| 10 | **Islamic & cultural fluency** | Qur'an/Tafsir/Hadith/Fiqh grounding, dignified cultural register in EN/AR/HA | System-prompt level now; corpus = Phase 5 |
-| 11 | **Mentor matrix** | ADVISE · CRITICIZE · GUIDE · IMPROVE · NOTIFY behaviors | System-prompt level; proactive notifications = Phase 8 |
-| 12 | **Autonomy** | Scheduled tasks, reminders, self-initiated alerts | Phase 8 |
-
----
-
-## 7. Target deployment topology
-
-| Concern | Decision | Why |
-|---|---|---|
-| Frontend | **Vercel** (Next.js + React + Tailwind, PWA) | Best DX for a developer who deploys themselves; edge network; free tier |
-| Backend | **Railway** (Node.js + Express + TypeScript) | Long-running processes (bots, polling, cron) — serverless cannot hold Telegram long-polling; simple deploys; PostgreSQL plugin |
-| Database | **PostgreSQL** via Railway (or Supabase) + **Prisma** | Lifelong memory must survive container restarts. SQLite/LibSQL only as a local dev convenience |
-| Bots | Same Railway backend process family | One codebase, one memory contract |
-| Not chosen | Hugging Face Spaces | Proven unreliable for this workload (stuck deployments, port/persistence constraints) — historical only |
-
-Full instructions: [`DEPLOYMENT.md`](DEPLOYMENT.md).
-
----
-
-## 8. What success looks like (acceptance criteria)
-
-The system is considered *real* when — and only when — all of the following hold simultaneously:
-
-1. A message sent from the **web PWA** gets a streamed, context-aware answer from the router, and both
-   messages are found in PostgreSQL afterwards.
-2. A **voice note in Hausa** sent to Telegram gets transcribed correctly and answered in text (and
-   optionally voice) referencing yesterday's conversation.
-3. Killing and redeploying the backend **loses nothing** the founder said that was marked important.
-4. Asking KX to **search the web / inspect a GitHub repo** produces real, verifiable results (a URL that
-   resolves, a commit that exists).
-5. Asking for an **image** returns an actual image, or an honest error naming the failing provider — never a
-   fake "success".
-6. The founder reviews the code and finds **no simulated feature**: every "working" checkbox in
-   `STATUS.md` has evidence.
-7. Cost stays within free tiers under daily use (token frugality enforced by the ContextManager).
-
----
-
-## 9. Non-goals (what this project is not)
-
-- **Not a commercial SaaS (yet).** Multi-tenancy, billing, and marketing are explicitly out of scope for
-  the personal-agent build. The architecture may allow it later; the mission does not require it now.
-- **Not an "unchained Godmode" toy.** The earlier Godmode-era framing is retired: this is engineering, not
-  bravado. Filters and refusals from hosted providers are acknowledged and routed around honestly.
-- **Not a paper.** `docs/archive/PAPER.md` (85 KB) is historical; the system's truth is its code and
-  `STATUS.md`.
-- **Not married to one model.** No vendor worship: models are interchangeable organs in a router.
-
----
-
-*This overview is versioned in git. If code and document disagree, code wins and the document gets fixed —
-not the other way around.*
+If the code disagrees with this overview, update the document to match the code and observed behavior.
