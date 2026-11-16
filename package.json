@@ -13,7 +13,9 @@
     "api:dev": "tsx watch api/server.ts",
     "typecheck": "tsc --noEmit",
     "test:core": "tsx --test api/services/ContextManager.test.ts api/services/LLMRouter.test.ts",
-    "typecheck:core": "tsc --noEmit --strict --skipLibCheck --esModuleInterop --module ESNext --moduleResolution bundler --target ES2022 --lib ES2022,DOM --types node api/types/core.ts api/services/ContextManager.ts api/services/ContextManager.test.ts api/adapters/types.ts api/adapters/OpenAICompatibleAdapter.ts api/services/LLMRouter.ts api/services/LLMRouter.test.ts api/repositories/SessionRepository.ts api/services/audio.service.ts api/agent/prompts.ts"
+    "typecheck:core": "tsc --noEmit --strict --skipLibCheck --esModuleInterop --module ESNext --moduleResolution bundler --target ES2022 --lib ES2022,DOM --types node api/types/core.ts api/services/ContextManager.ts api/services/ContextManager.test.ts api/adapters/types.ts api/adapters/OpenAICompatibleAdapter.ts api/services/LLMRouter.ts api/services/LLMRouter.test.ts api/repositories/SessionRepository.ts api/services/audio.service.ts api/agent/prompts.ts",
+    "typecheck:api": "tsc --noEmit -p tsconfig.api.json",
+    "typecheck:all": "npm run typecheck && npm run typecheck:api && npm run typecheck:core"
   },
   "dependencies": {
     "@types/ws": "^8.18.1",
