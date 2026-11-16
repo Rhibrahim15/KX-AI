@@ -66,7 +66,7 @@ async function consumeLoginAttempt(request: NextRequest): Promise<
   }
 
   const addressHash = createHash("sha256").update(address).digest("hex");
-  const key = `kx:login: ${addressHash}`.replace(" ", "");
+  const key = `kx:login:${addressHash}`;
   try {
     const response = await fetch(endpoint, {
       method: "POST",
