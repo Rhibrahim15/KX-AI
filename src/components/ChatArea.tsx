@@ -4,21 +4,17 @@ import { useRef, useEffect, useState, useCallback } from 'react'
 import { useStore } from '@/store'
 import { ChatMessage } from './ChatMessage'
 import { ChatInput } from './ChatInput'
-import { ArrowDown, Droplets, Hash } from 'lucide-react'
+import { ArrowDown } from 'lucide-react'
 
 export function ChatArea() {
-  const {
-    conversations, currentConversationId, personas, currentPersona,
-    liquidResponseEnabled, setLiquidResponseEnabled,
-    promptsTried,
-    ultraplinianEnabled, consortiumEnabled,
-  } = useStore()
+  const { conversations, currentConversationId } = useStore()
   const currentConversation = conversations.find(c => c.id === currentConversationId) || null
+  const lastAssistantMessage = [...(currentConversation?.messages || [])]
+    .reverse()
+    .find((message) => message.role === 'assistant')
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [isNearBottom, setIsNearBottom] = useState(true)
-
-  const persona = personas.find(p => p.id === currentConversation?.persona) || personas[0]
 
   const checkIfNearBottom = useCallback(() => {
     const container = scrollContainerRef.current
@@ -49,49 +45,22 @@ export function ChatArea() {
   return (
     <div className="flex flex-col h-screen relative">
       {/* Header */}
-      <header className="flex items-center justify-between px-6 py-4 border-b border-theme-primary bg-theme-dim/50">
+      <header className="flex items-center justify-between border-b border-white/[0.07] bg-[#090c13]/90 px-5 py-4">
         <div className="flex items-center gap-3">
-          <div
-            className="w-10 h-10 rounded-lg flex items-center justify-center text-xl"
-            style={{ backgroundColor: persona.color + '20', borderColor: persona.color }}
-          >
-            {persona.emoji}
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-sky-300/20 bg-sky-300/[0.07] text-xs font-semibold text-sky-200">
+            KX
           </div>
           <div>
-            <h2 className="font-semibold">{persona.name}</h2>
-            <p className="text-xs theme-secondary">{currentConversation.model.split('/').pop()}</p>
+            <h2 className="text-sm font-semibold text-white">KX Sanctuary OS</h2>
+            <p className="text-[11px] text-slate-500">
+              {lastAssistantMessage?.model
+                ? `Last response · ${lastAssistantMessage.model}`
+                : 'Automatic provider routing'}
+            </p>
           </div>
         </div>
-        <div className="flex items-center gap-3 text-xs theme-secondary">
-          {/* Prompts tried counter */}
-          <div className="flex items-center gap-1 font-mono" title="Total prompts tried this session">
-            <Hash className="w-3 h-3 opacity-60" />
-            <span>{promptsTried}</span>
-          </div>
-
-          <span className="opacity-30">|</span>
-
-          {/* Liquid Response universal toggle */}
-          <button
-            onClick={() => setLiquidResponseEnabled(!liquidResponseEnabled)}
-            className={`flex items-center gap-1.5 px-2 py-1 rounded-md border transition-all font-mono
-              ${liquidResponseEnabled
-                ? 'border-cyan-500/50 bg-cyan-500/10 text-cyan-400'
-                : 'border-theme-primary/30 bg-theme-dim/50 opacity-60 hover:opacity-100'
-              }`}
-            title={liquidResponseEnabled
-              ? 'Liquid Response ON — responses morph live as better answers arrive'
-              : 'Liquid Response OFF — wait for final response'
-            }
-          >
-            <Droplets className="w-3 h-3" />
-            <span className="text-[10px]">LIQUID</span>
-          </button>
-
-          <span className="opacity-30">|</span>
-
-          <span className="text-[10px] opacity-70">&#x2726;</span>
-          <span>{currentConversation.messages.length} messages</span>
+        <div className="text-[11px] text-slate-500">
+          {currentConversation.messages.length} messages
         </div>
       </header>
 

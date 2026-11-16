@@ -353,7 +353,7 @@ export const useStore = create<AppState>()(
       // Initial state
       theme: 'minimal',
       apiKey: '',
-      defaultModel: 'anthropic/claude-opus-4.6',
+      defaultModel: 'kx-auto',
       conversations: [],
       currentConversationId: null,
       isHydrated: false,
@@ -779,6 +779,7 @@ export const useStore = create<AppState>()(
           state.setApiKey("");
           state.setUltraplinianApiKey("");
           state.setUltraplinianApiUrl("");
+          state.setDefaultModel('kx-auto');
           state.setHydrated()
         }
       }
