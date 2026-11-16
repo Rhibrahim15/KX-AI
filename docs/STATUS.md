@@ -22,7 +22,7 @@ This report supersedes the June 30, 2026 audit. A source file existing is not pr
 | Visitor authentication | Implemented for private use | Single-password login, same-origin check, signed 12-hour HttpOnly/SameSite Strict cookie, middleware protection and production fail-closed configuration. |
 | Browser credentials | Improved | Standard provider keys and backend token stay server-side. Legacy browser keys are cleared and excluded from persistence/backups. |
 | Settings | Simplified | Active UI offers theme selection, privacy disclosures, local conversation backup import/export and local deletion. Unsupported legacy controls are archived. |
-| Rate limiting | Not implemented | Distributed login throttling, BFF/backend request limits and provider usage budgets remain required before public exposure. |
+| Login throttling | Implemented; integration not yet verified | The login route uses an atomic Upstash Redis Lua counter: 5 attempts per client address per 15-minute window. Production fails closed if Upstash credentials or a trusted client IP are unavailable. A configured Upstash instance and live abuse test are still required. |\n| API/BFF rate limits | Not implemented | General chat request limits and provider usage budgets remain required before public exposure. |
 | Persistent memory | Not active | Prisma schema and repository adapter boundary exist. Prisma package/client, migrations and live chat persistence are not wired. Browser conversations remain local. |
 | Telegram | Legacy implementation retained | Existing polling/voice path remains separate and uses in-process history. It is not yet migrated to the shared prompt/router/repository. |
 | Discord / WhatsApp | Unverified | Existing code requires end-to-end tests and shared-session integration. |
@@ -50,7 +50,7 @@ This report supersedes the June 30, 2026 audit. A source file existing is not pr
 
 Commit `252bf98` passed the complete GitHub Actions pipeline: web TypeScript check, active API TypeScript check, core TypeScript check, six core tests and Next.js production build. The latest branch head `845780b` primarily reorganizes historical docs, the duplicate scaffold and old HTML prototypes; its CI run is separate.
 
-CI also reports dependency advisories during `npm ci` (25 total in the observed install: 13 moderate, 10 high, 2 critical). The exact advisory/package breakdown has not yet been captured. Dependency upgrades are not being applied blindly; the audit report is being added to CI before selecting safe upgrades.
+CI also reports dependency advisories during `npm ci` (25 total in the observed install: 13 moderate, 10 high, 2 critical). The latest completed CI log captured 25 total advisories (13 moderate, 10 high, 2 critical), including 12 in production dependencies (5 moderate, 5 high, 2 critical). Dependency upgrades are not being applied blindly: the Next.js/React major-version compatibility impact and transitive dependency paths need a separate tested upgrade.
 
 ## Security and operational blockers
 
