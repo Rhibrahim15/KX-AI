@@ -1209,7 +1209,7 @@ function PrivacyTab() {
             <ul className="space-y-1 theme-secondary">
               <li>• No cookies or tracking</li>
               <li>• No telemetry (Sentry, GA, PostHog)</li>
-              <li>• API key stored locally only</li>
+              <li>• Optional advanced provider key held in memory only</li>
               <li>• AGPL-3.0 licensed - verify the code yourself</li>
             </ul>
           </div>
@@ -1967,7 +1967,7 @@ function PlanTab() {
       <div>
         <h3 className="text-lg font-semibold mb-1">Plan & Tier</h3>
         <p className="text-sm theme-secondary mb-4">
-          Your API key determines your tier. Higher tiers unlock more features, higher rate limits, and full research access.
+          Tier information is not connected to the rebuilt KX API yet.
         </p>
       </div>
 
@@ -2081,7 +2081,7 @@ function PlanTab() {
             <div className="text-sm">
               <p className="font-semibold mb-1">Upgrade Your Plan</p>
               <p className="theme-secondary text-xs">
-                API key tiers are assigned server-side via the <code className="font-mono text-[10px] bg-theme-accent px-1 rounded">GODMODE_TIER_KEYS</code> environment variable. Contact the API host or set the variable yourself if self-hosting.
+                This legacy tier-management screen is not active in the rebuilt KX API. It will be replaced with verified service and provider status.
               </p>
             </div>
           </div>

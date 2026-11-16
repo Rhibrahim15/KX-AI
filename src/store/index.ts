@@ -775,6 +775,10 @@ export const useStore = create<AppState>()(
       }),
       onRehydrateStorage: () => (state) => {
         if (state) {
+          // Remove credentials that older versions persisted in localStorage.
+          state.setApiKey("");
+          state.setUltraplinianApiKey("");
+          state.setUltraplinianApiUrl("");
           state.setHydrated()
         }
       }

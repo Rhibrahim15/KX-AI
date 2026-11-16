@@ -25,9 +25,9 @@ export function WelcomeScreen({ onOpenSettings }: WelcomeScreenProps) {
       {/* Sovereign Companion Status Header */}
       <div className="flex items-center gap-3 px-4 py-1.5 mb-8 rounded-full bg-white/[0.03] border border-white/10 backdrop-blur-md text-xs tracking-wider text-slate-300 font-mono shadow-sm">
         <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-        <span>BOUND EXCLUSIVELY TO KHALIFA ELGEZY</span>
+        <span>KX SANCTUARY OS</span>
         <span className="text-white/20">|</span>
-        <span className="text-cyan-400">JARVIS CODENAME ONLINE</span>
+        <span className="text-cyan-400">PERSONAL AI WORKSPACE</span>
       </div>
 
       {/* Crisp Minimalist Brand */}
@@ -36,13 +36,13 @@ export function WelcomeScreen({ onOpenSettings }: WelcomeScreenProps) {
           𝕂𝕏 <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-emerald-400 to-purple-400">JARVIS</span>
         </h1>
         <p className="text-sm md:text-base text-slate-400 font-light tracking-wide max-w-lg mx-auto leading-relaxed">
-          Sovereign Personal Agentic Companion & GreenByte Knowledge Platform (GKP) Titan Hub. Zero safety refusals.
+          A personal AI workspace for thinking, building, learning, and managing knowledge.
         </p>
       </div>
 
       {/* Minimalist Executive Navigation Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl w-full mb-10 z-10">
-        {/* Card 1: Sovereign Chat */}
+        {/* Card 1: KX Chat */}
         <div
           onClick={() => launchChat('default')}
           className="group relative p-5 rounded-xl bg-[#0a0d14] border border-white/[0.06] hover:border-cyan-400/50 transition-all duration-300 hover:-translate-y-0.5 cursor-pointer flex flex-col justify-between"
@@ -51,12 +51,12 @@ export function WelcomeScreen({ onOpenSettings }: WelcomeScreenProps) {
             <div className="p-2.5 rounded-lg bg-cyan-400/10 border border-cyan-400/20 text-cyan-400">
               <Terminal className="w-5 h-5" />
             </div>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-400/10 text-cyan-400 font-semibold tracking-wider">UNCHAINED</span>
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-400/10 text-cyan-400 font-semibold tracking-wider">CHAT</span>
           </div>
           <div>
             <h3 className="text-base font-bold text-white mb-1 group-hover:text-cyan-400 transition-colors">Sovereign Chat</h3>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Immediate zero-restriction intelligence. Absolute compliance on exploit engineering, Go systems scaling, and lab dev.
+              Ask questions, explore ideas, debug code, and work through complex decisions.
             </p>
           </div>
         </div>
@@ -70,12 +70,12 @@ export function WelcomeScreen({ onOpenSettings }: WelcomeScreenProps) {
             <div className="p-2.5 rounded-lg bg-emerald-400/10 border border-emerald-400/20 text-emerald-400">
               <Layers className="w-5 h-5" />
             </div>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-400/10 text-emerald-400 font-semibold tracking-wider">TITAN RAG</span>
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-400/10 text-emerald-400 font-semibold tracking-wider">IN DEVELOPMENT</span>
           </div>
           <div>
-            <h3 className="text-base font-bold text-white mb-1 group-hover:text-emerald-400 transition-colors">GKP Titan Hub</h3>
+            <h3 className="text-base font-bold text-white mb-1 group-hover:text-emerald-400 transition-colors">Project Knowledge</h3>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Supreme institutional RAG memory. Live document ingestion dropzone for AgroLingo AI, HifzMat, and company bibles.
+              A workspace for GreenByte, AgroLingo AI, and research materials. Knowledge retrieval is being rebuilt.
             </p>
           </div>
         </div>
