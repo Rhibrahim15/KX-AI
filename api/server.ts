@@ -3,6 +3,7 @@ import "dotenv/config";
 import { randomUUID } from "node:crypto";
 import cors from "cors";
 import express from "express";
+import helmet from "helmet";
 import { KX_SYSTEM_PROMPT } from "./agent/prompts";
 import { ContextManager, ContextBudgetError } from "./services/ContextManager";
 import { createDefaultLLMRouter, ProviderRequestError } from "./services/LLMRouter";
@@ -35,6 +36,7 @@ const contextManager = new ContextManager();
 const llmRouter = createDefaultLLMRouter();
 
 app.disable("x-powered-by");
+app.use(helmet());
 app.use(
   cors({
     origin(origin, callback) {
@@ -75,11 +77,12 @@ app.post("/v1/chat/completions", async (req, res) => {
   const requestId = randomUUID();
   const input = req.body?.messages;
 
-  if (!Array.isArray(input) || input.length === 0) {
-    return res.status(400).json({ error: "messages must be a non-empty array", requestId });
+  if (!Array.isArray(input) || input.length === 0 || input.length > 100) {
+    return res.status(400).json({ error: "messages must contain 1–100 entries", requestId });
   }
 
   const messages: Message[] = [];
+  let totalCharacters = 0;
   for (const item of input) {
     const role = item?.role as MessageRole;
     if (role !== "user" && role !== "assistant") {
@@ -88,8 +91,20 @@ app.post("/v1/chat/completions", async (req, res) => {
         requestId,
       });
     }
-    if (typeof item.content !== "string" || !item.content.trim()) {
-      return res.status(400).json({ error: "Every message must contain non-empty text.", requestId });
+    if (
+      typeof item.content !== "string" ||
+      !item.content.trim() ||
+      item.content.length > 20_000
+    ) {
+      return res.status(400).json({
+        error: "Every message must contain 1–20,000 characters of text.",
+        requestId,
+      });
+    }
+
+    totalCharacters += item.content.length;
+    if (totalCharacters > 60_000) {
+      return res.status(400).json({ error: "Total message content exceeds 60,000 characters.", requestId });
     }
 
     messages.push({

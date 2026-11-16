@@ -45,6 +45,14 @@ function validateMessages(value: unknown): ChatMessage[] | null {
 }
 
 export async function POST(request: NextRequest) {
+  const origin = request.headers.get("origin");
+  if (!origin || origin !== request.nextUrl.origin) {
+    return NextResponse.json(
+      { error: "Cross-origin chat requests are not allowed." },
+      { status: 403 },
+    );
+  }
+
   const backendUrl = process.env.KX_AI_BACKEND_URL?.trim();
   const backendToken = process.env.KX_AI_BACKEND_TOKEN?.trim();
 
