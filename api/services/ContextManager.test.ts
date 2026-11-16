@@ -63,3 +63,24 @@ test("fails clearly when system and retrieved context exceed the full budget", (
     ContextBudgetError,
   );
 });
+
+test("never silently drops the newest message when it exceeds the history budget", () => {
+  const manager = new ContextManager({
+    maxContextTokens: 100,
+    maxHistoryTokens: 10,
+  });
+
+  assert.throws(
+    () =>
+      manager.buildContext(
+        {
+          sessionId: "session-oversized",
+          messages: [
+            message("latest", "x".repeat(100), "2026-11-16T12:00:00.000Z"),
+          ],
+        },
+        "KX",
+      ),
+    /most recent message requires/i,
+  );
+});

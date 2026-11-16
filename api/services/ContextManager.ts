@@ -90,7 +90,14 @@ export class ContextManager {
       if (ordinaryCount >= this.maxMessages - pinned.length) break;
 
       const messageTokens = estimateTokens(message.content);
-      if (historyTokens + messageTokens > availableHistoryTokens) break;
+      if (historyTokens + messageTokens > availableHistoryTokens) {
+        if (ordinaryCount === 0) {
+          throw new ContextBudgetError(
+            `The most recent message requires ~${messageTokens} tokens, but only ${Math.max(0, availableHistoryTokens - historyTokens)} history tokens remain. Shorten the message or increase the configured context budget.`,
+          );
+        }
+        break;
+      }
 
       selected.push(message);
       historyTokens += messageTokens;
