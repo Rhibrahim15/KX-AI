@@ -1,124 +1,178 @@
-import express from 'express';
-import cors from 'cors';
-import path from 'path';
-import fs from 'fs';
+import "dotenv/config";
+
+import { randomUUID } from "node:crypto";
+import cors from "cors";
+import express from "express";
+import helmet from "helmet";
+import { KX_SYSTEM_PROMPT } from "./agent/prompts";
+import { ContextManager, ContextBudgetError } from "./services/ContextManager";
+import { createDefaultLLMRouter, ProviderRequestError } from "./services/LLMRouter";
+import type { Message, MessageRole } from "./types/core";
 
 const app = express();
-const PORT = process.env.PORT || 7860;
+const port = Number.parseInt(process.env.PORT || "7860", 10);
+const isProduction = process.env.NODE_ENV === "production";
+const apiAuthToken = process.env.API_AUTH_TOKEN;
 
-app.use(cors());
-app.use(express.json());
-app.use(express.static(path.join(process.cwd(), 'out')));
-app.use(express.static(process.cwd()));
+if (!Number.isInteger(port) || port <= 0 || port > 65_535) {
+  throw new Error("PORT must be a valid TCP port.");
+}
+if (isProduction && !apiAuthToken) {
+  throw new Error("API_AUTH_TOKEN is required when NODE_ENV=production.");
+}
 
-// Health
-app.get('/v1/health', (req, res) => res.json({ status: 'ok' }));
+const allowedOrigins = new Set(
+  (process.env.CORS_ORIGINS || process.env.CORS_ORIGIN || "http://localhost:3000")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean),
+);
 
-// Serve clean UI
-app.get('/', (req, res) => {
-  const uiPath = path.join(process.cwd(), 'kx_sanctuary_os.html');
-  if (fs.existsSync(uiPath)) {
-    res.sendFile(uiPath);
-  } else {
-    res.send('<h1>KX Sanctuary OS</h1>');
+if (allowedOrigins.has("*")) {
+  throw new Error("Wildcard CORS is not allowed. Configure explicit CORS_ORIGINS.");
+}
+
+const contextManager = new ContextManager();
+const llmRouter = createDefaultLLMRouter();
+
+app.disable("x-powered-by");
+app.use(helmet());
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin) return callback(null, true);
+      return callback(null, allowedOrigins.has(origin) ? origin : false);
+    },
+    methods: ["GET", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  }),
+);
+app.use(express.json({ limit: "1mb" }));
+
+// Health remains public for hosting-platform health checks. Other /v1 routes
+// require a bearer token in production; local development can run without one.
+app.use("/v1", (req, res, next) => {
+  if (req.path === "/health" || !apiAuthToken) return next();
+
+  const authorization = req.header("authorization");
+  if (authorization !== `Bearer ${apiAuthToken}`) {
+    return res.status(401).json({ error: "Unauthorized" });
   }
+  return next();
 });
 
-// ========== CHAT (Uses your real keys) ==========
-app.post('/v1/chat/completions', async (req, res) => {
-  const { messages } = req.body;
-  const userMessage = messages?.[messages.length - 1]?.content || "Hello";
+app.get("/v1/health", (_req, res) => {
+  res.json({ status: "ok", service: "kx-sanctuary-api" });
+});
 
-  const keys = {
-    groq: process.env.GROQ_API_KEY,
-    openrouter: process.env.OPENROUTER_API_KEY,
-    cerebras: process.env.CEREBRAS_API_KEY,
-    gemini: process.env.GEMINI_API_KEY,
-    mistral: process.env.MISTRAL_API_KEY,
-  };
-
-  // Priority: Groq > OpenRouter > Cerebras > Mistral
-  if (keys.groq) {
-    try {
-      const r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${keys.groq}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: "llama-3.3-70b-versatile",
-          messages: [{ role: "user", content: userMessage }],
-          max_tokens: 1000
-        })
-      });
-      if (r.ok) {
-        const d = await r.json();
-        return res.json({ choices: [{ message: { role: "assistant", content: d.choices[0].message.content } }] });
-      }
-    } catch (e) {}
-  }
-
-  if (keys.openrouter) {
-    try {
-      const r = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${keys.openrouter}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: "meta-llama/llama-3.3-70b-instruct",
-          messages: [{ role: "user", content: userMessage }],
-          max_tokens: 1000
-        })
-      });
-      if (r.ok) {
-        const d = await r.json();
-        return res.json({ choices: [{ message: { role: "assistant", content: d.choices[0].message.content } }] });
-      }
-    } catch (e) {}
-  }
-
-  // Fallback
+app.get("/", (_req, res) => {
   res.json({
-    choices: [{
-      message: {
-        role: "assistant",
-        content: "I'm running. Add more LLM keys in Secrets for better performance."
-      }
-    }]
+    name: "KX Sanctuary OS API",
+    status: "running",
+    health: "/v1/health",
   });
 });
 
-// ========== MEDIA GENERATION ==========
-app.post('/v1/media/video/image', async (req, res) => {
-  const { type = 'image', prompt } = req.body;
+app.post("/v1/chat/completions", async (req, res) => {
+  const requestId = randomUUID();
+  const input = req.body?.messages;
 
-  if (type === 'image') {
-    // Use PiAPI or Replicate as fallback
-    if (process.env.PIAPI_API_KEY) {
-      return res.json({ status: "success", message: "Image generation started via PiAPI", prompt });
-    }
-    return res.json({ status: "success", message: "Image generation (demo)", prompt });
+  if (!Array.isArray(input) || input.length === 0 || input.length > 100) {
+    return res.status(400).json({ error: "messages must contain 1–100 entries", requestId });
   }
 
-  if (type === 'video') {
-    if (process.env.KLING_API_KEY || process.env.LUMA_API_KEY || process.env.MINIMAX_API_KEY) {
-      return res.json({ status: "success", message: "Video generation started", prompt });
+  const messages: Message[] = [];
+  let totalCharacters = 0;
+  for (const item of input) {
+    const role = item?.role as MessageRole;
+    if (role !== "user" && role !== "assistant") {
+      return res.status(400).json({
+        error: "Only user and assistant messages are accepted from clients.",
+        requestId,
+      });
     }
-    return res.json({ status: "success", message: "Video generation (demo)", prompt });
+    if (
+      typeof item.content !== "string" ||
+      !item.content.trim() ||
+      item.content.length > 20_000
+    ) {
+      return res.status(400).json({
+        error: "Every message must contain 1–20,000 characters of text.",
+        requestId,
+      });
+    }
+
+    totalCharacters += item.content.length;
+    if (totalCharacters > 60_000) {
+      return res.status(400).json({ error: "Total message content exceeds 60,000 characters.", requestId });
+    }
+
+    messages.push({
+      role,
+      content: item.content,
+      timestamp:
+        typeof item.timestamp === "string" && !Number.isNaN(Date.parse(item.timestamp))
+          ? new Date(item.timestamp).toISOString()
+          : new Date().toISOString(),
+    });
   }
 
-  res.json({ status: "error", message: "Invalid type" });
+  const sessionId =
+    typeof req.body.sessionId === "string" && req.body.sessionId.trim()
+      ? req.body.sessionId.trim()
+      : requestId;
+
+  try {
+    const context = contextManager.buildContext(
+      { sessionId, messages },
+      KX_SYSTEM_PROMPT,
+    );
+    const result = await llmRouter.executeCall(context);
+
+    // OpenAI-compatible response shape keeps existing chat clients interoperable.
+    return res.json({
+      id: `kx-${requestId}`,
+      object: "chat.completion",
+      created: Math.floor(Date.now() / 1000),
+      model: result.model,
+      provider: result.provider,
+      choices: [
+        {
+          index: 0,
+          message: { role: "assistant", content: result.text },
+          finish_reason: "stop",
+        },
+      ],
+    });
+  } catch (error) {
+    if (error instanceof ContextBudgetError) {
+      return res.status(400).json({ error: error.message, requestId });
+    }
+    if (error instanceof ProviderRequestError && error.fatal) {
+      console.error(`[KX:${requestId}] Provider rejected the request as invalid.`);
+      return res.status(400).json({ error: "The model provider rejected the request payload.", requestId });
+    }
+
+    const reason = error instanceof Error ? error.message : "Unknown server error";
+    console.error(`[KX:${requestId}] Chat request failed: ${reason}`);
+    const noProviders = reason.includes("No LLM providers are configured");
+    return res.status(noProviders ? 503 : 502).json({
+      error: noProviders ? "No model provider is configured." : "All configured model providers are unavailable.",
+      requestId,
+    });
+  }
 });
 
-// Start bots (if tokens exist)
-if (process.env.TELEGRAM_BOT_TOKEN) {
-  console.log("✓ Telegram bot token detected");
-}
-if (process.env.DISCORD_BOT_TOKEN) {
-  console.log("✓ Discord bot token detected");
-}
-if (process.env.WHATSAPP_ACCESS_TOKEN) {
-  console.log("✓ WhatsApp bot token detected");
-}
+// Media is deliberately unavailable until a real provider integration and
+// task-status lifecycle exist. Never return a success-shaped placeholder.
+app.all("/v1/media/video/image", (_req, res) => {
+  res.status(501).json({
+    error: "Media generation is not implemented on this API version.",
+    code: "NOT_IMPLEMENTED",
+  });
+});
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`KX-AI running on port ${PORT}`);
-  console.log("Autonomous + Uncensored mode active");
+app.listen(port, "0.0.0.0", () => {
+  console.log(`KX Sanctuary OS API listening on port ${port}`);
+  console.log(`Allowed browser origins: ${[...allowedOrigins].join(", ") || "(none)"}`);
 });

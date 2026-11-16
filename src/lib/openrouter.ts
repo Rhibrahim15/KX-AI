@@ -61,8 +61,8 @@ interface Message {
 
 interface SendMessageOptions {
   messages: Message[]
-  model: string
-  apiKey: string
+  model?: string
+  apiKey?: string
   noLog?: boolean
   signal?: AbortSignal
   temperature?: number
@@ -91,79 +91,46 @@ interface OpenRouterResponse {
   }
 }
 
+export interface KXChatResult {
+  content: string;
+  provider: string;
+  model: string;
+}
+
 /**
- * Send a message to the AI model via OpenRouter
+ * Standard KX chat uses the same-origin Next.js BFF.
+ * Server-side provider credentials are never sent to browser JavaScript.
  */
 export async function sendMessage({
   messages,
-  model,
-  apiKey,
-  noLog = false,
   signal,
-  temperature = 0.7,
-  maxTokens = 4096,
-  top_p,
-  top_k,
-  frequency_penalty,
-  presence_penalty,
-  repetition_penalty
-}: SendMessageOptions): Promise<string> {
-  if (!apiKey) {
-    throw new Error('No API key set. Go to Settings → API Key and enter your OpenRouter key from [openrouter.ai/keys](https://openrouter.ai/keys).')
-  }
+}: SendMessageOptions): Promise<KXChatResult> {
+  const response = await fetch("/api/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ messages }),
+    signal,
+    cache: "no-store",
+  });
 
-  // Prepare request body
-  const body: Record<string, unknown> = {
-    model,
-    messages,
-    temperature,
-    max_tokens: maxTokens
-  }
-
-  // Add optional sampling parameters (only if explicitly set)
-  if (top_p !== undefined) body.top_p = top_p
-  if (top_k !== undefined) body.top_k = top_k
-  if (frequency_penalty !== undefined) body.frequency_penalty = frequency_penalty
-  if (presence_penalty !== undefined) body.presence_penalty = presence_penalty
-  if (repetition_penalty !== undefined) body.repetition_penalty = repetition_penalty
-
-  // Add provider-specific options if needed
-  const providerOptions: Record<string, unknown> = {}
-
-  // Handle no-log mode for supported providers
-  if (noLog) {
-    // OpenRouter passes through provider preferences
-    providerOptions['allow_fallbacks'] = false
-  }
-
-  if (Object.keys(providerOptions).length > 0) {
-    body.provider = providerOptions
-  }
-
-  const response = await fetch(OPENROUTER_API_URL, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-      'HTTP-Referer': 'https://godmod3.ai',
-      'X-Title': 'KX-AI'
-    },
-    body: JSON.stringify(body),
-    signal
-  })
-
+  const data = await response.json().catch(() => ({} as Record<string, unknown>));
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}))
-    throw new Error(formatAPIError(response.status, errorData.error?.message))
+    throw new Error(
+      typeof data.error === "string" ? data.error : `KX chat request failed with HTTP ${response.status}.`,
+    );
   }
 
-  const data: OpenRouterResponse = await response.json()
-
-  if (!data.choices || data.choices.length === 0) {
-    throw new Error('No response from model')
+  const choices = data.choices as Array<{ message?: { content?: unknown } }> | undefined;
+  const content = choices?.[0]?.message?.content;
+  if (typeof content !== "string" || !content.trim()) {
+    throw new Error("KX returned an empty or invalid assistant response.");
   }
 
-  return data.choices[0].message.content
+  return {
+    content,
+    provider: typeof data.provider === "string" ? data.provider : "managed",
+    model: typeof data.model === "string" ? data.model : "KX managed model",
+  };
 }
 
 /**

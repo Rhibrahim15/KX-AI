@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": [
+      "ES2022",
+      "DOM"
+    ],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "types": [
+      "node"
+    ],
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": [
+    "api/server.ts",
+    "api/agent/**/*.ts",
+    "api/adapters/**/*.ts",
+    "api/repositories/**/*.ts",
+    "api/services/ContextManager.ts",
+    "api/services/LLMRouter.ts",
+    "api/services/audio.service.ts",
+    "api/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "api/routes",
+    "api/lib",
+    "bots"
+  ]
+}

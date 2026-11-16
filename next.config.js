@@ -1,16 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // Enable static export for GitHub Pages
-  output: 'export',
-  // Disable image optimization for static export
+  // KX uses a server-side Route Handler as a backend-for-frontend.
+  // Static export would prevent that authenticated proxy from running.
   images: {
     unoptimized: true,
   },
-  // Base path for GitHub Pages (update this to your repo name if needed)
-  // basePath: '/kx-ai',
-  // Trailing slash for GitHub Pages compatibility
-  trailingSlash: true,
-}
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;

@@ -352,8 +352,8 @@ export const useStore = create<AppState>()(
     (set, get) => ({
       // Initial state
       theme: 'minimal',
-      apiKey: 'kx-sanctuary',
-      defaultModel: 'anthropic/claude-opus-4.6',
+      apiKey: '',
+      defaultModel: 'kx-auto',
       conversations: [],
       currentConversationId: null,
       isHydrated: false,
@@ -411,8 +411,8 @@ export const useStore = create<AppState>()(
       // ULTRAPLINIAN initial state
       ultraplinianEnabled: false,
       ultraplinianTier: 'fast' as const,
-      ultraplinianApiUrl: 'http://localhost:7860',
-      ultraplinianApiKey: 'kx-sanctuary',
+      ultraplinianApiUrl: '',
+      ultraplinianApiKey: '',
       ultraplinianLiveContent: null,
       ultraplinianLiveModel: null,
       ultraplinianLiveScore: null,
@@ -721,11 +721,10 @@ export const useStore = create<AppState>()(
         // stmModules excluded: transformer functions can't be serialized/deserialized
         const allowed = [
           'conversations', 'currentConversationId', 'theme', 'defaultModel',
-          'currentPersona', 'apiKey', 'autoTuneEnabled', 'autoTuneStrategy',
+          'currentPersona', 'autoTuneEnabled', 'autoTuneStrategy',
           'autoTuneOverrides', 'feedbackState', 'parseltongueConfig',
           'memories', 'memoriesEnabled', 'customSystemPrompt', 'useCustomSystemPrompt',
-          'consortiumEnabled', 'consortiumTier', 'liquidResponseEnabled', 'liquidMinDelta',
-          'ultraplinianEnabled', 'ultraplinianTier', 'ultraplinianApiUrl', 'ultraplinianApiKey',
+          'liquidResponseEnabled', 'liquidMinDelta',
           'datasetGenerationEnabled', 'noLogMode', 'showMagic', 'promptsTried',
         ]
         for (const key of allowed) {
@@ -743,7 +742,6 @@ export const useStore = create<AppState>()(
         theme: state.theme,
         activeTab: state.activeTab,
         showMagic: state.showMagic,
-        apiKey: state.apiKey,
         defaultModel: state.defaultModel,
         conversations: state.conversations,
         currentConversationId: state.currentConversationId,
@@ -773,11 +771,17 @@ export const useStore = create<AppState>()(
         // ULTRAPLINIAN persistence
         ultraplinianEnabled: state.ultraplinianEnabled,
         ultraplinianTier: state.ultraplinianTier,
-        ultraplinianApiUrl: state.ultraplinianApiUrl,
-        ultraplinianApiKey: state.ultraplinianApiKey,
       }),
       onRehydrateStorage: () => (state) => {
         if (state) {
+          // Remove credentials that older versions persisted in localStorage.
+          state.setApiKey("");
+          state.setUltraplinianApiKey("");
+          state.setUltraplinianApiUrl("");
+          state.setUltraplinianEnabled(false);
+          state.setConsortiumEnabled(false);
+          state.setAutoTuneEnabled(false);
+          state.setDefaultModel('kx-auto');
           state.setHydrated()
         }
       }
