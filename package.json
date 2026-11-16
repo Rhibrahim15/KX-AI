@@ -10,7 +10,9 @@
     "start": "next start",
     "lint": "next lint",
     "api": "tsx api/server.ts",
-    "api:dev": "tsx watch api/server.ts"
+    "api:dev": "tsx watch api/server.ts",
+    "typecheck": "tsc --noEmit",
+    "test:core": "tsx --test api/services/ContextManager.test.ts"
   },
   "dependencies": {
     "@types/ws": "^8.18.1",
