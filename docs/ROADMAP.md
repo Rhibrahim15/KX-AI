@@ -1,132 +1,109 @@
-# KX Sanctuary OS — Roadmap
+# KX Sanctuary OS — Rebuild roadmap
 
-> **Current position: Phase 0 (Foundation), not yet committed.**
-> Each phase has acceptance criteria — a checkbox is only ticked when its criterion is *demonstrated*, not
-> when the code is written.
+**Current position:** Foundation work is in progress on `rebuild/foundation` (draft PR #1). `main` remains untouched. A milestone is complete only after its acceptance tests pass.
 
----
+## Phase 0 — Foundation
 
-## Phase 0 — Foundation restructure ⬅ **WE ARE HERE**
+- [x] `api/types/core.ts` — shared message/session/context/provider contracts
+- [x] `api/services/ContextManager.ts` — token estimate, windowing, pinned messages, deduplication
+- [x] `api/adapters/types.ts` and `OpenAICompatibleAdapter.ts`
+- [x] `api/services/LLMRouter.ts` — configured failover; HTTP 400 is fatal
+- [x] `api/agent/prompts.ts` — one shared identity prompt
+- [x] `api/repositories/SessionRepository.ts` — repository boundary and Prisma adapter
+- [x] `prisma/schema.prisma` — Session/Message schema authored
+- [x] `api/services/audio.service.ts` — reusable Telegram Whisper transcription service
+- [ ] Install and lock `prisma` / `@prisma/client`; generate client and migration
+- [ ] Full Next.js build and runtime integration pass on the latest commit
 
-Commit the "house" as designed in [`ARCHITECTURE.md`](ARCHITECTURE.md):
+**Acceptance:** core type-check and unit tests pass; production app build passes; API boots without regression. Persistence is not claimed in this phase.
 
-- [ ] `api/types/core.ts` — Message / SessionState / ContextPackage / ModelProvider
-- [ ] `api/services/ContextManager.ts` — hybrid windowing, pinned messages, dedupe
-- [ ] `api/adapters/types.ts` + `api/adapters/OpenAIAdapter.ts` — provider adaptation
-- [ ] `api/services/LLMRouter.ts` — typed failover; **400 = fatal, no failover**
-- [ ] `prisma/schema.prisma` + install `prisma` & `@prisma/client`
-- [ ] `api/repositories/SessionRepository.ts` — interface + `PrismaSessionRepository`
-- [ ] `api/services/audio.service.ts` — extract Groq Whisper pipeline from `bots/telegram.ts`
-- [ ] `api/agent/prompts.ts` — single identity prompt (replaces `GODMODE_SYSTEM_PROMPT` import)
-- [ ] Update `tsconfig`/scripts; `npx tsc --noEmit` passes
+## Phase 1 — Persistent memory
 
-**Acceptance:** `npm run api` still boots (no behavior regression); new units compile; Prisma client
-generates. Nothing is claimed "working" beyond that.
+- [ ] Install Prisma dependencies and generate reviewed migrations
+- [ ] Wire `DATABASE_URL` and a PostgreSQL database
+- [ ] Persist inbound user messages before model execution
+- [ ] Persist assistant message and provider affinity transactionally
+- [ ] Migrate Telegram conversation history from the in-memory Map
+- [ ] Add session retrieval/listing APIs with appropriate authorization
 
----
+**Acceptance:** send a conversation, terminate the API process, restart it, and retrieve earlier messages from PostgreSQL.
 
-## Phase 1 — Persistence end-to-end (the amnesia cure)
+## Phase 2 — Web application
 
-- [ ] `DATABASE_URL` wired (local Postgres or Railway plugin); `prisma migrate dev`
-- [ ] `POST /v1/chat/completions` rewritten: session upsert → persist user msg → ContextManager → Router →
-      persist assistant msg + provider (transaction)
-- [ ] `api/controllers/telegram.controller.ts` (webhook mode) OR `bots/telegram.ts` refactored onto
-      SessionRepository — in-memory `Map` deleted
-- [ ] Session listing endpoint `GET /v1/sessions` (for the UI later)
+- [x] Select the substantive root Next.js app under `src/` as the canonical UI candidate
+- [x] Replace standard browser-to-provider calls with a same-origin BFF
+- [x] Keep the backend token server-side and remove legacy provider keys from browser persistence/backups
+- [x] Replace arbitrary model picker with honest server-managed routing
+- [x] Remove misleading claims and hide unverified tools from primary navigation
+- [ ] Pass the production build on the latest revision
+- [ ] Add visitor authentication/access gate
+- [ ] Add reliable rate limiting and usage budgets
+- [ ] Add user-visible provider status, retry and error states
+- [ ] Verify accessibility, mobile layout and keyboard interaction
 
-**Acceptance (must be demonstrated):** have a conversation → kill the server → restart → ask "what did I
-say earlier?" → the assistant answers from the DB. Screenshot it.
+**Acceptance:** access-controlled web app sends a real request through the BFF to the backend and displays the actual responding provider/model.
 
----
+## Phase 3 — Tools
 
-## Phase 2 — Premium PWA frontend (Vercel)
+- [ ] Typed tool protocol and registry
+- [ ] Web search with real source URLs
+- [ ] GitHub read operations first; write operations require explicit confirmation
+- [ ] Sandboxed file tools with path validation and audit logs
+- [ ] Per-tool permissions, timeouts and structured errors
 
-- [ ] Replace boilerplate `frontend/app/page.tsx` with the real premium UI: centered glowing orb, greeting,
-      quick actions (Take Notes / Brainstorm / Get Advice), bottom input bar (attach · search · reason · mic),
-      light/dark themes, mobile-first, fluid animations — quality bar: the Dribbble references or better
-- [ ] `src/app/api/chat/route.ts` — BFF proxy to `KX_AI_BACKEND_URL` (keeps backend URL and any token
-      server-side), streaming pass-through
-- [ ] Chat view: markdown, code highlighting, honest error states (no fake optimistic "success")
-- [ ] PWA: manifest + icons + offline shell
-- [ ] Deploy to Vercel; set `KX_AI_BACKEND_URL`
+**Acceptance:** every exposed tool performs a real call and returns verifiable results. Unsupported operations remain unavailable.
 
-**Acceptance:** open the Vercel URL on a phone, send a message, receive a real reply from the Railway
-backend, switch theme, install as PWA.
+## Phase 4 — Voice and media
 
----
+- [ ] Complete shared Telegram voice-service extraction and tests
+- [ ] Add web audio upload/recording through the same AudioService
+- [ ] Add optional TTS output after a real provider integration is chosen
+- [ ] Re-verify image/video provider APIs before implementing jobs and polling
+- [ ] Retain HTTP 501 until the media provider lifecycle is genuinely complete
 
-## Phase 3 — Hands I: web + GitHub + files
+**Acceptance:** voice transcription can be repeated with real audio; media output is an openable generated file or a precise provider error.
 
-- [ ] Tool-calling protocol through the adapters (`toolCalls`/`toolCallId` already in the type contract)
-- [ ] `search` tool — Tavily first, SerpAPI fallback; returns real URLs
-- [ ] `github` tool — read repo/issue/commit via REST (token scoped, read-mostly first)
-- [ ] `file` tool — sandboxed read/write within a workspace directory
-- [ ] System prompt: tool-use policy (when to search, when to act, when to ask)
+## Phase 5 — Knowledge and long-term memory
 
-**Acceptance:** "search for X and summarize with sources" → resolves real URLs; "what's in my KX-AI repo?"
-→ real file list from GitHub.
+- [ ] Curate and index the project knowledge corpus
+- [ ] Choose a supported vector strategy (pgvector is preferred only after PostgreSQL persistence is operational)
+- [ ] Retrieve top-k content into ContextPackage under a token budget
+- [ ] Add explicit memory review, correction and deletion controls
 
----
+**Acceptance:** answer questions from stored personal memory and cited project documents without inventing context.
 
-## Phase 4 — Media & voice out (kill the stub)
+## Phase 6 — Omnichannel
 
-- [ ] **Delete the fake `/v1/media/video/image` behavior.** Re-verify every provider endpoint against
-      official docs: Kling, Seedance (PiAPI), MiniMax Hailuo, Luma, HF FLUX, Imagen, Together
-- [ ] Honest async job flow: create task → poll status → return real file URL (or the provider's real error)
-- [ ] ElevenLabs TTS reply path (Telegram voice reply toggle; web playback)
-- [ ] Web audio input: upload/record → same AudioService as Telegram
+- [ ] Telegram uses the shared prompt, router, ContextManager and repository
+- [ ] Discord gateway passes live end-to-end tests
+- [ ] WhatsApp webhook verification and inbound→reply loop complete
+- [ ] Map identities safely so one user's sessions are not exposed to another
 
-**Acceptance:** image and video requests return actual openable files. A failing provider produces its real
-error message, not "success".
+**Acceptance:** the same user receives consistent KX identity and persistent context on each verified channel.
 
----
+## Phase 7 — Production operations
 
-## Phase 5 — Knowledge: RAG + long-term memory
+- [ ] Visitor authentication for the web BFF
+- [ ] Backend and BFF rate limiting, request caps and abuse controls
+- [ ] Secret rotation and provider spend limits
+- [ ] Railway/Vercel deployment and health checks
+- [ ] Logs/metrics/error monitoring without leaking prompts or credentials
+- [ ] Database backups and a successful restore test
+- [ ] Document runbooks and rollback procedure
 
-- [ ] Re-index `gkp/` + founder documents into a vector store (pgvector on the same Postgres, or Chroma)
-- [ ] Retrieval into `ContextPackage.ragContext` (top-k, token-capped)
-- [ ] Importance scoring: detect deadlines/appointments/tasks → `isImportant`/`category` automatically
-- [ ] "What do you remember about GreenByte/AgroLingo?" answered from memory + corpus
-
-**Acceptance:** ask about a fact stored weeks prior (via DB) and a fact from the corpus — both answered.
-
----
-
-## Phase 6 — Omnichannel hardening
-
-- [ ] WhatsApp: webhook verification (GET hub.challenge) + inbound→reply loop via the shared controller
-- [ ] Discord: verify gateway end-to-end against live server; slash commands
-- [ ] One identity, one memory: the same session continuity across channels (per-user mapping)
-
-**Acceptance:** the same question asked on Telegram and WhatsApp gets consistent, memory-aware answers.
-
----
-
-## Phase 7 — Deployment, security, operations
-
-- [ ] Railway backend live (Prisma `migrate deploy` on boot, healthcheck, log drain)
-- [ ] `API_AUTH_TOKEN` middleware; per-IP + per-key rate limiting; CORS locked to the Vercel origin
-- [ ] Secret rotation completed (all previously exposed keys replaced)
-- [ ] Uptime + error monitoring; `/v1/health` extended with provider reachability
-- [ ] Backups: Railway Postgres daily snapshot verified by a restore test
-
-**Acceptance:** public URLs work; unauthorized requests are rejected; a restore test passes.
-
----
+**Acceptance:** unauthorized callers are rejected, usage is bounded, backups restore, and the service can be operated and recovered safely.
 
 ## Phase 8 — Autonomy
 
-- [ ] Reminders & scheduled checks (cron on Railway): deadlines, market/price checks, security advisories
-- [ ] Proactive notifications (Telegram push) — the NOTIFY verb of the mentor matrix
-- [ ] Daily brief: agenda, tasks, weather/agriculture signal for GreenByte
+- [ ] Scheduled tasks and reminders
+- [ ] Proactive notifications with user-configured permissions
+- [ ] Daily briefing from verified calendar/tasks/weather/agriculture sources
 
-**Acceptance:** KX messages the founder first — with something true and useful — without being asked.
+**Acceptance:** KX initiates a useful, accurate notification under an explicitly configured schedule.
 
----
+## Later / exploratory
 
-### Later / exploratory (no dates, no promises)
-
-- Ollama self-hosted uncensored stack (the honest path to 90%+ compliance)
-- VoIP calls (Twilio/Deepgram/11Labs realtime), mobile app, VSCode companion
-- AgroLingo AI product integration (KX as research officer)
-- Multi-user onboarding (only if the personal mission ever expands)
+- Local Ollama/self-hosted models
+- Advanced voice calls and mobile client
+- AgroLingo AI integration
+- Multi-user onboarding only if the product direction changes

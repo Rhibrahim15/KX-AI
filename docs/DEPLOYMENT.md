@@ -1,137 +1,127 @@
-# KX Sanctuary OS — Deployment Guide
+# KX Sanctuary OS — Deployment and operations
 
-> Target topology: **Vercel** (Next.js PWA) ↔ **Railway** (Node.js + Express + TypeScript) ↔ **PostgreSQL**
-> (Railway plugin or Supabase) via **Prisma**. Bots run inside/next to the Railway backend.
->
-> Hugging Face Spaces is **retired** for this project (stuck deployments, port/persistence constraints).
-> This guide documents the intended setup; steps get executed in Phase 1/2/7 — nothing here is claimed as
-> "already deployed".
+**Status: deployment guide for the rebuild target; not a declaration that production is live.**
 
----
+Target topology: Next.js on Vercel → Express API on Railway → PostgreSQL via Prisma. The API and BFF are being rebuilt on branch `rebuild/foundation`.
 
-## 1. Prerequisites
+## 1. Current deployment gate
 
-- GitHub repo: `https://github.com/Rhibrahim15/KX-AI`
-- Accounts: Vercel, Railway, and the relevant provider consoles (Groq, OpenRouter, Cerebras, Mistral,
-  Google AI Studio, etc.)
-- **Rotate every API key that was ever pasted into a chat or screenshot BEFORE deploying** (see §6).
+Do **not** expose the web application publicly yet.
 
----
+The backend requires a bearer token in production, and the Next.js BFF keeps that token server-side. However, the BFF does not yet authenticate individual visitors or apply reliable rate limiting. An unrestricted visitor could still make requests through the BFF and spend the founder's provider quota.
 
-## 2. Railway — backend
+Before public release, implement and verify:
+- Visitor authentication or a reliable hosting-level access gate.
+- Rate limiting at the BFF and backend.
+- Request/usage limits and abuse monitoring.
+- Secret rotation and tested incident recovery.
+- Persistent storage and backup/restore verification.
 
-1. **New Project → Deploy from GitHub repo** → select `Rhibrahim15/KX-AI`.
-2. Service settings:
-   - Build: `npm install && npx prisma generate`
-   - Start: `npx prisma migrate deploy && npm run api`
-   - Root directory: repository root
-   - Healthcheck path: `/v1/health`
-   - Port: use Railway's injected `PORT` (server already reads `process.env.PORT`)
-3. **Add PostgreSQL**: Project → New → Database → PostgreSQL. Railway injects `DATABASE_URL` into the
-   service (link variables if it doesn't).
-4. Generate a public domain (Settings → Networking). Note it — the frontend needs it:
-   `https://kx-api-production-xxxx.up.railway.app`
-5. Set environment variables (Variables tab). Never commit them.
+## 2. Railway — API
 
-### Required variables (backend)
+Deploy the repository root as a Node.js service.
 
-| Variable | Powers | Required |
-|---|---|---|
-| `DATABASE_URL` | Prisma → PostgreSQL | ✅ (Phase 1+) |
-| `GROQ_API_KEY` | Primary LLM + **Whisper ASR** | ✅ |
-| `OPENROUTER_API_KEY` | Failover LLM (100+ models) | ✅ |
-| `CEREBRAS_API_KEY` | Failover LLM (very fast) | recommended |
-| `MISTRAL_API_KEY` | Failover LLM (coding) | recommended |
-| `GEMINI_API_KEY` | Fallback + Imagen images | recommended |
-| `NVIDIA_NIM_API_KEY` | Failover LLM | optional |
-| `TELEGRAM_BOT_TOKEN` | Telegram channel | for Telegram |
-| `DISCORD_BOT_TOKEN` | Discord channel | for Discord |
-| `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_BUSINESS_ACCOUNT_ID`, `WHATSAPP_VERIFY_TOKEN` | WhatsApp Cloud API | for WhatsApp |
-| `TAVILY_API_KEY` / `SERPAPI_KEY` | Web search tool (Phase 3) | Phase 3 |
-| `ELEVENLABS_API_KEY`, `ELEVENLABS_VOICE_ID` | TTS voice replies (Phase 4) | Phase 4 |
-| `PIAPI_API_KEY`, `KLING_API_KEY`, `MINIMAX_API_KEY`, `LUMA_API_KEY` | Video generation (Phase 4) | Phase 4 |
-| `HUGGINGFACE_API_KEY`, `REPLICATE_API_KEY` | Image/video aux (Phase 4) | Phase 4 |
-| `API_AUTH_TOKEN` | Backend auth middleware (Phase 7) | ✅ before public |
+Recommended settings for the current API milestone:
 
-> `DEEPGRAM_API_KEY` / `ASSEMBLYAI_API_KEY` are reserved for the future VoIP/realtime phase — not required now.
+| Setting | Value |
+|---|---|
+| Root directory | Repository root |
+| Install | `npm ci` |
+| Start | `npm run api` |
+| Health check | `/v1/health` |
+| Port | Railway-provided `PORT` |
 
----
+Required environment:
 
-## 3. Vercel — frontend
+| Variable | Purpose |
+|---|---|
+| `NODE_ENV` | Set to `production` |
+| `PORT` | Supplied by Railway |
+| `API_AUTH_TOKEN` | Strong random bearer token required at production startup |
+| `CORS_ORIGINS` | Exact web origin(s), comma-separated |
+| `GROQ_API_KEY` | Primary provider key |
+| `OPENROUTER_API_KEY` | First fallback provider |
+| `CEREBRAS_API_KEY` | Optional fallback |
+| `MISTRAL_API_KEY` | Optional fallback |
+| `LLM_PROVIDER_ORDER` | For example `groq,openrouter,cerebras,mistral` |
 
-1. **Add New Project → Import** the same GitHub repo.
-2. **Root Directory: repository root (`.`).** The root `src/` app is the substantive UI; `frontend/` is a separate starter scaffold and is not the deployment target.
-3. Environment variables:
-   - `KX_AI_BACKEND_URL = https://<railway-domain>` (server-side only, used by `src/app/api/chat/route.ts`)
-   - `KX_AI_AUTH_TOKEN` (once Phase 7 auth exists; forwarded server-side, never exposed to the browser)
-4. Deploy. The planned BFF pattern (`src/app/api/chat/route.ts`) will proxy browser → Vercel function → Railway, so the
-   backend origin/token never reach client code and CORS stays locked down.
+Use only provider credentials you have actually provisioned. Keep keys in Railway's variable manager, not in source files or Docker build arguments.
 
-### Auth & CORS policy (Phase 7)
+**Database note:** `DATABASE_URL` and the Prisma schema are prepared, but Prisma dependencies, migrations and repository wiring are not complete. Do not add a production database migration command to the start command until the persistence milestone is implemented and tested.
 
-- Railway backend: reject requests without `Authorization: Bearer <API_AUTH_TOKEN>` (bots and the Vercel
-  BFF hold the token).
-- CORS allowlist: only the Vercel production domain and `localhost` in dev.
+## 3. Vercel — web application
 
----
+Import the same repository. Configure:
 
-## 4. Database workflow (Prisma)
+| Setting | Value |
+|---|---|
+| Root directory | Repository root (`.`) |
+| Build command | `npm run build` |
+| Framework | Next.js |
+| App source | Root `src/` application |
 
-```bash
-# local dev
-npx prisma migrate dev --name init      # creates migration + client
-npx prisma studio                       # inspect sessions/messages
+The separate `frontend/` directory is starter scaffold and is not the canonical UI.
 
-# production (Railway start command)
-npx prisma migrate deploy               # applies pending migrations, no prompts
-```
+Server-only environment variables:
 
-- Backups: Railway Postgres daily snapshots; **run a restore test** before trusting them.
-- `CHROMA_DB_PATH` (from older env) is unnecessary if RAG moves to **pgvector on the same Postgres**
-  (Phase 5 recommendation: one database, one backup story).
+| Variable | Value |
+|---|---|
+| `KX_AI_BACKEND_URL` | HTTPS Railway API origin, e.g. `https://<service>.up.railway.app` |
+| `KX_AI_BACKEND_TOKEN` | Same secret value as Railway's `API_AUTH_TOKEN` |
 
----
+Do not prefix these variables with `NEXT_PUBLIC_`. The server-side route `src/app/api/chat/route.ts` reads them and forwards the backend token. The browser calls only the same-origin `/api/chat` route.
 
-## 5. Bots
+## 4. Authentication and CORS
 
-| Bot | Mode | Notes |
-|---|---|---|
-| Telegram | Long-polling inside the Railway backend (`bots/telegram.ts` or the new controller) | No public webhook needed; survives restarts; **requires Phase 1 to keep memory across restarts** |
-| Discord | Gateway WebSocket inside the backend | Verify end-to-end in Phase 6 |
-| WhatsApp | Webhook route mounted on the Express server (`/webhooks/whatsapp`) | Requires `WHATSAPP_VERIFY_TOKEN` handshake; HTTPS endpoint is Railway's public domain |
+- Production API startup fails when `API_AUTH_TOKEN` is missing.
+- Protected API requests require `Authorization: Bearer <API_AUTH_TOKEN>`.
+- `GET /v1/health` is public for hosting-platform health checks.
+- `CORS_ORIGINS` must be an explicit comma-separated list. Wildcard origins are rejected.
+- The BFF-to-API request is server-to-server. CORS is not visitor authentication.
+- Visitor authentication and rate limiting are still missing from the BFF. Treat the app as private-development-only until both are in place.
 
----
+## 5. Database and persistence milestone
 
-## 6. Security checklist (do not skip)
+The Prisma schema defines sessions and messages, and a repository adapter contract exists. The following are not complete yet:
+- Install and lock `prisma` and `@prisma/client`.
+- Generate Prisma Client and add reviewed migrations.
+- Wire inbound message persistence before provider execution.
+- Persist assistant messages and provider affinity transactionally.
+- Refactor Telegram onto the same repository.
+- Prove conversation continuity by restarting the API process.
 
-- [ ] **Rotate all exposed keys**: GitHub token, HF token, and every provider key pasted in earlier chats.
-      Treat them as compromised. Regenerate → update Railway/Vercel env → revoke old ones.
-- [ ] `.env` stays local; only `.env.example` lives in git (already enforced — verified).
-- [ ] Enable `API_AUTH_TOKEN` middleware before making the Railway URL public.
-- [ ] WhatsApp verify token: long random string, not the current placeholder-style value.
-- [ ] Telegram: consider `setWebhook` with a secret path token instead of long-polling for production.
-- [ ] Provider keys on Railway should be **project-level variables**, never in the Dockerfile or code.
+Only after this gate passes should a Railway PostgreSQL service and production migration step be treated as active requirements.
 
----
+## 6. Channels and optional integrations
 
-## 7. Smoke test (run after every deploy)
+| Channel | Current position |
+|---|---|
+| Web | Root UI and same-origin BFF exist; public visitor authentication is outstanding |
+| Telegram | Existing polling and Whisper code retained; not yet migrated to shared persistence |
+| Discord | Existing code requires end-to-end verification and shared-session integration |
+| WhatsApp | Existing send/webhook code requires complete inbound/reply verification |
+| Media | Disabled; API returns HTTP 501 |
+| RAG / tools | Not yet connected to the new chat path |
 
-1. `GET /v1/health` → `{"status":"ok"}`
-2. `POST /v1/chat/completions` with a test message → real model answer naming the provider used
-3. Telegram: text message answered; **voice note** in Hausa answered
-4. Restart the Railway service → previous conversation still remembered (Phase 1+)
-5. Vercel URL loads the PWA; a chat message round-trips through the BFF (Phase 2+)
-6. Unauthorized `curl` without token → `401` (Phase 7+)
+Do not label a channel deployed until a live end-to-end test passes.
 
-Only after all applicable tests pass may a channel be called "deployed".
+## 7. Smoke tests
 
----
+After the required deployment gates are met:
 
-## 8. Cost notes (free-tier discipline)
+1. `GET /v1/health` returns `200`.
+2. A protected direct API request without a bearer token returns `401`.
+3. A chat request through `POST /api/chat` returns a real assistant response and identifies the actual provider/model.
+4. A provider failure causes documented failover; HTTP 400 does not fail over.
+5. A media request returns explicit `501` until media generation is implemented.
+6. After persistence is complete, restart the backend and verify the conversation remains available.
+7. Visitor access and rate limits reject unauthorized or excessive requests.
+8. Backups are restored successfully in a test environment.
 
-- LLM traffic order: **Groq (fastest free) → Cerebras → Mistral → OpenRouter (free models) → Gemini**;
-  paid models only on explicit need.
-- ContextManager caps history (~8k tokens) — no accidental 100k-token bills.
-- Media generation is the most expensive capability: explicit user intent only, never automatic.
-- Railway free/trial credit + Railway Postgres are sufficient for a personal system at daily-use volume;
-  monitor the Railway usage dashboard.
+## 8. Secret hygiene
+
+- Rotate every key ever shared in a chat, screenshot, log or source file.
+- Keep `.env` local and git-ignored. Commit placeholders only in `.env.example`.
+- Keep API keys on the backend.
+- Store the BFF token only in Vercel server environment variables.
+- Never log authorization headers or raw secrets.

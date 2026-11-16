@@ -1,52 +1,56 @@
 # KX Sanctuary OS
 
-**KX** is a personal, multilingual AI assistant designed to help its founder think clearly, learn, build software, and manage work. The long-term direction is one assistant identity across web and messaging channels, backed by durable memory and tools that perform real actions.
+KX is a personal, multilingual AI workspace built around one assistant identity. Its purpose is to help its founder think clearly, learn, build software, and manage projects. The long-term direction is persistent memory, useful tools, and continuity across web and messaging channels.
 
-This repository is being rebuilt around a simple rule: **working, testable software over feature claims**.
+**Engineering rule:** functionality is not considered complete until it works and has been tested end to end. Unsupported features must say so clearly.
 
-## Current engineering status
+## Current state
 
-As of **16 November 2026**, the repository is under an architectural rebuild on the `rebuild/foundation` branch.
+The active rebuild is on `rebuild/foundation`; `main` remains unchanged. The work is being delivered in small, reviewable milestones through [draft PR #1](https://github.com/Rhibrahim15/KX-AI/pull/1).
 
-| Area | Verified position |
+| Area | Current position |
 |---|---|
-| API | Express entrypoint now uses the shared prompt, context manager and typed provider router on the rebuild branch |
-| Provider routing | Groq, OpenRouter, Cerebras and Mistral OpenAI-compatible adapters; 15-second per-provider timeout; HTTP 400 stops failover |
-| Context | Deterministic token-estimated windowing, deduplication and pinned-message handling |
-| Memory | Prisma schema and repository adapter prepared; database migrations and chat/Telegram persistence are not wired yet |
-| Telegram | Existing polling and voice-transcription implementation is retained for refactoring; persistent shared sessions are not yet implemented |
-| Web UI | Existing root `src/` components and a separate `frontend/` app both exist; the canonical frontend has not yet been selected |
-| Discord / WhatsApp | Existing integration code requires end-to-end verification and shared-session wiring |
-| Media generation | Deliberately returns HTTP 501 until a real provider integration and task lifecycle are implemented |
-| Production security | Production startup requires `API_AUTH_TOKEN`; CORS uses an explicit origin allowlist. Rate limiting and operational hardening remain future work |
+| Core API | Shared identity prompt, context manager and typed provider router are wired into the Express entrypoint on the rebuild branch |
+| Provider routing | Groq, OpenRouter, Cerebras and Mistral adapters; configured order; provider timeout; HTTP 400 stops failover |
+| Context | Approximate token budget, pinned messages, deduplication and chronological history selection |
+| Web chat | Root Next.js app under `src/`; standard chat uses a same-origin BFF at `/api/chat` |
+| Credentials | Standard chat credentials stay on the backend. Optional legacy keys are session-only and excluded from browser persistence and backups |
+| Memory | Prisma schema and repository boundary prepared; Prisma dependencies, migrations and live persistence are not wired yet |
+| Messaging channels | Existing Telegram/Discord/WhatsApp code is retained but not yet migrated to the shared core or proven end to end |
+| Knowledge and media | Preview/legacy areas only. Media API explicitly returns HTTP 501 rather than fake success |
+| Production access | Not ready for public exposure. The web BFF still needs visitor authentication and rate limiting |
 
-Do not describe persistence, omnichannel continuity, media generation or deployment as complete until their acceptance tests have passed.
+See [docs/STATUS.md](docs/STATUS.md) for the verified status and [docs/ROADMAP.md](docs/ROADMAP.md) for the build gates.
 
 ## Architecture
 
-The target runtime is intentionally layered:
-
 ```
-Web / Telegram / Discord / WhatsApp
-                |
-           Controllers
-                |
-       ContextManager + prompt
-                |
-       Typed LLMRouter
-                |
-       Provider adapters
-                |
-     SessionRepository (Prisma)
-                |
-        PostgreSQL memory
+Browser
+  │
+  ▼
+Next.js app (src/) ── POST /api/chat
+  │                    server-side BFF
+  │                    KX_AI_BACKEND_URL
+  │                    KX_AI_BACKEND_TOKEN
+  ▼
+Express API (api/server.ts)
+  │
+  ├── shared KX identity prompt
+  ├── ContextManager
+  ├── LLMRouter
+  │     └── Groq → OpenRouter → Cerebras → Mistral
+  │
+  └── SessionRepository (prepared; persistence not yet wired)
+           │
+           ▼
+       PostgreSQL / Prisma (next milestone)
 ```
 
-See [docs/REBUILD_PLAN.md](docs/REBUILD_PLAN.md) for the rebuild sequence. Architecture and product decisions belong in `docs/`; older code is preserved until its replacement is verified.
+Channels are interfaces, not separate assistants. All channels must eventually use the same identity, context rules and persistent repository.
 
-## Quick start
+## Local development
 
-Requirements: Node.js 20 or newer and npm.
+Requirements: Node.js 20+ and npm.
 
 ```bash
 git clone https://github.com/Rhibrahim15/KX-AI.git
@@ -55,45 +59,66 @@ npm ci
 cp .env.example .env
 ```
 
-Add at least one model provider key to `.env`, then run:
+In `.env`, configure at least one provider key (for example `GROQ_API_KEY`) and set:
+
+```dotenv
+KX_AI_BACKEND_URL=http://localhost:7860
+```
+
+If you set `API_AUTH_TOKEN` locally, set `KX_AI_BACKEND_TOKEN` to the same value. For a local development-only API with `NODE_ENV=development`, both can be left empty.
+
+Start the API in terminal 1:
+
+```bash
+npm run api:dev
+```
+
+Start the Next.js app in terminal 2:
+
+```bash
+npm run dev
+```
+
+Open `http://localhost:3000`. API health check: `http://localhost:7860/v1/health`.
+
+## Quality checks
 
 ```bash
 npm run typecheck:core
 npm run test:core
-npm run api:dev
+npm run build
 ```
 
-Health check:
-
-```bash
-curl http://localhost:7860/v1/health
-```
-
-Local API requests do not require `API_AUTH_TOKEN` unless you configure one. The API accepts an OpenAI-compatible `messages` array at `POST /v1/chat/completions`. Until the persistence milestone is completed, callers must send the conversation history they want the model to see.
-
-## Web proxy configuration
-
-For the deployed root Next.js app, set `KX_AI_BACKEND_URL` to the API origin and `KX_AI_BACKEND_TOKEN` to the same value as backend `API_AUTH_TOKEN`. These are server-only environment variables. The token is forwarded by `src/app/api/chat/route.ts` and is never exposed to browser JavaScript. Set backend `CORS_ORIGINS` to the deployed web origin.
-
-Standard chat is routed through this BFF. The browser does not send an OpenRouter credential for standard chat. Optional keys used by older advanced experiments are session-only and are not included in browser storage or backup exports.
+The GitHub Actions workflow runs these commands on rebuild pushes and pull requests. The full Next.js production build is included so frontend integration errors are not hidden by passing core-only tests.
 
 ## Configuration
 
-See [.env.example](.env.example). Only the variables required for the feature being run should be configured. Never paste credentials into issues, chat, screenshots or source files. Rotate any credential that may have been exposed.
+See [.env.example](.env.example).
 
-For production:
-- Set `NODE_ENV=production` and a strong `API_AUTH_TOKEN`.
-- Set `CORS_ORIGINS` to the exact deployed frontend origin(s).
-- Store credentials in the hosting provider's secret manager.
-- Do not expose the backend publicly before authentication, rate limiting and monitoring are reviewed.
+- `GROQ_API_KEY`, `OPENROUTER_API_KEY`, `CEREBRAS_API_KEY`, `MISTRAL_API_KEY`: server-side model provider credentials.
+- `LLM_PROVIDER_ORDER`: server-side failover order.
+- `API_AUTH_TOKEN`: backend bearer token; required when `NODE_ENV=production`.
+- `CORS_ORIGINS`: explicit allowed browser origins; wildcard origins are rejected.
+- `KX_AI_BACKEND_URL`: backend origin used by the Next.js BFF.
+- `KX_AI_BACKEND_TOKEN`: must match backend `API_AUTH_TOKEN`; server-only, never use a `NEXT_PUBLIC_` prefix.
+- `DATABASE_URL`: reserved for the persistence milestone; the current chat path does not use it yet.
 
-## Engineering rules
+## Important limitations
 
-1. No fake success responses. Unsupported functionality returns an explicit error.
-2. Persist inbound messages before model execution once the database milestone is wired.
-3. HTTP 400 from a provider is treated as an application/payload defect and does not trigger failover.
-4. Keep one KX identity prompt shared by all channels.
-5. Keep changes small, tested and reversible. Do not delete legacy modules until references and replacements are verified.
+- Chat history is not yet persisted in PostgreSQL. The current browser workspace stores conversations locally; the API receives the message history with each request.
+- The root app's model selector is intentionally replaced with server-managed automatic routing. The server reports the actual provider and model used.
+- Telegram voice-note transcription is being extracted into a shared service; the existing bot has not yet been migrated to persistent shared sessions.
+- Discord and WhatsApp are not yet integrated with the new runtime.
+- Knowledge retrieval, MCP tools and media generation are not claimed as operational. Media requests return HTTP 501.
+- The BFF hides backend credentials but does **not yet authenticate visitors**. Do not expose the web app publicly until a visitor access gate and reliable rate limiting are implemented. Backend bearer authentication alone does not protect an unrestricted public BFF.
+
+## Security
+
+1. Never commit `.env`, API keys, bot tokens or access tokens.
+2. Rotate credentials that have ever been pasted into chats, screenshots, logs or source files.
+3. Keep provider keys in backend environment variables.
+4. Keep `KX_AI_BACKEND_TOKEN` in the Next.js server environment only.
+5. Do not treat the application as public-deployment-ready until visitor authentication, rate limiting, monitoring and recovery procedures are implemented.
 
 ## License
 

@@ -1,57 +1,67 @@
-# KX Sanctuary OS — Verified Status
+# KX Sanctuary OS — Verified status
 
 **Audit date:** 16 November 2026  
 **Repository:** `Rhibrahim15/KX-AI`  
-**Main branch head:** `6e2b527`  
+**Main branch:** `6e2b527` (unchanged by this rebuild)  
 **Rebuild branch:** `rebuild/foundation`  
-**Latest rebuild commit:** `3ce069a`
+**Latest rebuild commit:** `cfb3b3f`  
+**Review:** [Draft PR #1](https://github.com/Rhibrahim15/KX-AI/pull/1)
 
-This document supersedes the June 30, 2026 status snapshot. It distinguishes repository inspection from runtime verification. A file existing is not proof that its feature works end-to-end.
+This report supersedes the June 30, 2026 audit. A source file existing is not proof that its capability works end to end. CI results below refer to GitHub Actions; no live provider or production deployment test is claimed.
 
 ## Current findings
 
-| Area | Status | Evidence / limitation |
+| Area | Status | Verified position |
 |---|---|---|
-| Root API server | Reworked on `rebuild/foundation` | Uses the shared KX prompt, ContextManager and typed LLMRouter. Runtime tests and CI are still required. |
-| Provider failover | Implemented on rebuild branch | Groq → OpenRouter → Cerebras → Mistral when credentials exist. HTTP 400 is fatal; other provider failures may fail over. |
-| Context management | Implemented on rebuild branch | Approximate token budgeting, deduplication, pinned messages and chronological output. Unit tests have been authored; execution is pending CI. |
-| Persistent memory | Not active | Prisma schema and repository adapter are present, but Prisma dependencies, migrations, DATABASE_URL and chat-controller wiring are not complete. |
-| Telegram | Legacy implementation retained | Existing polling and Whisper transcription code has not yet been migrated to the new shared service/repository. Its Map-based history remains volatile. |
-| Root web UI | Existing substantial UI | The canonical-looking application is the root Next.js app under `src/`; it includes chat, settings, store and multiple feature views. It has not yet been reconciled with the new backend contract. |
-| `frontend/` | Starter scaffold | Its page and layout are stock create-next-app content. It is not the preferred frontend candidate. |
-| Discord / WhatsApp | Unverified | Code exists, but end-to-end behavior and unified memory have not been proven. |
-| Media generation | Explicitly unavailable | The rebuilt API returns HTTP 501 until a real provider lifecycle is implemented. |
-| Production API security | Partially improved | Production startup requires `API_AUTH_TOKEN`; CORS uses explicit origins. The BFF keeps the backend token server-side; optional legacy provider keys are memory-only and excluded from browser persistence and backups. Rate limiting, audit logging and monitoring remain outstanding. |
-| Deployment | Not verified | No live Vercel/Railway/PostgreSQL deployment is claimed by this audit. |
+| API server | Reworked on rebuild branch | Uses the shared identity prompt, ContextManager and typed LLMRouter. Production startup requires `API_AUTH_TOKEN`. |
+| Provider routing | Implemented; core tested | Groq, OpenRouter, Cerebras and Mistral OpenAI-compatible adapters. Per-provider timeout. HTTP 400 stops failover; provider outage can fail over. |
+| Context manager | Implemented; unit tested | Approximate token budgeting, pinned-message inclusion, deduplication and chronological output. |
+| Web application | Root `src/` app is canonical candidate | Navigation and welcome page simplified; arbitrary model picker replaced by server-managed automatic routing. |
+| Web chat transport | Implemented; full UI build under verification | Standard chat calls a same-origin Next.js BFF. The BFF strips browser system prompts, validates user/assistant messages and forwards the backend token server-side. |
+| Browser credentials | Improved | Standard chat does not send a provider key. Optional legacy keys are excluded from Zustand persistence and backup exports; older persisted values are cleared on hydration. |
+| Visitor authentication | Not implemented | The BFF is reachable by visitors and does not yet authenticate users. Public deployment is blocked. |
+| Rate limiting | Not implemented | Both BFF and backend need request/usage limiting before public access. |
+| Persistent memory | Not active | Prisma schema and repository adapter boundary exist. Prisma package/client, migrations and live persistence are not wired. |
+| Telegram | Legacy implementation retained | Existing polling/voice transcription remains; memory is still process-local and the bot is not yet migrated to shared repository/prompt/router. |
+| Discord / WhatsApp | Unverified | Existing code requires live end-to-end verification and shared memory wiring. |
+| Knowledge / RAG | Not connected to new chat | Existing legacy GKP materials and UI are retained as development/preview areas. |
+| Media generation | Explicitly unavailable | The rebuilt API returns HTTP 501; it does not simulate a completed generation. |
+| Deployment | Not verified | No Railway/Vercel production deployment, persistent database, restore test or uptime monitoring is claimed. |
 
-## Rebuild branch changes
+## Rebuild branch contents
 
-The `rebuild/foundation` branch currently contains:
+- `api/types/core.ts`: shared message, session and context types.
+- `api/services/ContextManager.ts`: history windowing, pinning, deduplication and ordering.
+- `api/adapters/`: provider adapter contract and OpenAI-compatible implementation.
+- `api/services/LLMRouter.ts`: ordered provider failover, per-attempt timeout, explicit errors, HTTP 400 fatal semantics.
+- `api/agent/prompts.ts`: shared identity and conduct prompt.
+- `api/repositories/SessionRepository.ts`: repository interface and Prisma adapter boundary.
+- `prisma/schema.prisma`: PostgreSQL session/message schema.
+- `api/services/audio.service.ts`: reusable Telegram voice-to-Whisper transcription service.
+- `src/app/api/chat/route.ts`: same-origin BFF to the protected backend.
+- `api/server.ts`: shared core wiring, explicit CORS, production bearer auth and honest 501 media response.
+- Core unit tests and GitHub Actions production-build workflow.
+- Rewritten product, architecture, deployment and roadmap documentation.
 
-- Shared contracts in `api/types/core.ts`.
-- Hybrid history windowing and deduplication in `api/services/ContextManager.ts`.
-- OpenAI-compatible provider adapter contract and implementation.
-- Typed provider routing with per-attempt timeout and HTTP 400 fatal semantics.
-- Shared KX identity prompt in `api/agent/prompts.ts`.
-- Prisma schema and a repository adapter boundary.
-- Reusable Telegram voice-note transcription service.
-- API behavior that rejects unsupported media operations instead of returning fake success.
-- Core unit tests and a GitHub Actions workflow. Standard web chat now uses the same-origin Next.js BFF; optional legacy keys are not persisted or exported.
+## CI status
 
-**Not yet verified:** the CI workflow, a full root application build, real provider requests, database persistence, Telegram restart recovery, UI-to-API integration, and production deployment.
+The first CI runs passed the core type-check and all five unit tests. The newly added full Next.js production-build step exposed a type mismatch in the chat response adapter and a stale persona reference. Both were corrected in commit `cfb3b3f`; the CI run for that commit is pending/re-running. Do not call the latest UI build green until the run completes successfully.
 
-## Security actions
+## Security and operational blockers
 
-1. Rotate every credential previously pasted into chat, logs or screenshots. Revoke old credentials after updating local and hosting secret stores.
-2. Keep `.env` untracked. Commit placeholders only in `.env.example`.
-3. Configure a long random `API_AUTH_TOKEN` before production.
-4. Configure exact frontend origins in `CORS_ORIGINS`; wildcard CORS is rejected.
-5. Do not expose media, GitHub write operations, file operations or other privileged tools without authentication, validation, authorization and audit controls.
+1. Add visitor authentication to the BFF or verified hosting-level access protection.
+2. Add reliable rate limiting and usage controls at the BFF and backend.
+3. Rotate any provider, bot or GitHub credentials previously exposed in chats/screenshots.
+4. Complete Prisma dependencies/migrations and persistent chat wiring.
+5. Migrate Telegram and test restart continuity.
+6. Verify real provider calls and live deploys with smoke tests and monitoring.
 
 ## Next acceptance gates
 
-1. CI passes for core type-checking and unit tests.
-2. Complete the root Next.js UI cleanup, test the BFF against a live backend, reconcile model-selector behavior, and retire the duplicate starter app only after reference checks.
-3. Prisma dependencies and migrations are added; web chat and Telegram share a persistent session repository.
-4. Demonstrate memory survival by sending a conversation, restarting the API process, and retrieving earlier messages.
-5. Complete authentication, rate limiting, deployment and backup/restore verification before production release.
+1. GitHub Actions passes type-check, unit tests and `npm run build`.
+2. Visitor authentication and rate limits prevent an anonymous caller from using the BFF.
+3. Prisma migrations work locally and in CI; web chat persists inbound and assistant messages.
+4. Restart the API and demonstrate that earlier messages remain available.
+5. Telegram uses the same identity, context manager and repository.
+6. Verify the root UI and API together, then harden Discord/WhatsApp and tools.
+7. Only then consider production deployment.
