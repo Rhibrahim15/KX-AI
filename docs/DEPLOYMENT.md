@@ -10,10 +10,10 @@ Target topology: Next.js on Vercel → Express API on Railway → PostgreSQL via
 
 The backend requires a bearer token in production. The Next.js app also has a private password gate with a signed 12-hour HttpOnly session cookie. Middleware protects pages and API routes and fails closed when production access secrets are missing.
 
-These controls are not a complete public-service security layer. Distributed login throttling, shared BFF/API rate limiting, usage budgets, abuse monitoring and incident recovery are still outstanding. A signed-in user could otherwise consume the founder's provider quota.
+These controls are not a complete public-service security layer. Shared login throttling has been implemented on `hardening/login-and-deps` using Upstash Redis, but is not yet CI-validated or live-tested. Distributed BFF/API rate limiting, usage budgets, abuse monitoring and incident recovery are still outstanding. A signed-in user could otherwise consume the founder's provider quota.
 
 Before public release, implement and verify:
-- Shared brute-force protection for the login endpoint.
+- Configure and live-test the shared Upstash login throttle (5 attempts per client address per 15-minute window, then HTTP 429).
 - Distributed request limits at the BFF and backend.
 - Provider usage/spend budgets and abuse monitoring.
 - Secret rotation and recovery runbooks.
@@ -82,7 +82,8 @@ Never prefix these variables with `NEXT_PUBLIC_`. The server-side route `src/app
 - Express uses Helmet security headers.
 - The BFF rejects cross-origin chat POSTs, validates message roles and size, and forwards the token server-side.
 - The web password gate uses a signed 12-hour HttpOnly, SameSite Strict cookie. The login route checks the request origin and compares the password using a timing-safe comparison.
-- Distributed brute-force protection, request rate limiting and usage budgets remain missing. Keep the application private until these are configured.
+- The hardening branch adds an atomic shared login counter through Upstash Redis. Production login fails closed when the service, trusted address header or credentials are unavailable. Local development can omit Upstash.
+- General BFF/backend request rate limits and provider usage budgets remain missing. Keep the application private until these are configured and tested.
 
 ## 5. Database and persistence milestone
 
