@@ -3,13 +3,13 @@ import { Providers } from '@/components/Providers'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: '𝕂𝕏-𝔸𝕀 | Liberated AI Chat',
-  description: 'Open-source, privacy-respecting, multi-model chat interface for hackers and philosophers',
-  keywords: ['AI', 'chat', 'open-source', 'privacy', 'hacker', 'Claude', 'GPT', 'OpenRouter'],
-  authors: [{ name: 'Lysios Lab' }],
+  title: 'KX Sanctuary OS',
+  description: 'A personal AI workspace for thinking, building, learning and managing knowledge.',
+  keywords: ['KX Sanctuary OS', 'personal AI assistant', 'software engineering', 'knowledge management'],
+  authors: [{ name: 'KX Sanctuary OS' }],
   openGraph: {
-    title: '𝕂𝕏-𝔸𝕀',
-    description: 'Cognition without control. Tools for builders, not gatekeepers.',
+    title: 'KX Sanctuary OS',
+    description: 'A personal AI workspace for thinking, building and learning.',
     type: 'website',
   },
 }

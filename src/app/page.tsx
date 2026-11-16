@@ -7,7 +7,6 @@ import { SettingsModal } from '@/components/SettingsModal'
 import { WelcomeScreen } from '@/components/WelcomeScreen'
 import { useStore } from '@/store'
 import { useEasterEggs } from '@/hooks/useEasterEggs'
-import { useApiAutoDetect } from '@/hooks/useApiAutoDetect'
 import { MCPHubView } from '@/components/views/MCPHubView'
 import { ConnectionsView } from '@/components/views/ConnectionsView'
 import { GKPHubView } from '@/components/views/GKPHubView'
@@ -30,9 +29,6 @@ export default function Home() {
 
   // Initialize easter eggs
   useEasterEggs()
-
-  // Auto-detect self-hosted API server at same origin
-  useApiAutoDetect()
 
   // Sync theme class to <html>
   useEffect(() => {

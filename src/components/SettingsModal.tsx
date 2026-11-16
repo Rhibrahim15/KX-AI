@@ -230,10 +230,9 @@ function APIKeyTab() {
       <div>
         <h3 className="text-lg font-semibold mb-2">𝕂𝕏-𝔸𝕀 Master Key</h3>
         <p className="text-sm theme-secondary mb-4">
-          Your API key is stored locally and never sent to KX-AI servers.
-          Get your key at{' '}
+          This optional OpenRouter key is only used by legacy multi-model tools. Standard KX chat uses server-side provider credentials. It is kept in memory only and is not saved in browser storage or backups. Get a key at{' '}
           <a
-            href="https://Master Gateway or Groq LPU"
+            href="https://openrouter.ai/keys"
             target="_blank"
             rel="noopener noreferrer"
             className="theme-primary underline"
@@ -271,7 +270,7 @@ function APIKeyTab() {
       </div>
 
       <p className="text-xs theme-secondary">
-        Changes are saved automatically when you click away.
+        Changes apply for this browser session only. The key is cleared when the page is reloaded.
       </p>
     </div>
   )
@@ -2133,7 +2132,6 @@ function DataTab() {
       theme: store.theme,
       defaultModel: store.defaultModel,
       currentPersona: store.currentPersona,
-      apiKey: store.apiKey,
       // Features
       autoTuneEnabled: store.autoTuneEnabled,
       autoTuneStrategy: store.autoTuneStrategy,
@@ -2154,7 +2152,6 @@ function DataTab() {
       ultraplinianEnabled: store.ultraplinianEnabled,
       ultraplinianTier: store.ultraplinianTier,
       ultraplinianApiUrl: store.ultraplinianApiUrl,
-      ultraplinianApiKey: store.ultraplinianApiKey,
       // Privacy
       datasetGenerationEnabled: store.datasetGenerationEnabled,
       noLogMode: store.noLogMode,
@@ -2213,13 +2210,12 @@ function DataTab() {
         }
 
         const convCount = imported.conversations?.length ?? 0
-        const hasSettings = imported.theme || imported.defaultModel || imported.apiKey
+        const hasSettings = imported.theme || imported.defaultModel
         const memCount = imported.memories?.length ?? 0
         const parts = []
         if (convCount > 0) parts.push(`${convCount} conversations`)
         if (memCount > 0) parts.push(`${memCount} memories`)
         if (hasSettings) parts.push('settings')
-        if (imported.apiKey) parts.push('API key')
 
         setPendingImport(imported)
         setPendingImportSummary(parts.join(', ') || 'backup data')
@@ -2256,9 +2252,7 @@ function DataTab() {
       <div className="p-4 rounded-lg border border-theme-primary bg-theme-accent/50">
         <h3 className="text-lg font-semibold mb-1">Your Data. Your Device. Your Responsibility.</h3>
         <p className="text-sm theme-secondary leading-relaxed">
-          KX-AI stores everything locally in this browser — conversations, memories, settings, API keys.
-          Nothing is sent to a server. There is no cloud sync, no account, no safety net.
-          If you clear your browser data or switch devices, it's gone.
+          Chat messages are sent to the KX backend configured by the deployment for model processing. Conversations, memories and workspace preferences are stored in this browser; they are not synced across devices. Optional legacy provider keys are never included in browser storage or backups.
           <strong className="theme-primary"> Export a backup regularly.</strong>
         </p>
       </div>
@@ -2278,9 +2272,7 @@ function DataTab() {
           Export Full Backup
         </button>
         <p className="text-xs theme-secondary px-1">
-          Downloads a JSON file you own — {conversations.length} conversations, all settings,
-          memories, and config. Portable across browsers and devices.
-          Includes API keys — treat this file like a password.
+          Downloads a JSON file containing {conversations.length} conversations, settings and local memories. Provider credentials are not included.
         </p>
 
         {/* Import */}
