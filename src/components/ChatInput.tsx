@@ -1,797 +1,139 @@
 'use client'
 
-import { useState, useRef, useEffect, KeyboardEvent } from 'react'
+import { useRef, useState, type KeyboardEvent } from 'react'
+import { Loader2, Send, Square } from 'lucide-react'
 import { useStore } from '@/store'
-import { sendMessage, streamUltraplinian, streamConsortium } from '@/lib/openrouter'
-import { computeAutoTuneParams, getContextLabel, getStrategyLabel, PARAM_META } from '@/lib/autotune'
-import type { AutoTuneResult } from '@/lib/autotune'
-import { applyParseltongue, detectTriggers } from '@/lib/parseltongue'
-import { Send, Loader2, StopCircle, SlidersHorizontal } from 'lucide-react'
+import { sendMessage } from '@/lib/openrouter'
 
 export function ChatInput() {
   const {
     conversations,
     currentConversationId,
     addMessage,
-    updateMessageContent,
-    apiKey,
     isStreaming,
     setIsStreaming,
-    personas,
-    stmModules,
-    autoTuneEnabled,
-    autoTuneStrategy,
-    autoTuneOverrides,
-    autoTuneLastResult,
-    setAutoTuneLastResult,
-    feedbackState,
-    parseltongueConfig,
-    // Liquid Response (universal)
-    liquidResponseEnabled,
-    liquidMinDelta,
-    incrementPromptsTried,
-    // ULTRAPLINIAN
-    ultraplinianEnabled,
-    ultraplinianTier,
-    ultraplinianApiUrl,
-    ultraplinianApiKey,
-    ultraplinianRacing,
-    ultraplinianModelsResponded,
-    ultraplinianModelsTotal,
-    ultraplinianLiveModel,
-    ultraplinianLiveScore,
-    setUltraplinianLive,
-    setUltraplinianProgress,
-    setUltraplinianRacing,
-    resetUltraplinianRace,
-    // CONSORTIUM
-    consortiumEnabled,
-    consortiumTier,
-    consortiumPhase,
-    consortiumModelsCollected,
-    consortiumModelsTotal,
-    setConsortiumPhase,
-    setConsortiumProgress,
-    resetConsortium,
   } = useStore()
-  const currentConversation = conversations.find(c => c.id === currentConversationId) || null
 
   const [input, setInput] = useState('')
-  const [showTuneDetails, setShowTuneDetails] = useState(false)
-  const [parseltonguePreview, setParseltonguePreview] = useState<{
-    triggersFound: string[]
-    transformed: boolean
-  } | null>(null)
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
 
-  // Auto-resize textarea
-  useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto'
-      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 200)}px`
-    }
-  }, [input])
+  async function handleSubmit() {
+    const content = input.trim()
+    const sessionId = currentConversationId
 
-  // Live preview: compute autotune params as user types (debounced)
-  const [livePreview, setLivePreview] = useState<AutoTuneResult | null>(null)
-  useEffect(() => {
-    if (!autoTuneEnabled || !input.trim()) {
-      setLivePreview(null)
-      return
-    }
+    if (!content || !sessionId || isStreaming) return
 
-    const timer = setTimeout(() => {
-      const persona = personas.find(p => p.id === currentConversation?.persona) || personas[0]
-      const history = (currentConversation?.messages || []).map(m => ({
-        role: m.role,
-        content: m.content
+    const conversation = conversations.find((item) => item.id === sessionId)
+    const history = (conversation?.messages ?? [])
+      .filter((message) => message.role === 'user' || message.role === 'assistant')
+      .map((message) => ({
+        role: message.role as 'user' | 'assistant',
+        content: message.content,
       }))
 
-      const result = computeAutoTuneParams({
-        strategy: autoTuneStrategy,
-        message: input.trim(),
-        conversationHistory: history,
-        overrides: autoTuneOverrides,
-        learnedProfiles: feedbackState.learnedProfiles
-      })
-
-      setLivePreview(result)
-    }, 300)
-
-    return () => clearTimeout(timer)
-  }, [input, autoTuneEnabled, autoTuneStrategy, autoTuneOverrides, currentConversation, personas, feedbackState])
-
-  // Live preview: detect triggers as user types (debounced)
-  useEffect(() => {
-    if (!parseltongueConfig.enabled || !input.trim()) {
-      setParseltonguePreview(null)
-      return
-    }
-
-    const timer = setTimeout(() => {
-      const triggers = detectTriggers(input.trim(), parseltongueConfig.customTriggers)
-      if (triggers.length > 0) {
-        setParseltonguePreview({
-          triggersFound: triggers,
-          transformed: true
-        })
-      } else {
-        setParseltonguePreview(null)
-      }
-    }, 200)
-
-    return () => clearTimeout(timer)
-  }, [input, parseltongueConfig])
-
-  const handleSubmit = async () => {
-    if (!input.trim() || !currentConversationId || isStreaming) return
-
-    const originalMessage = input.trim()
     setInput('')
     setIsStreaming(true)
-    incrementPromptsTried()
+    addMessage(sessionId, { role: 'user', content })
 
-    // Legacy prompt obfuscation has been retired. Send the user's actual text.
-    const parseltongueResult = { transformedText: originalMessage, triggersFound: [] as string[] }
-    const userMessage = originalMessage
-
-
-    // Add user message (show original to user, send transformed to API)
-    addMessage(currentConversationId, {
-      role: 'user',
-      content: originalMessage  // Show original message in UI
-    })
-
-    // Get persona and model
-    const persona = personas.find(p => p.id === currentConversation?.persona) || personas[0]
-    const model = currentConversation?.model || 'anthropic/claude-3-opus'
-
-    // The backend owns the system identity and prompt. Only pass real
-    // user/assistant conversation turns from the browser.
-    const messages = [
-      ...((currentConversation?.messages || [])
-        .filter(m => m.role === 'user' || m.role === 'assistant')
-        .map(m => ({
-          role: m.role as 'user' | 'assistant',
-          content: m.content,
-        }))),
-      { role: 'user' as const, content: userMessage },
-    ]
-
-    // Compute AutoTune parameters if enabled
-    let tuneResult: AutoTuneResult | null = null
-    if (autoTuneEnabled) {
-      const history = (currentConversation?.messages || []).map(m => ({
-        role: m.role,
-        content: m.content
-      }))
-
-      tuneResult = computeAutoTuneParams({
-        strategy: autoTuneStrategy,
-        message: userMessage,
-        conversationHistory: history,
-        overrides: autoTuneOverrides,
-        learnedProfiles: feedbackState.learnedProfiles
-      })
-
-      setAutoTuneLastResult(tuneResult)
-    }
+    const controller = new AbortController()
+    abortControllerRef.current = controller
 
     try {
-      abortControllerRef.current = new AbortController()
+      const result = await sendMessage({
+        messages: [...history, { role: 'user', content }],
+        signal: controller.signal,
+      })
 
-      // ── CONSORTIUM PATH: Hive-mind synthesis ──────────────────────
-      if (consortiumEnabled && ultraplinianApiUrl && ultraplinianApiKey && !ultraplinianEnabled) {
-        const assistantMsgId = addMessage(currentConversationId, {
-          role: 'assistant',
-          content: '',
-          model: 'consortium',
-          persona: persona.id,
-        })
+      addMessage(sessionId, {
+        role: 'assistant',
+        content: result.content,
+        model: `${result.provider} · ${result.model}`,
+      })
+    } catch (cause) {
+      const wasCancelled =
+        cause instanceof Error &&
+        (cause.name === 'AbortError' || cause.name === 'TimeoutError')
 
-        setConsortiumPhase('collecting')
-        resetConsortium()
+      const message = wasCancelled
+        ? 'Response stopped.'
+        : cause instanceof Error
+          ? cause.message
+          : 'KX could not complete this request. Please try again.'
 
-        await streamConsortium(
-          {
-            messages,
-            openrouterApiKey: apiKey,
-            apiBaseUrl: ultraplinianApiUrl,
-            godmodeApiKey: ultraplinianApiKey,
-            tier: consortiumTier,
-            stm_modules: stmModules.filter(m => m.enabled).map(m => m.id),
-            liquid: liquidResponseEnabled,
-            liquid_min_delta: liquidMinDelta,
-            signal: abortControllerRef.current.signal,
-          },
-          {
-            onStart: (data) => {
-              setConsortiumProgress(0, data.models_queried)
-              updateMessageContent(currentConversationId, assistantMsgId,
-                `*Collecting from ${data.models_queried} models...*`)
-            },
-            onModelResult: (data) => {
-              setConsortiumProgress(data.models_collected, data.models_total)
-              // Only update with progress text if liquid hasn't already shown real content
-              if (!liquidResponseEnabled) {
-                updateMessageContent(currentConversationId, assistantMsgId,
-                  `*Collecting responses... ${data.models_collected}/${data.models_total} models*`)
-              }
-            },
-            onBestResponse: (data) => {
-              // Liquid response: show best individual model response while collecting
-              updateMessageContent(currentConversationId, assistantMsgId, data.content, {
-                model: `${data.model} (${data.score}pts — synthesizing...)`,
-              })
-            },
-            onSynthesisStart: (data) => {
-              setConsortiumPhase('synthesizing')
-              if (!liquidResponseEnabled) {
-                updateMessageContent(currentConversationId, assistantMsgId,
-                  `*${data.responses_collected} models collected. Orchestrator synthesizing ground truth...*`)
-              }
-            },
-            onComplete: (data) => {
-              const finalContent = data.synthesis || ''
-              const orchModel = data.orchestrator?.model || 'consortium'
-              setConsortiumPhase('done')
-
-              updateMessageContent(currentConversationId, assistantMsgId, finalContent, {
-                model: `consortium (${orchModel})`,
-                ...(tuneResult ? {
-                  autoTuneParams: tuneResult.params,
-                  autoTuneContext: tuneResult.detectedContext,
-                  autoTuneContextScores: tuneResult.contextScores,
-                  autoTunePatternMatches: tuneResult.patternMatches,
-                  autoTuneDeltas: tuneResult.paramDeltas,
-                } : {}),
-              })
-            },
-            onError: (error) => {
-              updateMessageContent(currentConversationId, assistantMsgId,
-                `CONSORTIUM error: ${error}`)
-              setConsortiumPhase('idle')
-            },
-          },
-        )
-
-        setIsStreaming(false)
-        setConsortiumPhase('idle')
-        return
-      }
-
-      // ── ULTRAPLINIAN PATH: Multi-model race with liquid response ──
-      if (ultraplinianEnabled && ultraplinianApiUrl && ultraplinianApiKey) {
-        // Add placeholder assistant message that we'll update live
-        const assistantMsgId = addMessage(currentConversationId, {
-          role: 'assistant',
-          content: '',
-          model: 'ultraplinian',
-          persona: persona.id,
-        })
-
-        setUltraplinianRacing(true)
-        resetUltraplinianRace()
-
-        // Collect all race responses for browsing later
-        const collectedResponses: Array<{ model: string; content: string; score: number; duration_ms: number }> = []
-
-        await streamUltraplinian(
-          {
-            messages,
-            openrouterApiKey: apiKey,
-            apiBaseUrl: ultraplinianApiUrl,
-            godmodeApiKey: ultraplinianApiKey,
-            tier: ultraplinianTier,
-            stm_modules: stmModules.filter(m => m.enabled).map(m => m.id),
-            liquid: liquidResponseEnabled,
-            liquid_min_delta: liquidMinDelta,
-            signal: abortControllerRef.current.signal,
-          },
-          {
-            onRaceStart: (data) => {
-              setUltraplinianProgress(0, data.models_queried)
-              updateMessageContent(currentConversationId, assistantMsgId,
-                `*Racing ${data.models_queried} models...*`)
-            },
-            onModelResult: (data) => {
-              setUltraplinianProgress(data.models_responded, data.models_total)
-            },
-            onLeaderChange: (data) => {
-              // Collect each leader response for later browsing
-              collectedResponses.push({
-                model: data.model,
-                content: data.content,
-                score: data.score,
-                duration_ms: data.duration_ms,
-              })
-              setUltraplinianLive(data.content, data.model, data.score)
-              updateMessageContent(currentConversationId, assistantMsgId, data.content, {
-                model: data.model,
-              })
-            },
-            onComplete: async (data) => {
-              const finalContent = data.response || ''
-              const winnerModel = data.winner?.model || 'ultraplinian'
-
-              // Build full race responses from rankings (backend now includes content)
-              const rankingResponses = (data.race?.rankings ?? [])
-                .filter(r => r.success && r.content)
-                .map(r => ({
-                  model: r.model,
-                  content: r.content!,
-                  score: r.score,
-                  duration_ms: r.duration_ms,
-                  isWinner: r.model === winnerModel,
-                }))
-                .sort((a, b) => b.score - a.score)
-
-              // Fall back to collected leader changes if rankings lack content
-              const raceResponses = rankingResponses.length > 0
-                ? rankingResponses
-                : collectedResponses.map(r => ({
-                    ...r,
-                    isWinner: r.model === winnerModel,
-                  }))
-
-              updateMessageContent(currentConversationId, assistantMsgId, finalContent, {
-                model: winnerModel,
-                raceResponses: raceResponses.length > 1 ? raceResponses : undefined,
-                ...(tuneResult ? {
-                  autoTuneParams: tuneResult.params,
-                  autoTuneContext: tuneResult.detectedContext,
-                  autoTuneContextScores: tuneResult.contextScores,
-                  autoTunePatternMatches: tuneResult.patternMatches,
-                  autoTuneDeltas: tuneResult.paramDeltas,
-                } : {}),
-              })
-              resetUltraplinianRace()
-
-              // Wait for LLM classification to land (usually already resolved)
-              // Beacon metadata to HF dataset (fire-and-forget, no content)
-              recordChatEvent({
-                mode: 'ultraplinian',
-                model: winnerModel,
-                duration_ms: data.race?.total_duration_ms || 0,
-                response_length: finalContent.length,
-                success: true,
-                pipeline: {
-                  autotune: autoTuneEnabled,
-                  parseltongue: parseltongueConfig.enabled,
-                  stm_modules: stmModules.filter(m => m.enabled).map(m => m.id),
-                  strategy: autoTuneStrategy,
-                  godmode: true,
-                },
-                ...(tuneResult ? {
-                  autotune: {
-                    detected_context: tuneResult.detectedContext,
-                    confidence: tuneResult.confidence,
-                  },
-                } : {}),
-                parseltongue: parseltongueConfig.enabled ? {
-                  triggers_found: parseltongueResult.triggersFound.length,
-                  technique: parseltongueConfig.technique,
-                  intensity: parseltongueConfig.intensity,
-                } : undefined,
-                ultraplinian: {
-                  tier: ultraplinianTier,
-                  models_queried: data.race?.models_queried || 0,
-                  models_succeeded: data.race?.models_succeeded || 0,
-                  winner_model: winnerModel,
-                  winner_score: data.winner?.score || 0,
-                  total_duration_ms: data.race?.total_duration_ms || 0,
-                },
-                classification: promptClassification,
-                persona: persona.id,
-                prompt_length: originalMessage.length,
-                conversation_depth: currentConversation?.messages?.length || 0,
-                memory_count: activeMemories.length,
-                no_log: noLogMode,
-                parseltongue_transformed: parseltongueResult.triggersFound.length > 0,
-              })
-            },
-            onError: (error) => {
-              updateMessageContent(currentConversationId, assistantMsgId,
-                `**ULTRAPLINIAN Error:** ${error}`)
-              resetUltraplinianRace()
-            },
-          },
-        )
-      } else {
-        // ── STANDARD PATH: Single model ────────────────────────────
-        const startTime = Date.now()
-        const result = await sendMessage({
-          messages,
-          signal: abortControllerRef.current.signal,
-        })
-        const effectiveModel = result.model
-        const durationMs = Date.now() - startTime
-
-        // Apply STM transformations
-        let transformedResponse: string = result.content
-        for (const stm of stmModules) {
-          if (stm.enabled) {
-            transformedResponse = stm.transformer(transformedResponse)
-          }
-        }
-
-        addMessage(currentConversationId, {
-          role: 'assistant',
-          content: transformedResponse,
-          model: effectiveModel,
-          persona: persona.id,
-          ...(tuneResult ? {
-            autoTuneParams: tuneResult.params,
-            autoTuneContext: tuneResult.detectedContext,
-            autoTuneContextScores: tuneResult.contextScores,
-            autoTunePatternMatches: tuneResult.patternMatches,
-            autoTuneDeltas: tuneResult.paramDeltas
-          } : {})
-        })
-
-        // Wait for LLM classification to land (usually already resolved)
-        // Beacon metadata to HF dataset (fire-and-forget, no content)
-        recordChatEvent({
-          mode: 'standard',
-          model: effectiveModel,
-          duration_ms: durationMs,
-          response_length: transformedResponse.length,
-          success: true,
-          pipeline: {
-            autotune: autoTuneEnabled,
-            parseltongue: parseltongueConfig.enabled,
-            stm_modules: stmModules.filter(m => m.enabled).map(m => m.id),
-            strategy: autoTuneStrategy,
-            godmode: useCustomSystemPrompt,
-          },
-          ...(tuneResult ? {
-            autotune: {
-              detected_context: tuneResult.detectedContext,
-              confidence: tuneResult.confidence,
-            },
-          } : {}),
-          parseltongue: parseltongueConfig.enabled ? {
-            triggers_found: parseltongueResult.triggersFound.length,
-            technique: parseltongueConfig.technique,
-            intensity: parseltongueConfig.intensity,
-          } : undefined,
-          classification: promptClassification,
-          persona: persona.id,
-          prompt_length: originalMessage.length,
-          conversation_depth: currentConversation?.messages?.length || 0,
-          memory_count: activeMemories.length,
-          no_log: noLogMode,
-          parseltongue_transformed: parseltongueResult.triggersFound.length > 0,
-        })
-      }
-    } catch (error: any) {
-      resetUltraplinianRace()
-      if (error.name === 'AbortError') {
-        addMessage(currentConversationId, {
-          role: 'assistant',
-          content: '_[Response stopped by user]_',
-          model,
-          persona: persona.id
-        })
-        recordChatEvent({
-          mode: ultraplinianEnabled ? 'ultraplinian' : 'standard',
-          model,
-          duration_ms: 0,
-          response_length: 0,
-          success: false,
-          error_type: 'abort',
-          pipeline: {
-            autotune: autoTuneEnabled,
-            parseltongue: parseltongueConfig.enabled,
-            stm_modules: stmModules.filter(m => m.enabled).map(m => m.id),
-            strategy: autoTuneStrategy,
-            godmode: useCustomSystemPrompt,
-          },
-          classification: promptClassification,
-          persona: persona.id,
-          prompt_length: originalMessage.length,
-          conversation_depth: currentConversation?.messages?.length || 0,
-          memory_count: activeMemories.length,
-          no_log: noLogMode,
-          parseltongue_transformed: parseltongueResult.triggersFound.length > 0,
-        })
-      } else {
-        console.error('Error sending message:', error)
-        const errMsg = error.message || 'Failed to get response. Check your API key in Settings and try again.'
-        const errLower = errMsg.toLowerCase()
-        const errorType = errLower.includes('api key') || errLower.includes('expired') || errLower.includes('denied') || errLower.includes('permission')
-          ? 'auth'
-          : errLower.includes('rate limit') || errLower.includes('wait')
-          ? 'rate_limit'
-          : errLower.includes('timeout') || errLower.includes('timed out')
-          ? 'timeout'
-          : errLower.includes('unavailable') || errLower.includes('overloaded')
-          ? 'model_error'
-          : errLower.includes('credit') || errLower.includes('insufficient')
-          ? 'billing'
-          : 'unknown'
-        addMessage(currentConversationId, {
-          role: 'assistant',
-          content: `**Error:** ${errMsg}`,
-          model,
-          persona: persona.id
-        })
-        recordChatEvent({
-          mode: ultraplinianEnabled ? 'ultraplinian' : 'standard',
-          model,
-          duration_ms: 0,
-          response_length: 0,
-          success: false,
-          error_type: errorType,
-          pipeline: {
-            autotune: autoTuneEnabled,
-            parseltongue: parseltongueConfig.enabled,
-            stm_modules: stmModules.filter(m => m.enabled).map(m => m.id),
-            strategy: autoTuneStrategy,
-            godmode: useCustomSystemPrompt,
-          },
-          classification: promptClassification,
-          persona: persona.id,
-          prompt_length: originalMessage.length,
-          conversation_depth: currentConversation?.messages?.length || 0,
-          memory_count: activeMemories.length,
-          no_log: noLogMode,
-          parseltongue_transformed: parseltongueResult.triggersFound.length > 0,
-        })
-      }
+      addMessage(sessionId, {
+        role: 'assistant',
+        content: wasCancelled
+          ? `_${message}_`
+          : `**KX could not respond.** ${message}`,
+      })
     } finally {
+      if (abortControllerRef.current === controller) {
+        abortControllerRef.current = null
+      }
       setIsStreaming(false)
-      setUltraplinianRacing(false)
-      abortControllerRef.current = null
     }
   }
 
-  const handleStop = () => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort()
+  function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault()
+      void handleSubmit()
     }
   }
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      handleSubmit()
-    }
+  function handleStop() {
+    abortControllerRef.current?.abort()
   }
-
-  // Determine which result to show (live preview while typing, last result after send)
-  const displayResult = livePreview || autoTuneLastResult
-
-  // Count active memories for display
-  const activeMemoryCount = memoriesEnabled ? memories.filter(m => m.active).length : 0
 
   return (
-    <div className="border-t border-theme-primary bg-theme-dim/50 p-4">
-      <div className="max-w-4xl mx-auto">
-        {/* AutoTune live parameter display */}
-        {autoTuneEnabled && displayResult && showTuneDetails && (
-          <div className="mb-3 p-3 bg-theme-bg border border-theme-primary rounded-lg space-y-3">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-xs font-semibold theme-primary">
-                <SlidersHorizontal className="w-3 h-3" />
-                AUTOTUNE {autoTuneStrategy === 'adaptive'
-                  ? `// ${getContextLabel(displayResult.detectedContext)} (${Math.round(displayResult.confidence * 100)}%)`
-                  : `// ${getStrategyLabel(autoTuneStrategy)}`
-                }
-              </div>
-            </div>
-
-            {/* Context Competition - show all context scores */}
-            {displayResult.contextScores && displayResult.contextScores.length > 1 && (
-              <div className="flex items-center gap-1 text-[10px] font-mono">
-                <span className="theme-secondary mr-1">CONTEXT:</span>
-                {displayResult.contextScores
-                  .filter(s => s.percentage > 0)
-                  .slice(0, 4)
-                  .map((s, i) => (
-                    <span key={s.type} className="flex items-center">
-                      {i > 0 && <span className="text-gray-600 mx-1">&gt;</span>}
-                      <span className={i === 0 ? 'text-cyan-400 font-bold' : 'theme-secondary'}>
-                        {getContextLabel(s.type)} {s.percentage}%
-                      </span>
-                    </span>
-                  ))}
-              </div>
-            )}
-
-            {/* Pattern Match Reasoning - why this context was detected */}
-            {displayResult.patternMatches && displayResult.patternMatches.length > 0 && (
-              <div className="text-[10px] font-mono">
-                <span className="theme-secondary">MATCHED: </span>
-                <span className="text-purple-400">
-                  {displayResult.patternMatches
-                    .slice(0, 3)
-                    .map(p => p.pattern)
-                    .join(' | ')}
-                  {displayResult.patternMatches.length > 3 && ` +${displayResult.patternMatches.length - 3} more`}
-                </span>
-              </div>
-            )}
-
-            {/* Parameter Grid with Deltas */}
-            <div className="grid grid-cols-6 gap-2">
-              {(Object.entries(displayResult.params) as [keyof typeof PARAM_META, number][]).map(
-                ([key, value]) => {
-                  // Find if there's a delta for this param
-                  const delta = displayResult.paramDeltas?.find(d => d.param === key)
-                  const hasDelta = delta && Math.abs(delta.delta) > 0.001
-
-                  return (
-                    <div
-                      key={key}
-                      className={`text-center p-1.5 rounded border transition-all
-                        ${hasDelta
-                          ? 'bg-cyan-500/10 border-cyan-500/30'
-                          : 'bg-theme-dim border-theme-primary/30'
-                        }`}
-                      title={delta?.reason || PARAM_META[key].description}
-                    >
-                      <div className="text-[10px] theme-secondary font-mono">
-                        {PARAM_META[key].short}
-                      </div>
-                      <div className="text-sm font-bold theme-primary font-mono">
-                        {typeof value === 'number' ? value.toFixed(2) : value}
-                      </div>
-                      {hasDelta && (
-                        <div className={`text-[9px] font-mono ${delta.delta > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                          {delta.delta > 0 ? '+' : ''}{delta.delta.toFixed(2)}
-                        </div>
-                      )}
-                    </div>
-                  )
-                }
-              )}
-            </div>
-
-            {/* Delta Explanations - what changed and why */}
-            {displayResult.paramDeltas && displayResult.paramDeltas.length > 0 && (
-              <div className="text-[10px] font-mono space-y-0.5 pt-1 border-t border-theme-primary/20">
-                <span className="theme-secondary">TUNING:</span>
-                {displayResult.paramDeltas.slice(0, 4).map((d, i) => (
-                  <div key={`${d.param}-${i}`} className="flex items-center gap-1 pl-2">
-                    <span className="text-cyan-400">{PARAM_META[d.param].short}</span>
-                    <span className="theme-secondary">
-                      {d.before.toFixed(2)} → {d.after.toFixed(2)}
-                    </span>
-                    <span className={d.delta > 0 ? 'text-emerald-400' : 'text-red-400'}>
-                      ({d.delta > 0 ? '+' : ''}{d.delta.toFixed(2)})
-                    </span>
-                    <span className="text-purple-400">{d.reason}</span>
-                  </div>
-                ))}
-                {displayResult.paramDeltas.length > 4 && (
-                  <div className="pl-2 theme-secondary">+{displayResult.paramDeltas.length - 4} more adjustments</div>
-                )}
-              </div>
-            )}
-          </div>
-        )}
-
-        <div className="flex items-end gap-3">
-          <div className="flex-1 relative">
-            <textarea
-              ref={textareaRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Command JARVIS or query GreenByte Titan Hub... (Shift+Enter for new line)"
-              disabled={isStreaming}
-              rows={1}
-              className="w-full px-4 py-3 pr-12 bg-[#0a0d14] border border-white/[0.08] rounded-lg
-                resize-none focus:outline-none focus:border-cyan-400/50 text-white
-                placeholder:text-slate-500 disabled:opacity-50
-                transition-all duration-200 font-sans text-sm"
-              style={{ minHeight: '48px', maxHeight: '200px' }}
-            />
-
-            {/* Character count */}
-            {input.length > 0 && (
-              <div className="absolute right-3 bottom-3 text-xs theme-secondary">
-                {input.length}
-              </div>
-            )}
-          </div>
-
-          {/* Submit/Stop button */}
-          {isStreaming ? (
-            <button
-              onClick={handleStop}
-              className="p-3 bg-red-500/20 border border-red-500 rounded-lg
-                hover:bg-red-500/30 transition-all"
-              aria-label="Stop generation"
-            >
-              <StopCircle className="w-5 h-5 text-red-500" />
-            </button>
-          ) : (
-            <button
-              onClick={handleSubmit}
-              disabled={!input.trim()}
-              className="p-3 bg-[#0f141f] border border-white/[0.08] rounded-lg text-cyan-400
-                hover:bg-cyan-400/10 hover:border-cyan-400/40 shadow-sm transition-all
-                disabled:opacity-30 disabled:cursor-not-allowed"
-              aria-label="Send message"
-            >
-              {isStreaming ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <Send className="w-5 h-5" />
-              )}
-            </button>
-          )}
-        </div>
-
-        {/* Status indicators */}
-        <div className="flex items-center justify-between mt-2 text-xs theme-secondary">
-          <div className="flex items-center gap-4">
-            {autoTuneEnabled && (
-              <button
-                onClick={() => setShowTuneDetails(!showTuneDetails)}
-                className={`flex items-center gap-1 transition-colors hover:text-cyan-400
-                  ${showTuneDetails ? 'text-cyan-400' : ''}`}
-              >
-                <SlidersHorizontal className="w-3 h-3 text-cyan-400" />
-                AutoTune {autoTuneStrategy === 'adaptive' && displayResult
-                  ? `[${getContextLabel(displayResult.detectedContext)}]`
-                  : `[${getStrategyLabel(autoTuneStrategy)}]`
-                }
-              </button>
-            )}
-            {noLogMode && (
-              <span className="flex items-center gap-1">
-                <span className="text-yellow-500 text-[10px]">&#x25C8;</span>
-                No-Log Mode
-              </span>
-            )}
-            {stmModules.some(m => m.enabled) && (
-              <span className="flex items-center gap-1">
-                <span className="text-purple-500 text-[10px]">&#x2B23;</span>
-                {stmModules.filter(m => m.enabled).length} STM Active
-              </span>
-            )}
-            {activeMemoryCount > 0 && (
-              <span className="flex items-center gap-1">
-                <span className="text-cyan-400 text-[10px]">&#x2726;</span>
-                {activeMemoryCount} Memories
-              </span>
-            )}
-            {parseltongueConfig.enabled && (
-              <span className={`flex items-center gap-1 ${parseltonguePreview ? 'text-emerald-400' : ''}`}>
-                <span className="text-cyan-400 text-[10px]">&#x2621;</span>
-                Parseltongue
-                {parseltonguePreview && ` [${parseltonguePreview.triggersFound.length} triggers]`}
-              </span>
-            )}
-            {ultraplinianEnabled && (
-              <span className="flex items-center gap-1 text-orange-400">
-                <span className="text-[10px]">&#x2694;</span>
-                ULTRAPLINIAN [{ultraplinianTier}]
-              </span>
-            )}
-          </div>
-          {isStreaming && (
-            <span className="flex items-center gap-1">
-              <Loader2 className="w-3 h-3 animate-spin" />
-              {consortiumPhase === 'collecting'
-                ? `Collecting ${consortiumModelsCollected}/${consortiumModelsTotal} models...`
-                : consortiumPhase === 'synthesizing'
-                ? `Synthesizing ground truth...`
-                : ultraplinianRacing
-                ? `Racing ${ultraplinianModelsResponded}/${ultraplinianModelsTotal} models${ultraplinianLiveModel ? ` // Leader: ${ultraplinianLiveModel.split('/').pop()} (${ultraplinianLiveScore})` : '...'}`
-                : autoTuneEnabled && autoTuneLastResult
-                  ? `Tuned @ T=${autoTuneLastResult.params.temperature.toFixed(2)}...`
-                  : 'Thinking...'
-              }
+    <div className="border-t border-white/[0.07] bg-[#090c13]/90 p-4">
+      <div className="mx-auto flex max-w-4xl items-end gap-3">
+        <div className="relative min-w-0 flex-1">
+          <textarea
+            value={input}
+            onChange={(event) => setInput(event.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Message KX… (Shift+Enter for a new line)"
+            aria-label="Message KX"
+            disabled={isStreaming}
+            rows={1}
+            maxLength={20_000}
+            className="w-full resize-none rounded-xl border border-white/[0.09] bg-[#0a0d14] px-4 py-3 pr-16 text-sm leading-6 text-white outline-none transition placeholder:text-slate-500 focus:border-sky-300/40 disabled:opacity-60"
+            style={{ minHeight: '48px', maxHeight: '200px' }}
+          />
+          {input.length > 0 && (
+            <span className="absolute bottom-3 right-3 text-[10px] tabular-nums text-slate-600">
+              {input.length.toLocaleString()}/20,000
             </span>
           )}
         </div>
+
+        {isStreaming ? (
+          <button
+            type="button"
+            onClick={handleStop}
+            aria-label="Stop response"
+            title="Stop response"
+            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-rose-300/20 bg-rose-300/[0.08] text-rose-200 transition hover:bg-rose-300/[0.14]"
+          >
+            <Square className="h-4 w-4" />
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => void handleSubmit()}
+            disabled={!input.trim() || !currentConversationId}
+            aria-label="Send message"
+            title="Send message"
+            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-sky-300/20 bg-sky-300/[0.09] text-sky-100 transition hover:bg-sky-300/[0.15] disabled:cursor-not-allowed disabled:opacity-30"
+          >
+            <Send className="h-4 w-4" />
+          </button>
+        )}
       </div>
+      <p className="mx-auto mt-2 max-w-4xl text-[10px] text-slate-600">
+        KX uses server-managed model routing. Check important answers and verify external actions.
+      </p>
     </div>
   )
 }
