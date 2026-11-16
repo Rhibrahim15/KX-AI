@@ -352,7 +352,7 @@ export const useStore = create<AppState>()(
     (set, get) => ({
       // Initial state
       theme: 'minimal',
-      apiKey: 'kx-sanctuary',
+      apiKey: '',
       defaultModel: 'anthropic/claude-opus-4.6',
       conversations: [],
       currentConversationId: null,
@@ -411,8 +411,8 @@ export const useStore = create<AppState>()(
       // ULTRAPLINIAN initial state
       ultraplinianEnabled: false,
       ultraplinianTier: 'fast' as const,
-      ultraplinianApiUrl: 'http://localhost:7860',
-      ultraplinianApiKey: 'kx-sanctuary',
+      ultraplinianApiUrl: '',
+      ultraplinianApiKey: '',
       ultraplinianLiveContent: null,
       ultraplinianLiveModel: null,
       ultraplinianLiveScore: null,
@@ -721,11 +721,11 @@ export const useStore = create<AppState>()(
         // stmModules excluded: transformer functions can't be serialized/deserialized
         const allowed = [
           'conversations', 'currentConversationId', 'theme', 'defaultModel',
-          'currentPersona', 'apiKey', 'autoTuneEnabled', 'autoTuneStrategy',
+          'currentPersona', 'autoTuneEnabled', 'autoTuneStrategy',
           'autoTuneOverrides', 'feedbackState', 'parseltongueConfig',
           'memories', 'memoriesEnabled', 'customSystemPrompt', 'useCustomSystemPrompt',
           'consortiumEnabled', 'consortiumTier', 'liquidResponseEnabled', 'liquidMinDelta',
-          'ultraplinianEnabled', 'ultraplinianTier', 'ultraplinianApiUrl', 'ultraplinianApiKey',
+          'ultraplinianEnabled', 'ultraplinianTier',
           'datasetGenerationEnabled', 'noLogMode', 'showMagic', 'promptsTried',
         ]
         for (const key of allowed) {
@@ -743,7 +743,6 @@ export const useStore = create<AppState>()(
         theme: state.theme,
         activeTab: state.activeTab,
         showMagic: state.showMagic,
-        apiKey: state.apiKey,
         defaultModel: state.defaultModel,
         conversations: state.conversations,
         currentConversationId: state.currentConversationId,
@@ -773,8 +772,6 @@ export const useStore = create<AppState>()(
         // ULTRAPLINIAN persistence
         ultraplinianEnabled: state.ultraplinianEnabled,
         ultraplinianTier: state.ultraplinianTier,
-        ultraplinianApiUrl: state.ultraplinianApiUrl,
-        ultraplinianApiKey: state.ultraplinianApiKey,
       }),
       onRehydrateStorage: () => (state) => {
         if (state) {

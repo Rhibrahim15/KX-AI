@@ -452,23 +452,27 @@ export function ChatInput() {
       } else {
         // ── STANDARD PATH: Single model ────────────────────────────
         const startTime = Date.now()
-        const response = proxyMode
-          ? await sendMessageViaProxy({
-              messages,
+        const result = proxyMode
+          ? {
+              content: await sendMessageViaProxy({
+                messages,
+                model,
+                apiBaseUrl: ultraplinianApiUrl,
+                godmodeApiKey: ultraplinianApiKey,
+                signal: abortControllerRef.current.signal,
+                stm_modules: stmModules.filter(m => m.enabled).map(m => m.id),
+                ...(tuneResult ? {
+                  temperature: tuneResult.params.temperature,
+                  top_p: tuneResult.params.top_p,
+                  top_k: tuneResult.params.top_k,
+                  frequency_penalty: tuneResult.params.frequency_penalty,
+                  presence_penalty: tuneResult.params.presence_penalty,
+                  repetition_penalty: tuneResult.params.repetition_penalty,
+                } : {}),
+              }),
               model,
-              apiBaseUrl: ultraplinianApiUrl,
-              godmodeApiKey: ultraplinianApiKey,
-              signal: abortControllerRef.current.signal,
-              stm_modules: stmModules.filter(m => m.enabled).map(m => m.id),
-              ...(tuneResult ? {
-                temperature: tuneResult.params.temperature,
-                top_p: tuneResult.params.top_p,
-                top_k: tuneResult.params.top_k,
-                frequency_penalty: tuneResult.params.frequency_penalty,
-                presence_penalty: tuneResult.params.presence_penalty,
-                repetition_penalty: tuneResult.params.repetition_penalty,
-              } : {}),
-            })
+              provider: "configured backend",
+            }
           : await sendMessage({
               messages,
               model,
@@ -484,10 +488,11 @@ export function ChatInput() {
                 repetition_penalty: tuneResult.params.repetition_penalty
               } : {})
             })
+        const effectiveModel = result.model
         const durationMs = Date.now() - startTime
 
         // Apply STM transformations
-        let transformedResponse = response
+        let transformedResponse = result.content
         for (const stm of stmModules) {
           if (stm.enabled) {
             transformedResponse = stm.transformer(transformedResponse)
@@ -497,7 +502,7 @@ export function ChatInput() {
         addMessage(currentConversationId, {
           role: 'assistant',
           content: transformedResponse,
-          model,
+          model: effectiveModel,
           persona: persona.id,
           ...(tuneResult ? {
             autoTuneParams: tuneResult.params,
@@ -514,7 +519,7 @@ export function ChatInput() {
         // Beacon metadata to HF dataset (fire-and-forget, no content)
         recordChatEvent({
           mode: 'standard',
-          model,
+          model: effectiveModel,
           duration_ms: durationMs,
           response_length: transformedResponse.length,
           success: true,
