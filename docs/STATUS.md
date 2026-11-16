@@ -4,7 +4,8 @@
 **Repository:** `Rhibrahim15/KX-AI`  
 **Main branch:** `6e2b527` — unchanged  
 **Rebuild branch:** `rebuild/foundation`  
-**Latest branch head at this update:** `845780b`  
+**Foundation baseline:** `9d9f650`  
+**Hardening branch:** `hardening/login-and-deps` (PR #2)  
 **Runtime verification snapshot:** `252bf98` — CI passed  
 **Review:** [Draft PR #1](https://github.com/Rhibrahim15/KX-AI/pull/1)
 
@@ -22,7 +23,7 @@ This report supersedes the June 30, 2026 audit. A source file existing is not pr
 | Visitor authentication | Implemented for private use | Single-password login, same-origin check, signed 12-hour HttpOnly/SameSite Strict cookie, middleware protection and production fail-closed configuration. |
 | Browser credentials | Improved | Standard provider keys and backend token stay server-side. Legacy browser keys are cleared and excluded from persistence/backups. |
 | Settings | Simplified | Active UI offers theme selection, privacy disclosures, local conversation backup import/export and local deletion. Unsupported legacy controls are archived. |
-| Login throttling | Implemented; integration not yet verified | The login route uses an atomic Upstash Redis Lua counter: 5 attempts per client address per 15-minute window. Production fails closed if Upstash credentials or a trusted client IP are unavailable. A configured Upstash instance and live abuse test are still required.
+| Login throttling | Implemented; integration not yet verified | The login route includes an atomic Upstash Redis Lua counter: 5 attempts per client address per 15-minute window. It has not yet passed CI or a live Upstash abuse test. Production is designed to fail closed if Upstash credentials or a trusted client IP are unavailable.
 | API/BFF rate limits | Not implemented | General chat request limits and provider usage budgets remain required before public exposure. |
 | Persistent memory | Not active | Prisma schema and repository adapter boundary exist. Prisma package/client, migrations and live chat persistence are not wired. Browser conversations remain local. |
 | Telegram | Legacy implementation retained | Existing polling/voice path remains separate and uses in-process history. It is not yet migrated to the shared prompt/router/repository. |
