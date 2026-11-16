@@ -39,7 +39,9 @@
 - [x] Remove misleading claims and hide unverified tools from primary navigation
 - [ ] Pass the production build on the latest revision
 - [x] Add private password gate with signed HttpOnly session and fail-closed production behavior
-- [ ] Add shared login brute-force protection, distributed rate limiting and usage budgets
+- [x] Add shared atomic login throttling via Upstash Redis (5 attempts / 15-minute window; production fails closed if unavailable)
+- [ ] Provision Upstash and verify live throttling behavior
+- [ ] Add distributed API/BFF request limits and provider usage budgets
 - [ ] Add user-visible provider status, retry and error states
 - [ ] Verify accessibility, mobile layout and keyboard interaction
 
@@ -85,8 +87,9 @@
 
 ## Phase 7 — Production operations
 
-- [ ] Visitor authentication for the web BFF
-- [ ] Backend and BFF rate limiting, request caps and abuse controls
+- [x] Private visitor authentication for the web BFF
+- [x] Shared login brute-force throttling implementation
+- [ ] Backend and BFF rate limiting, request caps and provider spend controls
 - [ ] Secret rotation and provider spend limits
 - [ ] Railway/Vercel deployment and health checks
 - [ ] Logs/metrics/error monitoring without leaking prompts or credentials
