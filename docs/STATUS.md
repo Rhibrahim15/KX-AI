@@ -21,7 +21,7 @@ This document supersedes the June 30, 2026 status snapshot. It distinguishes rep
 | `frontend/` | Starter scaffold | Its page and layout are stock create-next-app content. It is not the preferred frontend candidate. |
 | Discord / WhatsApp | Unverified | Code exists, but end-to-end behavior and unified memory have not been proven. |
 | Media generation | Explicitly unavailable | The rebuilt API returns HTTP 501 until a real provider lifecycle is implemented. |
-| Production API security | Partially improved | Production startup requires `API_AUTH_TOKEN`; CORS uses explicit origins. Rate limiting, audit logging and monitoring remain outstanding. |
+| Production API security | Partially improved | Production startup requires `API_AUTH_TOKEN`; CORS uses explicit origins. The BFF keeps the backend token server-side; optional legacy provider keys are memory-only and excluded from browser persistence and backups. Rate limiting, audit logging and monitoring remain outstanding. |
 | Deployment | Not verified | No live Vercel/Railway/PostgreSQL deployment is claimed by this audit. |
 
 ## Rebuild branch changes
@@ -36,7 +36,7 @@ The `rebuild/foundation` branch currently contains:
 - Prisma schema and a repository adapter boundary.
 - Reusable Telegram voice-note transcription service.
 - API behavior that rejects unsupported media operations instead of returning fake success.
-- Core unit tests and a GitHub Actions workflow.
+- Core unit tests and a GitHub Actions workflow. Standard web chat now uses the same-origin Next.js BFF; optional legacy keys are not persisted or exported.
 
 **Not yet verified:** the CI workflow, a full root application build, real provider requests, database persistence, Telegram restart recovery, UI-to-API integration, and production deployment.
 
@@ -51,7 +51,7 @@ The `rebuild/foundation` branch currently contains:
 ## Next acceptance gates
 
 1. CI passes for core type-checking and unit tests.
-2. Root Next.js UI is selected as canonical and connected through a server-side BFF; the duplicate starter app is retired only after this is proven.
+2. Complete the root Next.js UI cleanup, test the BFF against a live backend, reconcile model-selector behavior, and retire the duplicate starter app only after reference checks.
 3. Prisma dependencies and migrations are added; web chat and Telegram share a persistent session repository.
 4. Demonstrate memory survival by sending a conversation, restarting the API process, and retrieving earlier messages.
 5. Complete authentication, rate limiting, deployment and backup/restore verification before production release.

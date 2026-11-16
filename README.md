@@ -71,6 +71,12 @@ curl http://localhost:7860/v1/health
 
 Local API requests do not require `API_AUTH_TOKEN` unless you configure one. The API accepts an OpenAI-compatible `messages` array at `POST /v1/chat/completions`. Until the persistence milestone is completed, callers must send the conversation history they want the model to see.
 
+## Web proxy configuration
+
+For the deployed root Next.js app, set `KX_AI_BACKEND_URL` to the API origin and `KX_AI_BACKEND_TOKEN` to the same value as backend `API_AUTH_TOKEN`. These are server-only environment variables. The token is forwarded by `src/app/api/chat/route.ts` and is never exposed to browser JavaScript. Set backend `CORS_ORIGINS` to the deployed web origin.
+
+Standard chat is routed through this BFF. The browser does not send an OpenRouter credential for standard chat. Optional keys used by older advanced experiments are session-only and are not included in browser storage or backup exports.
+
 ## Configuration
 
 See [.env.example](.env.example). Only the variables required for the feature being run should be configured. Never paste credentials into issues, chat, screenshots or source files. Rotate any credential that may have been exposed.
