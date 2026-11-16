@@ -23,13 +23,7 @@ export class ProviderRequestError extends Error {
   }
 }
 
-const providerDefaults: Array<{
-  provider: "groq" | "openrouter" | "cerebras" | "mistral";
-  keyName: string;
-  baseUrl: string;
-  modelName: string;
-  defaultModel: string;
-}> = [
+const providerDefaults = [
   {
     provider: "groq",
     keyName: "GROQ_API_KEY",
@@ -58,7 +52,9 @@ const providerDefaults: Array<{
     modelName: "MISTRAL_MODEL",
     defaultModel: "mistral-small-latest",
   },
-];
+] as const;
+
+type ConfiguredProvider = (typeof providerDefaults)[number];
 
 export class LLMRouter {
   private readonly adapters: ModelAdapter[];
@@ -135,14 +131,16 @@ export function createDefaultLLMRouter(
   env: NodeJS.ProcessEnv = process.env,
   options: Omit<LLMRouterOptions, "adapters"> = {},
 ): LLMRouter {
-  const byName = new Map(providerDefaults.map((provider) => [provider.provider, provider]));
+  const byName = new Map<string, ConfiguredProvider>(
+    providerDefaults.map((provider) => [provider.provider, provider]),
+  );
   const configuredOrder = (env.LLM_PROVIDER_ORDER || "groq,openrouter,cerebras,mistral")
     .split(",")
     .map((provider) => provider.trim())
     .filter(Boolean);
 
   const adapters = configuredOrder.flatMap((name) => {
-    const provider = byName.get(name as keyof typeof Object);
+    const provider = byName.get(name);
     if (!provider) return [];
 
     const apiKey = env[provider.keyName];
