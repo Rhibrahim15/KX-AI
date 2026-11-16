@@ -452,7 +452,7 @@ export function ChatInput() {
       } else {
         // ── STANDARD PATH: Single model ────────────────────────────
         const startTime = Date.now()
-        const result = proxyMode
+        const result: { content: string; model: string; provider: string } = proxyMode
           ? {
               content: await sendMessageViaProxy({
                 messages,
@@ -492,7 +492,7 @@ export function ChatInput() {
         const durationMs = Date.now() - startTime
 
         // Apply STM transformations
-        let transformedResponse = result.content
+        let transformedResponse: string = result.content
         for (const stm of stmModules) {
           if (stm.enabled) {
             transformedResponse = stm.transformer(transformedResponse)

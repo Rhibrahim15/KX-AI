@@ -68,15 +68,15 @@ export function ChatArea() {
       <div ref={scrollContainerRef} onScroll={handleScroll} className="flex-1 overflow-y-auto px-4 py-6 relative">
         {currentConversation.messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
-            <div className="text-6xl mb-4">{persona.emoji}</div>
-            <h3 className="text-xl font-semibold mb-2">
-              Chat with {persona.name}
-            </h3>
-            <p className="theme-secondary max-w-md text-sm">
-              {persona.description}
+            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-sky-300/20 bg-sky-300/[0.07] text-lg font-semibold text-sky-200">
+              KX
+            </div>
+            <h3 className="mb-2 text-xl font-semibold text-white">Start a conversation</h3>
+            <p className="max-w-md text-sm text-slate-400">
+              Ask a question, explore an idea, or work through a technical problem. KX will use the providers configured on the server.
             </p>
-            <div className="mt-6 flex flex-wrap gap-2 justify-center max-w-lg">
-              {getSuggestedPrompts(persona.id).map((prompt, i) => (
+            <div className="mt-6 flex max-w-lg flex-wrap justify-center gap-2">
+              {getSuggestedPrompts('default').map((prompt, i) => (
                 <SuggestedPrompt key={i} prompt={prompt} />
               ))}
             </div>
