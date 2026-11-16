@@ -61,8 +61,8 @@ interface Message {
 
 interface SendMessageOptions {
   messages: Message[]
-  model: string
-  apiKey: string
+  model?: string
+  apiKey?: string
   noLog?: boolean
   signal?: AbortSignal
   temperature?: number

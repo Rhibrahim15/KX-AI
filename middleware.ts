@@ -2,10 +2,23 @@ import { NextRequest, NextResponse } from "next/server";
 
 const COOKIE_NAME = "kx_access";
 
-function decodeBase64Url(value: string): Uint8Array {
+function decodeBase64Url(value: string): ArrayBuffer {
   const base64 = value.replace(/-/g, "+").replace(/_/g, "/");
   const padded = base64.padEnd(Math.ceil(base64.length / 4) * 4, "=");
-  return Uint8Array.from(atob(padded), (character) => character.charCodeAt(0));
+  const decoded = atob(padded);
+  const buffer = new ArrayBuffer(decoded.length);
+  const bytes = new Uint8Array(buffer);
+  for (let index = 0; index < decoded.length; index += 1) {
+    bytes[index] = decoded.charCodeAt(index);
+  }
+  return buffer;
+}
+
+function encodeText(value: string): ArrayBuffer {
+  const encoded = new TextEncoder().encode(value);
+  const buffer = new ArrayBuffer(encoded.length);
+  new Uint8Array(buffer).set(encoded);
+  return buffer;
 }
 
 async function hasValidSession(request: NextRequest, secret: string): Promise<boolean> {
@@ -30,7 +43,7 @@ async function hasValidSession(request: NextRequest, secret: string): Promise<bo
   try {
     const key = await crypto.subtle.importKey(
       "raw",
-      new TextEncoder().encode(secret),
+      encodeText(secret),
       { name: "HMAC", hash: "SHA-256" },
       false,
       ["verify"],
@@ -40,7 +53,7 @@ async function hasValidSession(request: NextRequest, secret: string): Promise<bo
       "HMAC",
       key,
       decodeBase64Url(encodedSignature),
-      new TextEncoder().encode(payload),
+      encodeText(payload),
     );
   } catch {
     return false;

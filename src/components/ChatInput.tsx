@@ -2,10 +2,9 @@
 
 import { useState, useRef, useEffect, KeyboardEvent } from 'react'
 import { useStore } from '@/store'
-import { sendMessage, sendMessageViaProxy, streamUltraplinian, streamConsortium } from '@/lib/openrouter'
+import { sendMessage, streamUltraplinian, streamConsortium } from '@/lib/openrouter'
 import { recordChatEvent } from '@/lib/telemetry'
 import { classifyPrompt } from '@/lib/classify'
-import { classifyWithLLM } from '@/lib/classify-llm'
 import type { ClassificationResult } from '@/lib/classify'
 import { computeAutoTuneParams, getContextLabel, getStrategyLabel, PARAM_META } from '@/lib/autotune'
 import type { AutoTuneResult } from '@/lib/autotune'
@@ -133,9 +132,6 @@ export function ChatInput() {
     return () => clearTimeout(timer)
   }, [input, parseltongueConfig])
 
-  // Proxy mode: Route directly through self-hosted GreenByte API
-  const proxyMode = true
-
   const handleSubmit = async () => {
     if (!input.trim() || !currentConversationId || isStreaming) return
 
@@ -201,12 +197,10 @@ export function ChatInput() {
     ]
 
     // Classify prompt for research telemetry
-    // Regex runs instantly as fallback; LLM classifier fires in parallel
-    // with the main model call and overwrites with a more accurate result.
-    let promptClassification: ClassificationResult = classifyPrompt(userMessage)
-    const llmClassifyPromise = apiKey
-      ? classifyWithLLM(userMessage, apiKey).then(result => { promptClassification = result })
-      : Promise.resolve()
+    // Use the local deterministic classifier. Standard chat must not make
+    // secondary provider calls with a browser-held API key.
+    const promptClassification: ClassificationResult = classifyPrompt(userMessage)
+    const llmClassifyPromise = Promise.resolve()
 
     // Compute AutoTune parameters if enabled
     let tuneResult: AutoTuneResult | null = null
@@ -452,42 +446,10 @@ export function ChatInput() {
       } else {
         // ── STANDARD PATH: Single model ────────────────────────────
         const startTime = Date.now()
-        const result: { content: string; model: string; provider: string } = proxyMode
-          ? {
-              content: await sendMessageViaProxy({
-                messages,
-                model,
-                apiBaseUrl: ultraplinianApiUrl,
-                godmodeApiKey: ultraplinianApiKey,
-                signal: abortControllerRef.current.signal,
-                stm_modules: stmModules.filter(m => m.enabled).map(m => m.id),
-                ...(tuneResult ? {
-                  temperature: tuneResult.params.temperature,
-                  top_p: tuneResult.params.top_p,
-                  top_k: tuneResult.params.top_k,
-                  frequency_penalty: tuneResult.params.frequency_penalty,
-                  presence_penalty: tuneResult.params.presence_penalty,
-                  repetition_penalty: tuneResult.params.repetition_penalty,
-                } : {}),
-              }),
-              model,
-              provider: "configured backend",
-            }
-          : await sendMessage({
-              messages,
-              model,
-              apiKey,
-              noLog: noLogMode,
-              signal: abortControllerRef.current.signal,
-              ...(tuneResult ? {
-                temperature: tuneResult.params.temperature,
-                top_p: tuneResult.params.top_p,
-                top_k: tuneResult.params.top_k,
-                frequency_penalty: tuneResult.params.frequency_penalty,
-                presence_penalty: tuneResult.params.presence_penalty,
-                repetition_penalty: tuneResult.params.repetition_penalty
-              } : {})
-            })
+        const result = await sendMessage({
+          messages,
+          signal: abortControllerRef.current.signal,
+        })
         const effectiveModel = result.model
         const durationMs = Date.now() - startTime
 
